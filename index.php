@@ -16,7 +16,7 @@
                     <div class="titulo">
                         <img id="Logo" src="Fondos/Logo3.png" alt="Logo Alpasa" width="400"  />
                     </div>
-                       <form name="form1" action="Control/verificar-usuario.php" method="POST" class="col-12" id="form1"> 
+                       <form name="form1" action="api/login/verificar-usuario.php" method="POST" class="col-12" id="form1"> 
                     <div class="form-group">
                         <input type="text" name="usuario" placeholder="Usuario" pattern="^[A-Za-z]+$" required>
                         

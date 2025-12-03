@@ -1,6 +1,6 @@
 <?php
-  include ('Config/conexion.php');
-  include "Config/Header.php";
+  include ('api/db/conexion.php');
+  //include "Templates/Header.php";
 
 $fecha =  getdate();
 $hora = date("Y-m-d");
