@@ -1,8 +1,11 @@
+<?php
+   $BaseURL = getenv('BaseURL');
+   $VERSION = getenv('VERSION');
+   $NUMERO = getenv('NUMERO');
+?>
 </div>
-        <?php include_once 'scripts.php' ?>
-        <?php include_once 'scripts-datatables.php' ?>
-        <?php $VERSION= getenv('VERSION'); ?>
-        <?php $NUMERO= getenv('NUMERO'); ?>
+        <?php include_once $BaseURL . "/templates/scripts.php" ?>
+        <?php include_once $BaseURL . "/templates/scripts-datatables.php" ?>
       </body>
    </html>
 <footer class="main-footer">
