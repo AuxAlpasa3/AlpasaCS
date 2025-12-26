@@ -162,16 +162,6 @@ echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34
         });
     });
 </script>
-<body class="hold-transition sidebar-mini layout-fixed">
-  <div class="wrapper">
-    <?php
-    include_once "../templates/nav.php";
-    include_once "../templates/aside.php";
-    ?>
-    <div class="content-wrapper">
-      <section class="content mt-4">
-        <div class="container-fluid">
-          <br />
           <div class="card">
               <div class="container-fluid">
                     <div style="text-align: right;">
@@ -434,75 +424,20 @@ echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34
                                           ?>
                                         </td>
                                       </tr>
-                                    </tbody>
+                                      </tbody>
                                   </table>
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                          
-                          <!-- POLÍGONO B (mantener mismo patrón) -->
-                          <div class="column">
-                            <div class="card">
-                              <div class="card-header">
-                                <h3>POLIGONO B</h3>
-                                <span class="toggle-icon">+</span>
-                              </div>
-                              <div class="card-body">
-                                <div class="table-container">
-                                  <table class="stats-table">
-                                    <thead>
-                                      <tr>
-                                        <th class="category-header">CATEGORÍA</th>
-                                        <th class="status-header">
-                                          <div class="status-indicator en-sitio"></div>
-                                          <div>EN SITIO</div>
-                                        </th>
-                                        <th class="status-header">
-                                          <div class="status-indicator ingresos"></div>
-                                          <div>INGRESOS</div>
-                                        </th>
-                                        <th class="status-header">
-                                          <div class="status-indicator egresos"></div>
-                                          <div>EGRESOS</div>
-                                        </th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      <!-- Mantener el código PHP original para POLÍGONO B -->
-                                      <!-- ... -->
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <!-- Resto de las cards manteniendo el código original -->
-                        <!-- ... -->
-                        
-                        <!-- Contador de actualización -->
-                        <div style="text-align: center; margin-top: 20px; color: #6c757d; font-size: 0.9em;">
-                          <span id="lastUpdate">Última actualización: <span id="updateTime">--:--:--</span></span>
-                          <br>
-                          <small style="color: #28a745;">Los datos se actualizan automáticamente cada 15 segundos</small>
                         </div>
               </div>
           </div>
-        </div>
-      </section>
-    </div>
+                                            
   <?php include_once "../templates/footer.php"; ?>
-  <aside class="control-sidebar">
-  </aside>
-  </div>
-</body>
-
-</html>
 
 <style>
-/* Mantener exactamente los mismos estilos del código original */
 .row {
   display: flex;
   flex-wrap: wrap;
@@ -711,7 +646,6 @@ echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34
 </style>
 
 <script>
-// Función para abrir/cerrar todas las cards
 function toggleAllCards(action) {
   const cards = document.querySelectorAll('.card');
   

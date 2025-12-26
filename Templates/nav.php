@@ -1,9 +1,8 @@
 <?php
 $VERSION = getenv('VERSION') ?: '';
-$BaseURL = getenv('BaseURL');
 
-if (!isset($_SESSION['idusuario' . $VERSION]) ) {
-    header('Location: ' . $BaseURL . '/Index.php');
+if (!isset($_SESSION['idusuario' . $VERSION]) || !isset($_SESSION['rol_current_users' . $VERSION])) {
+    header('Location: ../login.php');
     exit();
 }
 
@@ -38,7 +37,7 @@ $rolUsuario = htmlspecialchars($_SESSION['rol_current_users' . $VERSION], ENT_QU
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                 <span class="dropdown-header">
                     <small>Bienvenido</small><br>
-                    <strong>CONTROL DE ACCESOS</strong>
+                    <strong>ALPASA</strong>
                 </span>
                 
                 <div class="dropdown-divider"></div>
