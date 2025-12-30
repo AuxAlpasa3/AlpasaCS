@@ -5,33 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Control de Accesos - Alpasa</title>
-    <!-- Custom fonts for this template-->
     <link href="<?php echo base_url; ?>vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <!-- Custom styles for this template-->
     <link href="<?php echo base_url; ?>css/sb-admin-2.min.css" rel="stylesheet">
 </head>
-<?php
-    $Visitante = $row['Visitante'];
-    $Empresa = $row['Empresa'];
-    $Vis_Motivo = $row['Vis_Motivo'];
-    $Visita = $row['Visita'];
-    $Veh_Modelo = $row['Veh_Modelo'];
-    $Veh_Color = $row['Veh_Color'];
-    $Veh_Placas = $row['Veh_Placas'];
-    $Ubicacion = $row['NomCorto'];
-    $DispN = $row['DispEnt'];
-    $Fecha = $row['FechaEntrada'];
-    $TiempoMarcaje = $row['TiempoEnt'];
-    $Foto0 = $row['Foto0Ent'];
-    $Foto1 = $row['Foto1Ent'];
-    $Foto2 = $row['Foto2Ent'];
-    $Foto3 = $row['Foto3Ent'];
-    $Foto4 = $row['Foto4Ent'];
-    $Observaciones = $row['ObsEnt'];
-    $Usuario = $row['UsuarioEnt'];
-
-?>
 <div class="modal fade"  id="MovEntrada<?php echo $IdMov;?>" tabindex="-1" role="dialog" aria-labelledby="my-modal-title" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -43,15 +20,8 @@
             </div>
             <div class="modal-body">
                 <div class="col-auto" style="text-align: center;">
-                    <h5 style="color: darkorange;">Nombre del Visitante: </h5>
-                        <h5 style="align-self: center;"><?php echo $Visitante;?></h5>
-                    <h5 style="color: darkorange;">Empresa: </h5>
-                        <h5 style="align-self: center;"><?php echo $Empresa;?></h5>
-                    <h5 style="color: darkorange;">Motivo de Visita: </h5>
-                        <h5 style="align-self: center;"><?php echo $Vis_Motivo;?></h5>
-                    <h5 style="color: darkorange;">Descripción del Vehiculo: </h5>
-                        <h5 style="align-self: center;"><?php echo $Veh_Modelo." ".$Veh_Color." ".$Veh_Placas;?></h5>
-
+                    <h5 style="color: darkorange;">Nombre Empleado: </h5>
+                        <h5 style="align-self: center;"><?php echo $Personal;?></h5>
                     <h5 style="color: darkorange;">Ubicación: </h5>
                         <h5 style="align-self: center;"><?php echo $Ubicacion;?></h5>
                     <h5 style="color: darkorange;">Dispositivo Utilizado: </h5>

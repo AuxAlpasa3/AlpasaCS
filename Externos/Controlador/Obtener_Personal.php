@@ -31,7 +31,7 @@ $orderDirection = ($orderDirection == 'desc') ? 'DESC' : 'ASC';
 try {
     $queryCountTotal = "SELECT COUNT(*) as total 
                        FROM t_Personal as t1 
-                       WHERE NoEmpleado > 0 AND t1.tipoPersonal = 1";
+                       WHERE NoEmpleado > 0 AND t1.tipoPersonal = 3";
     
     $stmtCountTotal = $Conexion->query($queryCountTotal);
     $totalRecords = $stmtCountTotal->fetch(PDO::FETCH_ASSOC)['total'];
@@ -48,7 +48,7 @@ try {
                   LEFT JOIN t_cargo as t3 on t1.Cargo=t3.IdCargo 
                   LEFT JOIN t_departamento as t4 on t4.IdDepartamento=t1.Departamento 
                   LEFT JOIN t_ubicacion as t5 on t5.IdUbicacion =t1.IdUbicacion
-                  WHERE NoEmpleado > 0 AND t1.tipoPersonal = 1";
+                  WHERE NoEmpleado > 0 AND t1.tipoPersonal = 3";
     
     $queryFiltered = $queryBase;
     $searchParams = [];

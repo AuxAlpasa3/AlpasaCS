@@ -3,13 +3,11 @@ include '../api/db/conexion.php';
 $VERSION = getenv('VERSION');
 session_start();
 
-// Verificar sesión
 if (!isset($_SESSION['current_user' . $VERSION])) {
     header("location: ../api/login/logout.php");
     exit;
 }
 
-// Control de tiempo de sesión
 $session_duration = 30 * 60;
 $current_time = time();
 if (isset($_SESSION['login_time' . $VERSION]) && ($current_time - $_SESSION['login_time' . $VERSION] > $session_duration)) {
@@ -225,4 +223,5 @@ $IdUsuario = $_SESSION['idusuario' . $VERSION];
     <div class="wrapper">
         <?php include_once "../templates/nav.php"; ?>
         <?php include_once "../templates/aside.php"; ?>
-        <div class="content-wrapper">
+
+        

@@ -30,7 +30,7 @@ try {
                 LEFT JOIN t_ubicacion as t5 ON t5.IdUbicacion = t1.IdUbicacion 
                 INNER JOIN t_personal as t2 ON t1.IdPer = t2.IdPersonal
                 LEFT JOIN regentper as t4 ON t1.FolMovEnt = t4.FolMov
-                WHERE t1.IdMov = :idMov AND t2.tipoPersonal = 1";
+                WHERE t1.IdMov = :idMov AND t2.tipoPersonal = 3";
     } else {
         $sql = "SELECT 
                     t1.*,
@@ -52,7 +52,7 @@ try {
                 LEFT JOIN t_ubicacion as t5 ON t5.IdUbicacion = t1.IdUbicacion 
                 INNER JOIN t_personal as t2 ON t1.IdPer = t2.IdPersonal
                 LEFT JOIN regsalper as t6 ON t1.FolMovSal = t6.FolMov
-                WHERE t1.IdMov = :idMov AND t2.tipoPersonal = 1";
+                WHERE t1.IdMov = :idMov AND t2.tipoPersonal = 3";
     }
     
     $stmt = $Conexion->prepare($sql);
