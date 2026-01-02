@@ -32,11 +32,7 @@
                 <div class="col"style="text-align: center;">
                     <h5 style="color: darkorange;">Imagenes</h5>
                     <div class="row" style="text-align: center;">
-                       <p style="align-self: center;"><?php echo '<img src="'.$Foto0.'" width="200" id="foto0">';?></p>
-                       <p style="align-self: center;"><?php echo '<img src="'.$Foto1.'" width="200" id="foto1">';?></p>
-                       <p style="align-self: center;"><?php echo '<img src="'.$Foto2.'" width="200" id="foto2">';?></p>
-                       <p style="align-self: center;"><?php echo '<img src="'.$Foto3.'" width="200" id="foto3">';?></p>
-                       <p style="align-self: center;"><?php echo '<img src="'.$Foto4.'" width="200" id="foto4">';?></p>
+                        
                     </div>
                 </div>
                 <div class="col-auto" style="text-align: center;">

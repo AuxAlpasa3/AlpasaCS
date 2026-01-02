@@ -56,13 +56,18 @@ $IdUsuario = $_SESSION['idusuario' . $VERSION];
     <link rel="stylesheet" href="../plugins/summernote/summernote-bs4.min.css">
     
     <!-- Select2 -->
-    <link rel="stylesheet" href="../plugins/select2/css/select2.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap4.min.css">
-    
+
+    <!-- Incluir el tema personalizado -->
+    <link rel="stylesheet" href="../css/theme-primary.css">
+    <!-- DataTables Buttons CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css">
+        
     <style>
         /* Estilos generales */
         th, td, option, select, input {
@@ -71,27 +76,112 @@ $IdUsuario = $_SESSION['idusuario' . $VERSION];
         }
         
         /* Select2 personalizado */
-        .select2-results__option {
-            display: block !important;
+        .select2-container--bootstrap-5 {
+            width: 100% !important;
         }
-        
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            color: #000 !important;
-        }
-        
-        .select2-container--default .select2-search--inline .select2-search__field {
-            color: #000 !important;
-        }
-        
-        .select2-container .select2-selection--multiple {
+
+        .select2-container--bootstrap-5 .select2-selection {
             min-height: 38px;
-            height: auto !important;
+            border: 1px solid #ced4da !important;
+            border-radius: 0.25rem !important;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
-        
-        .select2-container .select2-selection--multiple .select2-selection__rendered {
+
+        .select2-container--bootstrap-5 .select2-selection:focus {
+            border-color: #86b7fe !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            line-height: 36px;
+            padding-left: 12px;
+            color: #212529;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection--single {
+            height: 38px;
+        }
+
+        .select2-container--bootstrap-5 .select2-dropdown {
+            border-color: #ced4da;
+            border-radius: 0.25rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            z-index: 1060 !important;
+        }
+
+        .select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field {
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection__clear {
+            margin-right: 30px;
+            font-size: 18px;
+            color: #6c757d;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection__clear:hover {
+            color: #dc3545;
+        }
+
+        /* Estilos para resultados personalizados */
+        .select2-result-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .select2-result-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .select2-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .select2-result-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .select2-result-meta {
+            font-size: 12px;
+            color: #666;
             display: flex;
-            flex-wrap: wrap;
-            max-height: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .select2-result-meta .badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            font-weight: 500;
+        }
+
+        .select2-loading {
+            padding: 12px;
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .select2-loading .fa-spinner {
+            margin-right: 8px;
+            color: #d94f00;
+        }
+
+        .select2-results__message {
+            padding: 12px;
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+            font-size: 14px;
         }
         
         /* Utilidades */
@@ -166,7 +256,7 @@ $IdUsuario = $_SESSION['idusuario' . $VERSION];
         
         .view-photo-link {
             cursor: pointer;
-            color: #007bff;
+            color: #d94f00;
             text-decoration: none;
             font-size: 12px;
         }
@@ -217,6 +307,124 @@ $IdUsuario = $_SESSION['idusuario' . $VERSION];
             border-color: #b84200;
         }
         
+        /* Estilos para loading */
+        #loading {
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+        }
+
+        /* Ajustes para responsividad */
+        @media (max-width: 768px) {
+            .select2-container--bootstrap-5 .select2-selection {
+                min-height: 42px;
+            }
+            
+            .select2-container--bootstrap-5 .select2-selection--single {
+                height: 42px;
+            }
+            
+            .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+                line-height: 40px;
+                font-size: 16px;
+            }
+            
+            .select2-dropdown {
+                font-size: 16px;
+            }
+            
+            .select2-result-item {
+                padding: 12px;
+            }
+            
+            .select2-result-title {
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .select2-container--bootstrap-5 {
+                font-size: 16px;
+            }
+            
+            .select2-search--dropdown .select2-search__field {
+                font-size: 16px;
+                height: 44px;
+            }
+        }
+
+        /* Scroll personalizado para Select2 en móviles */
+        @media (max-width: 768px) {
+            .select2-dropdown {
+                max-height: 300px;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Mejoras para el layout de filtros */
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .form-control:focus, .select2-container--bootstrap-5 .select2-selection:focus {
+            border-color: #d94f00 !important;
+            box-shadow: 0 0 0 0.2rem rgba(217, 79, 0, 0.25) !important;
+        }
+
+        /* Animación suave para cambios */
+        #movimientos-container {
+            transition: opacity 0.3s ease;
+        }
+
+        #movimientos-container.loading {
+            opacity: 0.5;
+        }
+
+        /* Estilos para alertas */
+        .alert {
+            border-radius: 0.375rem;
+            border: 1px solid transparent;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Mejoras visuales para tabla */
+        .table th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+
+        .table td, .table th {
+            vertical-align: middle;
+            padding: 12px 8px;
+        }
+
+        /* Estilos para los botones de acción */
+        .btn-ver-entrada, .btn-ver-salida {
+            min-width: 70px;
+            font-size: 13px;
+            padding: 4px 10px;
+        }
+        
     </style>
 </head>
 
@@ -224,5 +432,3 @@ $IdUsuario = $_SESSION['idusuario' . $VERSION];
     <div class="wrapper">
         <?php include_once "../templates/nav.php"; ?>
         <?php include_once "../templates/aside.php"; ?>
-
-        
