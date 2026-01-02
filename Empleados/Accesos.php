@@ -16,145 +16,102 @@ include_once "../templates/head.php";
         <div class="container-fluid">
             <div class="card">
                 <div class="card-header text-white" style="padding: 1rem; border-bottom: 2px solid #d94f00; background-color: #d94f00">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <h5 class="mb-0">Filtros de Búsqueda</h5>
-                        </div>
-                        <div class="col-md-6 text-right">
-                            <button id="btn-recargar-movimientos" class="btn btn-sm btn-light">
-                                <i class="fas fa-sync-alt"></i> Recargar
-                            </button>
-                        </div>
-                    </div>
+                   
                 </div>
                 <div class="card-body">
                     <!-- Filtros -->
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <div class="card card-primary card-outline">
-                                <div class="card-header">
-                                    <h3 class="card-title"><i class="fas fa-filter"></i> Filtros Avanzados</h3>
-                                    <div class="card-tools">
-                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <form id="filtros-form">
-                                        <div class="row">
-                                            <!-- Filtro por Fecha -->
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label>Fecha:</label>
-                                                    <select id="filtro-fecha" class="form-control">
-                                                        <option value="hoy">Hoy</option>
-                                                        <option value="ayer">Ayer</option>
-                                                        <option value="semana">Esta semana</option>
-                                                        <option value="mes">Este mes</option>
-                                                        <option value="personalizado">Personalizado</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Rango de fechas personalizado (oculto inicialmente) -->
-                                            <div class="col-md-4" id="rango-fechas-container" style="display: none;">
-                                                <div class="form-group">
-                                                    <label>Desde:</label>
-                                                    <input type="date" id="fecha-inicio" class="form-control" 
-                                                           value="<?php echo date('Y-m-d'); ?>">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4" id="rango-fechas-hasta-container" style="display: none;">
-                                                <div class="form-group">
-                                                    <label>Hasta:</label>
-                                                    <input type="date" id="fecha-fin" class="form-control" 
-                                                           value="<?php echo date('Y-m-d'); ?>">
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Filtro por Personal -->
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label>Personal:</label>
-                                                    <select id="filtro-personal" class="form-control select2" style="width: 100%;">
-                                                        <option value="">Todos</option>
-                                                        <?php
-                                                        // Aquí puedes cargar dinámicamente el personal desde la base de datos
-                                                        // Ejemplo:
-                                                        // $personal = obtenerPersonal();
-                                                        // foreach($personal as $p) {
-                                                        //     echo '<option value="' . $p['id'] . '">' . $p['nombre'] . ' - ' . $p['id_personal'] . '</option>';
-                                                        // }
-                                                        ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Filtro por Ubicación -->
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label>Ubicación:</label>
-                                                    <select id="filtro-ubicacion" class="form-control select2" style="width: 100%;">
-                                                        <option value="">Todas</option>
-                                                        <?php
-                                                        // Aquí puedes cargar dinámicamente las ubicaciones desde la base de datos
-                                                        // Ejemplo:
-                                                        // $ubicaciones = obtenerUbicaciones();
-                                                        // foreach($ubicaciones as $u) {
-                                                        //     echo '<option value="' . $u['id'] . '">' . $u['nombre'] . '</option>';
-                                                        // }
-                                                        ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Filtro por Tipo de Movimiento -->
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label>Tipo de Movimiento:</label>
-                                                    <select id="filtro-tipo" class="form-control">
-                                                        <option value="">Todos</option>
-                                                        <option value="entrada">Entradas</option>
-                                                        <option value="salida">Salidas</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- ID Personal (búsqueda específica) -->
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label>ID Personal:</label>
-                                                    <input type="text" id="filtro-id-personal" class="form-control" 
-                                                           placeholder="Buscar por ID específico">
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Botones de acción -->
-                                            <div class="col-md-12">
-                                                <div class="form-group text-right">
-                                                    <button type="button" id="btn-aplicar-filtros" class="btn btn-primary">
-                                                        <i class="fas fa-search"></i> Aplicar Filtros
-                                                    </button>
-                                                    <button type="button" id="btn-limpiar-filtros" class="btn btn-secondary">
-                                                        <i class="fas fa-broom"></i> Limpiar Filtros
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
+                    <div class="row mb-3">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Fecha:</label>
+                                <select id="filtro-fecha" class="form-control">
+                                    <option value="hoy">Hoy</option>
+                                    <option value="ayer">Ayer</option>
+                                    <option value="semana">Esta semana</option>
+                                    <option value="mes">Este mes</option>
+                                    <option value="personalizado">Personalizado</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-2" id="rango-fechas-container" style="display: none;">
+                            <div class="form-group">
+                                <label>Desde:</label>
+                                <input type="date" id="fecha-inicio" class="form-control" value="<?php echo date('Y-m-d'); ?>">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-2" id="rango-fechas-hasta-container" style="display: none;">
+                            <div class="form-group">
+                                <label>Hasta:</label>
+                                <input type="date" id="fecha-fin" class="form-control" value="<?php echo date('Y-m-d'); ?>">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Personal:</label>
+                                <select id="filtro-personal" class="form-control">
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Ubicación:</label>
+                                <select id="filtro-ubicacion" class="form-control">
+                                    <option value="">Todas</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Tipo:</label>
+                                <select id="filtro-tipo" class="form-control">
+                                    <option value="">Todos</option>
+                                    <option value="entrada">Entradas</option>
+                                    <option value="salida">Salidas</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-1">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button type="button" id="btn-aplicar-filtros" class="btn btn-primary btn-block">
+                                    <i class="fas fa-search"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Loading y resultados -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>ID Personal:</label>
+                                <input type="text" id="filtro-id-personal" class="form-control" placeholder="Buscar por ID...">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button type="button" id="btn-limpiar-filtros" class="btn btn-secondary btn-block">
+                                    <i class="fas fa-broom"></i> Limpiar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div id="loading" class="text-center" style="display: none;">
                         <div class="spinner-border text-primary" role="status">
                             <span class="sr-only">Cargando...</span>
                         </div>
                         <p class="mt-2">Cargando movimientos...</p>
                     </div>
+                    
                     <div id="movimientos-container">
                     </div>
                 </div>
@@ -171,15 +128,11 @@ include_once '../templates/footer.php';
 
 <script type="text/javascript">
 $(document).ready(function() {
-    // Inicializar Select2 si está disponible
-    if ($.fn.select2) {
-        $('.select2').select2({
-            theme: 'bootstrap4',
-            placeholder: 'Seleccione una opción'
-        });
-    }
+    // Cargar opciones en los selects
+    cargarPersonal();
+    cargarUbicaciones();
     
-    // Mostrar/ocultar rango de fechas según selección
+    // Mostrar/ocultar rango de fechas
     $('#filtro-fecha').change(function() {
         if ($(this).val() === 'personalizado') {
             $('#rango-fechas-container').show();
@@ -190,29 +143,65 @@ $(document).ready(function() {
         }
     });
     
-    // Función para cargar movimientos con filtros
+    // Función para cargar personal
+    function cargarPersonal() {
+        $.ajax({
+            url: 'Controlador/ajax_get_personal.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                if (!data.error && Array.isArray(data)) {
+                    var select = $('#filtro-personal');
+                    select.empty();
+                    select.append('<option value="">Todos</option>');
+                    
+                    $.each(data, function(index, item) {
+                        select.append('<option value="' + item.id + '">' + item.nombre + ' (ID: ' + item.codigo + ')</option>');
+                    });
+                }
+            },
+            error: function() {
+                console.error('Error al cargar personal');
+            }
+        });
+    }
+    
+    // Función para cargar ubicaciones
+    function cargarUbicaciones() {
+        $.ajax({
+            url: 'Controlador/ajax_get_ubicaciones.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                if (!data.error && Array.isArray(data)) {
+                    var select = $('#filtro-ubicacion');
+                    select.empty();
+                    select.append('<option value="">Todas</option>');
+                    
+                    $.each(data, function(index, item) {
+                        select.append('<option value="' + item.id + '">' + item.nombre + '</option>');
+                    });
+                }
+            },
+            error: function() {
+                console.error('Error al cargar ubicaciones');
+            }
+        });
+    }
+    
+    // Función para cargar movimientos
     function cargarMovimientos() {
         $('#loading').show();
         $('#movimientos-container').empty();
         
-        // Obtener valores de los filtros
-        var filtroFecha = $('#filtro-fecha').val();
-        var fechaInicio = $('#fecha-inicio').val();
-        var fechaFin = $('#fecha-fin').val();
-        var filtroPersonal = $('#filtro-personal').val();
-        var filtroUbicacion = $('#filtro-ubicacion').val();
-        var filtroTipo = $('#filtro-tipo').val();
-        var filtroIdPersonal = $('#filtro-id-personal').val();
-        
-        // Parámetros para la petición AJAX
         var params = {
-            filtro_fecha: filtroFecha,
-            fecha_inicio: fechaInicio,
-            fecha_fin: fechaFin,
-            id_personal: filtroPersonal,
-            id_ubicacion: filtroUbicacion,
-            tipo_movimiento: filtroTipo,
-            id_personal_especifico: filtroIdPersonal
+            filtro_fecha: $('#filtro-fecha').val(),
+            fecha_inicio: $('#fecha-inicio').val(),
+            fecha_fin: $('#fecha-fin').val(),
+            id_personal: $('#filtro-personal').val(),
+            id_ubicacion: $('#filtro-ubicacion').val(),
+            tipo_movimiento: $('#filtro-tipo').val(),
+            id_personal_especifico: $('#filtro-id-personal').val()
         };
         
         $.ajax({
@@ -220,150 +209,138 @@ $(document).ready(function() {
             type: 'GET',
             data: params,
             dataType: 'html',
-            beforeSend: function() {
-                $('#loading').show();
-            },
             success: function(response) {
                 $('#movimientos-container').html(response);
-                try {
-                    inicializarDataTable();
-                } catch (error) {
-                    console.error('Error al inicializar DataTable:', error);
-                }
+                inicializarDataTable();
                 $('#loading').hide();
             },
             error: function(xhr, status, error) {
-                $('#movimientos-container').html(
-                    '<div class="alert alert-danger">Error al cargar los movimientos: ' + error + '</div>'
-                );
-                $('#loading').hide();
-            },
-            complete: function() {
+                $('#movimientos-container').html('<div class="alert alert-danger">Error: ' + error + '</div>');
                 $('#loading').hide();
             }
         });
     }
     
-    // Inicializar DataTable
-    function inicializarDataTable() {
-        if ($('#dataTableMovimientos').length) {
-            if ($.fn.DataTable.isDataTable('#dataTableMovimientos')) {
-                $('#dataTableMovimientos').DataTable().destroy();
-                $('#dataTableMovimientos').empty();
-            }
-            
-            $('#dataTableMovimientos').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
-                },
-                "responsive": true,
-                "autoWidth": false,
-                "order": [[0, "desc"]],
-                "pageLength": 25,
-                "initComplete": function(settings, json) {
-                    console.log('DataTable inicializado correctamente');
-                    // Agregar información de filtros aplicados
-                    var filtrosInfo = obtenerInfoFiltros();
-                    if (filtrosInfo) {
-                        $('#dataTableMovimientos_wrapper').prepend(
-                            '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
-                            '<i class="fas fa-info-circle"></i> Filtros aplicados: ' + filtrosInfo +
-                            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
-                            '<span aria-hidden="true">&times;</span>' +
-                            '</button>' +
-                            '</div>'
-                        );
-                    }
-                },
-                "drawCallback": function(settings) {
-                    $('#loading').hide();
-                }
-            });
-        } else {
-            console.warn('La tabla #dataTableMovimientos no existe en el HTML cargado');
-            $('#loading').hide();
-        }
+    // Inicializar DataTable - VERSIÓN MEJORADA
+function inicializarDataTable() {
+    console.log('Inicializando DataTable...');
+    
+    var $table = $('#dataTableMovimientos');
+    if (!$table.length) {
+        console.warn('La tabla no existe');
+        $('#loading').hide();
+        return;
     }
     
-    function obtenerInfoFiltros() {
-        var info = [];
+    // Verificar si hay datos (filas con más de una celda)
+    var hasData = false;
+    $table.find('tbody tr').each(function() {
+        var tdCount = $(this).find('td').length;
+        console.log('Filas encontradas con ' + tdCount + ' columnas');
+        if (tdCount > 1) { // Si tiene más de 1 celda (8 columnas normales)
+            hasData = true;
+        }
+    });
+    
+    // Verificar estructura
+    var thCount = $table.find('thead tr th').length;
+    console.log('Columnas en thead: ' + thCount + ', ¿Tiene datos?: ' + hasData);
+    
+    // Esperar a que el DOM se actualice
+    setTimeout(function() {
+        // Destruir DataTable si ya existe
+        if ($.fn.DataTable.isDataTable('#dataTableMovimientos')) {
+            $('#dataTableMovimientos').DataTable().destroy();
+            $table.removeClass('dataTable no-footer');
+        }
         
-        var filtroFecha = $('#filtro-fecha').val();
-        if (filtroFecha && filtroFecha !== 'hoy') {
-            if (filtroFecha === 'personalizado') {
-                var fechaInicio = $('#fecha-inicio').val();
-                var fechaFin = $('#fecha-fin').val();
-                if (fechaInicio && fechaFin) {
-                    info.push('Fecha: ' + fechaInicio + ' a ' + fechaFin);
-                }
+        try {
+            if (hasData) {
+                // INICIALIZAR CON DATOS
+                $('#dataTableMovimientos').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json",
+                        "emptyTable": "No hay datos disponibles en la tabla"
+                    },
+                    "responsive": true,
+                    "autoWidth": false,
+                    "order": [[0, "desc"]],
+                    "pageLength": 25,
+                    "initComplete": function(settings, json) {
+                        console.log('DataTable inicializado con datos');
+                        $('#loading').hide();
+                    },
+                    "drawCallback": function(settings) {
+                        $('#loading').hide();
+                    },
+                    "columns": [
+                        { "width": "10%" },
+                        { "width": "20%" },
+                        { "width": "10%" },
+                        { "width": "10%" },
+                        { "width": "15%" },
+                        { "width": "10%" },
+                        { "width": "15%" },
+                        { "width": "10%" }
+                    ]
+                });
             } else {
-                var textos = {
-                    'ayer': 'Ayer',
-                    'semana': 'Esta semana',
-                    'mes': 'Este mes'
-                };
-                info.push('Fecha: ' + textos[filtroFecha]);
+                // SIN DATOS - Solo mostrar mensaje, NO inicializar DataTable
+                console.log('Tabla sin datos, mostrando mensaje estático');
+                $('#loading').hide();
+                
+                $table.addClass('table table-bordered table-striped');
+                
+                var $messageRow = $table.find('tbody tr');
+                if ($messageRow.length) {
+                    $messageRow.find('td').html(
+                        '<div class="text-center py-4">' +
+                        '<i class="fas fa-database fa-3x text-muted mb-3"></i>' +
+                        '<h5 class="text-muted">No se encontraron movimientos</h5>' +
+                        '<p class="small text-muted">Intenta con otros filtros</p>' +
+                        '</div>'
+                    );
+                }
             }
+        } catch (error) {
+            console.error('Error al inicializar DataTable:', error);
+            $('#loading').hide();
+            
+            $table.addClass('table table-bordered table-striped');
         }
-        
-        var filtroTipo = $('#filtro-tipo').val();
-        if (filtroTipo) {
-            info.push('Tipo: ' + (filtroTipo === 'entrada' ? 'Entradas' : 'Salidas'));
-        }
-        
-        var filtroIdPersonal = $('#filtro-id-personal').val();
-        if (filtroIdPersonal) {
-            info.push('ID Personal: ' + filtroIdPersonal);
-        }
-        
-        var filtroPersonal = $('#filtro-personal option:selected').text();
-        if ($('#filtro-personal').val()) {
-            info.push('Personal: ' + filtroPersonal);
-        }
-        
-        var filtroUbicacion = $('#filtro-ubicacion option:selected').text();
-        if ($('#filtro-ubicacion').val()) {
-            info.push('Ubicación: ' + filtroUbicacion);
-        }
-        
-        return info.length > 0 ? info.join(' | ') : null;
-    }
+    }, 100);
+}
     
     $('#btn-aplicar-filtros').click(function() {
         cargarMovimientos();
     });
     
     $('#btn-limpiar-filtros').click(function() {
-        $('#filtros-form')[0].reset();
-        $('#filtro-fecha').val('hoy').trigger('change');
+        $('#filtro-fecha').val('hoy');
         $('#rango-fechas-container').hide();
         $('#rango-fechas-hasta-container').hide();
-        if ($.fn.select2) {
-            $('.select2').val('').trigger('change');
-        }
+        $('#filtro-personal').val('');
+        $('#filtro-ubicacion').val('');
+        $('#filtro-tipo').val('');
+        $('#filtro-id-personal').val('');
         cargarMovimientos();
     });
     
-    // Permitir búsqueda por Enter en ID Personal
     $('#filtro-id-personal').keypress(function(e) {
         if (e.which == 13) {
-            e.preventDefault();
             cargarMovimientos();
         }
     });
     
-    // Cargar movimientos inicialmente
+    // Cargar movimientos al inicio
     cargarMovimientos();
     
-    // Función para cargar detalles del movimiento
+    // Función para detalles
     function cargarDetalleMovimiento(tipo, idMov) {
         $.ajax({
             url: 'Controlador/ajax_detalle_movimiento.php',
             type: 'GET',
-            data: {
-                tipo: tipo,
-                idMov: idMov
-            },
+            data: { tipo: tipo, idMov: idMov },
             dataType: 'html',
             beforeSend: function() {
                 $('#modal-container').html('<div class="text-center p-4"><div class="spinner-border text-primary"></div></div>');
@@ -372,39 +349,30 @@ $(document).ready(function() {
                 $('#modal-container').html(response);
                 $('.modal').modal('show');
             },
-            error: function(xhr, status, error) {
-                $('#modal-container').html(
-                    '<div class="alert alert-danger">Error al cargar los detalles: ' + error + '</div>'
-                );
+            error: function() {
+                $('#modal-container').html('<div class="alert alert-danger">Error al cargar detalles</div>');
             }
         });
     }
     
-    // Eventos para ver detalles
+    // Eventos para detalles
     $(document).on('click', '.btn-ver-entrada', function(e) {
         e.preventDefault();
-        var idMov = $(this).data('id');
-        cargarDetalleMovimiento('entrada', idMov);
+        cargarDetalleMovimiento('entrada', $(this).data('id'));
     });
     
     $(document).on('click', '.btn-ver-salida', function(e) {
         e.preventDefault();
-        var idMov = $(this).data('id');
-        cargarDetalleMovimiento('salida', idMov);
+        cargarDetalleMovimiento('salida', $(this).data('id'));
     });
     
-    // Cerrar modales
-    $(document).on('click', '[data-dismiss="modal"], .btn-close, .modal-close', function() {
+    // Cerrar modal
+    $(document).on('click', '[data-dismiss="modal"], .btn-close', function() {
         $('.modal').modal('hide');
     });
     
     $(document).on('hidden.bs.modal', '.modal', function() {
         $('#modal-container').empty();
-    });
-    
-    // Recargar movimientos
-    $(document).on('click', '#btn-recargar-movimientos', function() {
-        cargarMovimientos();
     });
 });
 </script>
@@ -416,27 +384,11 @@ $(document).ready(function() {
     font-size: 12px; 
     font-weight: 600; 
 }
-.badge-success { 
-    background-color: #28a745; 
-    color: white; 
-}
-.badge-warning { 
-    background-color: #ffc107; 
-    color: #212529; 
-}
-.badge-info { 
-    background-color: #17a2b8; 
-    color: white; 
-}
-.badge-secondary { 
-    background-color: #6c757d; 
-    color: white; 
-}
-
-.spinner-border { 
-    width: 3rem; 
-    height: 3rem; 
-}
+.badge-success { background-color: #28a745; color: white; }
+.badge-warning { background-color: #ffc107; color: #212529; }
+.badge-info { background-color: #17a2b8; color: white; }
+.badge-secondary { background-color: #6c757d; color: white; }
+.badge-primary { background-color: #007bff; color: white; }
 
 #loading {
     padding: 20px;
@@ -449,26 +401,7 @@ $(document).ready(function() {
     left: 0;
 }
 
-.card-primary.card-outline {
-    border-top: 3px solid #007bff;
-}
-
-.select2-container--bootstrap4 .select2-selection--single {
-    height: calc(2.25rem + 2px) !important;
-}
-
 @media (max-width: 768px) {
-    .badge { 
-        font-size: 0.75em !important; 
-        min-width: 70px !important; 
-    }
-    
-    .row.mb-4 .col-md-4 {
-        margin-bottom: 15px;
-    }
-    
-    .form-group.text-right {
-        text-align: left !important;
-    }
+    .badge { font-size: 0.75em !important; }
 }
 </style>

@@ -213,3 +213,83 @@ $(document).ready(function() {
     $('#modalDetalle').modal('show');
 });
 </script>
+
+
+<?php
+// Controlador/ajax_detalle_movimiento.php
+include '../../api/db/conexion.php';
+
+$tipo = $_GET['tipo'] ?? '';
+$idMov = $_GET['idMov'] ?? 0;
+
+if (empty($tipo) || empty($idMov)) {
+    die('<div class="alert alert-danger">Parámetros inválidos</div>');
+}
+
+try {
+    if ($tipo == 'entrada') {
+        $sql = "SELECT * FROM regentper WHERE FolMov = :idMov";
+    } else {
+        $sql = "SELECT * FROM regsalper WHERE FolMov = :idMov";
+    }
+    
+    $stmt = $Conexion->prepare($sql);
+    $stmt->bindParam(':idMov', $idMov, PDO::PARAM_INT);
+    $stmt->execute();
+    $detalle = $stmt->fetch(PDO::FETCH_OBJ);
+    
+} catch (PDOException $e) {
+    die('<div class="alert alert-danger">Error: ' . $e->getMessage() . '</div>');
+}
+?>
+
+<div class="modal fade" id="modalDetalle" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-info-circle"></i> 
+                    Detalle de <?php echo $tipo == 'entrada' ? 'Entrada' : 'Salida'; ?>
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <?php if ($detalle): ?>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th>Campo</th>
+                                    <th>Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($detalle as $campo => $valor): ?>
+                                    <tr>
+                                        <td><strong><?php echo htmlspecialchars($campo); ?></strong></td>
+                                        <td><?php echo htmlspecialchars($valor ?? 'N/A'); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-warning">
+                        No se encontraron detalles para este movimiento.
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    $('#modalDetalle').modal('show');
+});
+</script>
