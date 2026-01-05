@@ -455,14 +455,9 @@ $(document).ready(function() {
                 { 
                     "data": "Estatus",
                     "className": "text-center",
+                    // MOSTRAR EL HTML QUE VIENE DEL SERVIDOR (ya incluye el badge)
                     "render": function(data, type, row) {
-                        var badgeClass = 'secondary';
-                        if (data === 'Activo') badgeClass = 'success';
-                        else if (data === 'Inactivo') badgeClass = 'warning';
-                        else if (data === 'Baja') badgeClass = 'danger';
-                        else if (data === 'Vacaciones') badgeClass = 'info';
-                        
-                        return '<span class="badge badge-' + badgeClass + '">' + data + '</span>';
+                        return data;
                     }
                 },
                 { "data": "Ubicacion" },
@@ -471,12 +466,9 @@ $(document).ready(function() {
                     "orderable": false,
                     "searchable": false,
                     "className": "text-center",
+                    // MOSTRAR EL HTML QUE VIENE DEL SERVIDOR (el botón de descarga)
                     "render": function(data, type, row) {
-                        if (data === 'Activo') {
-                            return '<span class="badge badge-success">Activo</span>';
-                        } else {
-                            return '<span class="badge badge-danger">Inactivo</span>';
-                        }
+                        return data;
                     }
                 },
                 { 
@@ -550,7 +542,7 @@ $(document).ready(function() {
                     text: 'Excel',
                     title: 'Catalogo_Personal_' + new Date().toISOString().split('T')[0],
                     exportOptions: {
-                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9],
+                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                         modifier: {
                             page: 'all'
                         }
@@ -597,7 +589,7 @@ $(document).ready(function() {
                     title: 'Catálogo de Personal',
                     message: 'Fecha: ' + new Date().toLocaleDateString(),
                     exportOptions: {
-                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9],
+                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                         modifier: {
                             page: 'all'
                         }
@@ -675,7 +667,7 @@ $(document).ready(function() {
                     text: 'Imprimir',
                     title: 'Catálogo de Personal',
                     exportOptions: {
-                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9],
+                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                         modifier: {
                             page: 'all'
                         }
@@ -1023,6 +1015,53 @@ $(document).ready(function() {
     padding-top: 10px;
 }
 
+/* Estilos para botones dentro de la tabla */
+.table .btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+    margin: 2px;
+}
+
+.table .btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.table .btn-info:hover {
+    background-color: #138496;
+    border-color: #117a8b;
+}
+
+.table .btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.table .btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+}
+
+.table .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.table .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.table .btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.table .btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .badge { font-size: 0.75em !important; }
@@ -1057,6 +1096,12 @@ $(document).ready(function() {
     .dataTables_length,
     .dataTables_filter {
         text-align: center;
+    }
+    
+    .table .btn-sm {
+        padding: 2px 4px;
+        font-size: 10px;
+        margin: 1px;
     }
 }
 
@@ -1094,6 +1139,15 @@ $(document).ready(function() {
     
     body {
         margin: 0.5cm !important;
+    }
+    
+    .table .btn {
+        display: none !important;
+    }
+    
+    a[href*="GenerarDoc"] {
+        text-decoration: none !important;
+        color: #000 !important;
     }
 }
 </style>
