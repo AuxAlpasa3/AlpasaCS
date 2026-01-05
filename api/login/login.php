@@ -6,7 +6,7 @@ session_start();
   $password = $_POST['password'];
   $VERSION= getenv('VERSION');
 
-    $sentencia = $Conexion->prepare("SELECT trim(contrasenia) as pass,Usuario,IdUsuario,rol FROM t_usuarios_web where Usuario= ? and Status=1");
+    $sentencia = $Conexion->prepare("SELECT trim(contrasenia) as pass,Usuario,IdUsuario,rol FROM t_usuario where Usuario= ? and Status=1");
     $sentencia->execute([$usuario]);
     $client = $sentencia->fetch();
 

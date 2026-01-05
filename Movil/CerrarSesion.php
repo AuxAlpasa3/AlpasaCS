@@ -2,25 +2,47 @@
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
+
 Include '../api/db/conexion.php';
 
-$idUsuario = $_GET['idUsuario'];
+$idUsuario = $_GET['idUsuario'] ?? '';
+$deviceId = $_GET['deviceId'] ?? '';
 
-if (empty($idUsuario)) {
-    echo json_encode("Parámetro idUsuario requerido", JSON_UNESCAPED_UNICODE);
+if (empty($idUsuario) || empty($deviceId)) {
+    echo json_encode(array('success' => false, 'message' => 'Parámetros incompletos'), JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 try {
-    $sentencia = $Conexion->prepare("UPDATE t_usuario SET Sesion = '' WHERE IdUsuario = ?");
-    $sentencia->execute([$idUsuario]);
+    $cerrarSesion = $conexion->prepare("
+        UPDATE t_sesiones_dispositivos 
+        SET FechaLogout = GETDATE(), 
+            Activa = 0 
+        WHERE IdUsuario = ? 
+        AND IdDispositivo = ? 
+        AND Activa = 1");
     
-    if ($sentencia->rowCount() > 0) {
-        echo json_encode("Sesión cerrada correctamente", JSON_UNESCAPED_UNICODE);
+    $cerrarSesion->execute([$idUsuario, $deviceId]);
+    
+    if ($cerrarSesion->rowCount() > 0) {
+        $respuesta = array(
+            'success' => true,
+            'message' => 'Sesión cerrada correctamente'
+        );
     } else {
-        echo json_encode("No se pudo cerrar la sesión", JSON_UNESCAPED_UNICODE);
+        $respuesta = array(
+            'success' => false,
+            'message' => 'No se encontró sesión activa'
+        );
     }
-} catch (PDOException $e) {
-    echo json_encode("Error al cerrar la sesión: " . $e->getMessage(), JSON_UNESCAPED_UNICODE);
+    
+    echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
+    
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(array(
+        'success' => false,
+        'message' => 'Error al cerrar sesión: ' . $e->getMessage()
+    ), JSON_UNESCAPED_UNICODE);
 }
 ?>

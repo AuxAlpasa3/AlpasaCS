@@ -1,25 +1,11 @@
 <?php
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, Device-Id, Device-Name, Device-Location, Device-Location-Id');
 
-// Habilitar logging para debug
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
+require_once '../api/db/conexion.php';
 
-// Incluir conexión a SQL Server
-require_once '../conexion/conexion.php';
-
-// Función para registrar en log
-function logMessage($message) {
-    $logFile = __DIR__ . '/../logs/sesiones_' . date('Y-m-d') . '.log';
-    $timestamp = date('Y-m-d H:i:s');
-    $logMessage = "[$timestamp] $message" . PHP_EOL;
-    file_put_contents($logFile, $logMessage, FILE_APPEND);
-}
-
-// Manejar solicitud OPTIONS para CORS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -29,46 +15,62 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'POST') {
     try {
-        // Obtener datos del request
         $input = json_decode(file_get_contents('php://input'), true);
         
         if (!$input) {
             $input = $_POST;
         }
         
-        logMessage("Datos recibidos: " . json_encode($input));
+        // También verificar datos de headers
+        $deviceHeaders = [
+            'Device-Id' => $_SERVER['HTTP_DEVICE_ID'] ?? '',
+            'Device-Name' => $_SERVER['HTTP_DEVICE_NAME'] ?? '',
+            'Device-Location' => $_SERVER['HTTP_DEVICE_LOCATION'] ?? '',
+            'Device-Location-Id' => $_SERVER['HTTP_DEVICE_LOCATION_ID'] ?? ''
+        ];
         
-        if (empty($input)) {
-            echo json_encode(['success' => false, 'error' => 'Datos inválidos o vacíos']);
-            exit;
-        }
-        
+        // Validar que tenemos datos mínimos
         $action = $input['action'] ?? '';
         $IdUsuario = $input['IdUsuario'] ?? '';
-        $IdDispositivo = $input['IdDispositivo'] ?? '';
-        $NombreDispositivo = $input['NombreDispositivo'] ?? 'Dispositivo móvil';
-        $IdUbicacion = $input['IdUbicacion'] ?? '';
-        $NombreUbicacion = $input['NombreUbicacion'] ?? 'Ubicación desconocida';
-        $FechaLogin = $input['FechaLogin'] ?? '';
-        $FechaLogout = $input['FechaLogout'] ?? null;
-        $Activa = isset($input['Activa']) ? (int)$input['Activa'] : 1;
         
-        // Validar datos requeridos
-        if (empty($IdUsuario) || empty($IdDispositivo)) {
-            echo json_encode(['success' => false, 'error' => 'Datos incompletos: IdUsuario e IdDispositivo son requeridos']);
+        if (empty($IdUsuario) || empty($action)) {
+            echo json_encode([
+                'success' => false, 
+                'error' => 'Datos incompletos: IdUsuario y action son requeridos'
+            ], JSON_UNESCAPED_UNICODE);
             exit;
         }
         
-        // Validar acción
-        if (!in_array($action, ['login', 'logout'])) {
-            echo json_encode(['success' => false, 'error' => 'Acción no válida. Debe ser login o logout']);
-            exit;
+        $IdDispositivo = !empty($deviceHeaders['Device-Id']) ? $deviceHeaders['Device-Id'] : ($input['IdDispositivo'] ?? 'unknown');
+        $NombreDispositivo = !empty($deviceHeaders['Device-Name']) ? $deviceHeaders['Device-Name'] : ($input['NombreDispositivo'] ?? 'Dispositivo móvil');
+        $NombreUbicacion = !empty($deviceHeaders['Device-Location']) ? $deviceHeaders['Device-Location'] : ($input['NombreUbicacion'] ?? 'Ubicación desconocida');
+        $IdUbicacion = !empty($deviceHeaders['Device-Location-Id']) ? $deviceHeaders['Device-Location-Id'] : ($input['IdUbicacion'] ?? '');
+        $source = $input['source'] ?? 'app';
+        
+        $checkTable = $Conexion->query("SELECT COUNT(*) as existe FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 't_sesiones_dispositivos'");
+        $tableExists = $checkTable->fetch(PDO::FETCH_ASSOC);
+        
+        if ($tableExists['existe'] == 0) {
+            // Crear tabla si no existe
+            $createTable = $Conexion->prepare("
+                CREATE TABLE t_sesiones_dispositivos (
+                    IdSesion INT IDENTITY(1,1) PRIMARY KEY,
+                    IdUsuario INT NOT NULL,
+                    IdDispositivo NVARCHAR(255) NOT NULL,
+                    NombreDispositivo NVARCHAR(100),
+                    IdUbicacion NVARCHAR(100),
+                    NombreUbicacion NVARCHAR(255),
+                    FechaLogin DATETIME DEFAULT GETDATE(),
+                    FechaLogout DATETIME NULL,
+                    Activa BIT DEFAULT 1,
+                    FOREIGN KEY (IdUsuario) REFERENCES t_usuario(IdUsuario)
+                )
+            ");
+            $createTable->execute();
         }
         
-        // Procesar según la acción
         if ($action === 'login') {
-            // Primero, cerrar cualquier sesión activa previa para este usuario-dispositivo
-            $stmtClose = $conn->prepare("
+            $stmtClose = $Conexion->prepare("
                 UPDATE t_sesiones_dispositivos 
                 SET FechaLogout = GETDATE(), 
                     Activa = 0 
@@ -78,56 +80,42 @@ if ($method === 'POST') {
             ");
             
             $stmtClose->execute([$IdUsuario, $IdDispositivo]);
-            logMessage("Sesiones anteriores cerradas para usuario $IdUsuario en dispositivo $IdDispositivo");
             
-            // Registrar nueva sesión
-            $stmt = $conn->prepare("
+            $stmt = $Conexion->prepare("
                 INSERT INTO t_sesiones_dispositivos 
                 (IdUsuario, IdDispositivo, NombreDispositivo, IdUbicacion, NombreUbicacion, FechaLogin, Activa)
-                OUTPUT INSERTED.IdSesion
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, GETDATE(), 1)
             ");
             
-            // Formatear fecha de login
-            if (empty($FechaLogin)) {
-                $fechaLoginSQL = date('Y-m-d H:i:s');
-            } else {
-                $fechaLoginSQL = date('Y-m-d H:i:s', strtotime($FechaLogin));
-            }
-            
-            $params = [
+            $stmt->execute([
                 $IdUsuario,
                 $IdDispositivo,
                 $NombreDispositivo,
                 $IdUbicacion,
-                $NombreUbicacion,
-                $fechaLoginSQL,
-                $Activa
-            ];
+                $NombreUbicacion
+            ]);
             
-            $stmt->execute($params);
-            
-            // Obtener el ID insertado
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            $IdSesion = $row['IdSesion'] ?? null;
-            
-            logMessage("Nueva sesión registrada: IdSesion=$IdSesion, Usuario=$IdUsuario, Dispositivo=$IdDispositivo");
+            $updateUsuario = $Conexion->prepare("
+                UPDATE t_usuario 
+                SET UltimaSesion = GETDATE() 
+                WHERE IdUsuario = ?
+            ");
+            $updateUsuario->execute([$IdUsuario]);
             
             echo json_encode([
                 'success' => true, 
-                'message' => 'Sesión registrada exitosamente',
-                'IdSesion' => $IdSesion,
+                'message' => 'Sesión de login registrada exitosamente',
                 'data' => [
                     'IdUsuario' => $IdUsuario,
                     'IdDispositivo' => $IdDispositivo,
-                    'FechaLogin' => $fechaLoginSQL
+                    'FechaLogin' => date('Y-m-d H:i:s'),
+                    'source' => $source
                 ]
-            ]);
+            ], JSON_UNESCAPED_UNICODE);
             
         } elseif ($action === 'logout') {
-            // Buscar sesión activa para cerrar
-            $stmtFind = $conn->prepare("
-                SELECT IdSesion 
+            $stmtFind = $Conexion->prepare("
+                SELECT TOP 1 IdSesion 
                 FROM t_sesiones_dispositivos 
                 WHERE IdUsuario = ? 
                 AND IdDispositivo = ? 
@@ -138,114 +126,96 @@ if ($method === 'POST') {
             $stmtFind->execute([$IdUsuario, $IdDispositivo]);
             $session = $stmtFind->fetch(PDO::FETCH_ASSOC);
             
-            if ($session) {
+            if ($session && isset($session['IdSesion'])) {
                 // Cerrar sesión existente
                 $IdSesion = $session['IdSesion'];
                 
-                $stmtUpdate = $conn->prepare("
+                $stmtUpdate = $Conexion->prepare("
                     UPDATE t_sesiones_dispositivos 
-                    SET FechaLogout = ?, 
+                    SET FechaLogout = GETDATE(), 
                         Activa = 0 
                     WHERE IdSesion = ?
                 ");
                 
-                // Formatear fecha de logout
-                if (empty($FechaLogout)) {
-                    $fechaLogoutSQL = date('Y-m-d H:i:s');
-                } else {
-                    $fechaLogoutSQL = date('Y-m-d H:i:s', strtotime($FechaLogout));
-                }
+                $stmtUpdate->execute([$IdSesion]);
                 
-                $stmtUpdate->execute([$fechaLogoutSQL, $IdSesion]);
-                
-                logMessage("Sesión cerrada: IdSesion=$IdSesion, Usuario=$IdUsuario");
-                
-                echo json_encode([
-                    'success' => true, 
-                    'message' => 'Sesión cerrada exitosamente',
-                    'IdSesion' => $IdSesion,
-                    'data' => [
-                        'IdUsuario' => $IdUsuario,
-                        'IdDispositivo' => $IdDispositivo,
-                        'FechaLogout' => $fechaLogoutSQL
-                    ]
-                ]);
+                $message = 'Sesión de logout registrada exitosamente';
             } else {
-                // No se encontró sesión activa, crear registro histórico
-                $stmtInsert = $conn->prepare("
+                $stmtInsert = $Conexion->prepare("
                     INSERT INTO t_sesiones_dispositivos 
                     (IdUsuario, IdDispositivo, NombreDispositivo, IdUbicacion, NombreUbicacion, 
                      FechaLogin, FechaLogout, Activa)
-                    OUTPUT INSERTED.IdSesion
-                    VALUES (?, ?, ?, ?, ?, DATEADD(HOUR, -1, GETDATE()), ?, 0)
+                    VALUES (?, ?, ?, ?, ?, DATEADD(HOUR, -1, GETDATE()), GETDATE(), 0)
                 ");
                 
-                // Formatear fecha de logout
-                if (empty($FechaLogout)) {
-                    $fechaLogoutSQL = date('Y-m-d H:i:s');
-                } else {
-                    $fechaLogoutSQL = date('Y-m-d H:i:s', strtotime($FechaLogout));
-                }
-                
-                $params = [
+                $stmtInsert->execute([
                     $IdUsuario,
                     $IdDispositivo,
-                    $NombreDispositivo ?? 'Dispositivo móvil',
-                    $IdUbicacion ?? '',
-                    $NombreUbicacion ?? 'Ubicación desconocida',
-                    $fechaLogoutSQL
-                ];
-                
-                $stmtInsert->execute($params);
-                
-                $row = $stmtInsert->fetch(PDO::FETCH_ASSOC);
-                $IdSesion = $row['IdSesion'] ?? null;
-                
-                logMessage("Sesión histórica creada: IdSesion=$IdSesion, Usuario=$IdUsuario (no se encontró sesión activa)");
-                
-                echo json_encode([
-                    'success' => true, 
-                    'message' => 'Registro histórico de sesión creado',
-                    'IdSesion' => $IdSesion,
-                    'note' => 'No se encontró sesión activa, se creó registro histórico'
+                    $NombreDispositivo,
+                    $IdUbicacion,
+                    $NombreUbicacion
                 ]);
+                
+                $message = 'Registro histórico de sesión creado (no había sesión activa)';
             }
+            
+            echo json_encode([
+                'success' => true, 
+                'message' => $message,
+                'data' => [
+                    'IdUsuario' => $IdUsuario,
+                    'IdDispositivo' => $IdDispositivo,
+                    'FechaLogout' => date('Y-m-d H:i:s'),
+                    'source' => $source
+                ]
+            ], JSON_UNESCAPED_UNICODE);
+        } else {
+            echo json_encode([
+                'success' => false, 
+                'error' => 'Acción no válida. Debe ser "login" o "logout"'
+            ], JSON_UNESCAPED_UNICODE);
         }
         
     } catch (PDOException $e) {
-        $errorMessage = $e->getMessage();
-        logMessage("Error PDO: $errorMessage");
-        
         echo json_encode([
             'success' => false, 
             'error' => 'Error de base de datos',
-            'debug' => $errorMessage
-        ]);
+            'details' => $e->getMessage()
+        ], JSON_UNESCAPED_UNICODE);
     } catch (Exception $e) {
-        $errorMessage = $e->getMessage();
-        logMessage("Error general: $errorMessage");
-        
         echo json_encode([
             'success' => false, 
             'error' => 'Error en el servidor',
-            'debug' => $errorMessage
-        ]);
+            'details' => $e->getMessage()
+        ], JSON_UNESCAPED_UNICODE);
     }
     
 } elseif ($method === 'GET') {
-    // Para obtener sesiones (si necesitas esta funcionalidad)
     $action = $_GET['action'] ?? '';
     
     try {
+        // Verificar si la tabla existe
+        $checkTable = $Conexion->query("SELECT COUNT(*) as existe FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 't_sesiones_dispositivos'");
+        $tableExists = $checkTable->fetch(PDO::FETCH_ASSOC);
+        
+        if ($tableExists['existe'] == 0) {
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Tabla de sesiones no existe aún',
+                'sessions' => [],
+                'count' => 0
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        
         if ($action === 'get_active_sessions') {
-            // Obtener todas las sesiones activas
-            $stmt = $conn->prepare("
+            $stmt = $Conexion->prepare("
                 SELECT 
                     s.*,
-                    u.Nombre as NombreUsuario,
+                    u.Descripcion as NombreUsuario,
                     u.Usuario as UsuarioLogin
                 FROM t_sesiones_dispositivos s
-                LEFT JOIN t_usuarios u ON s.IdUsuario = u.IdUsuario
+                LEFT JOIN t_usuario u ON s.IdUsuario = u.IdUsuario
                 WHERE s.Activa = 1
                 ORDER BY s.FechaLogin DESC
             ");
@@ -257,91 +227,70 @@ if ($method === 'POST') {
                 'success' => true, 
                 'sessions' => $sessions,
                 'count' => count($sessions)
-            ]);
+            ], JSON_UNESCAPED_UNICODE);
             
-        } elseif ($action === 'get_today_sessions') {
-            // Obtener sesiones del día actual
-            $stmt = $conn->prepare("
-                SELECT 
-                    s.*,
-                    u.Nombre as NombreUsuario
-                FROM t_sesiones_dispositivos s
-                LEFT JOIN t_usuarios u ON s.IdUsuario = u.IdUsuario
-                WHERE CONVERT(DATE, s.FechaLogin) = CONVERT(DATE, GETDATE())
-                ORDER BY s.FechaLogin DESC
-            ");
+        } elseif ($action === 'check_session') {
+            $IdUsuario = $_GET['IdUsuario'] ?? '';
+            $IdDispositivo = $_GET['IdDispositivo'] ?? '';
             
-            $stmt->execute();
-            $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            echo json_encode([
-                'success' => true, 
-                'sessions' => $sessions,
-                'count' => count($sessions)
-            ]);
-            
-        } elseif ($action === 'get_session_stats') {
-            // Obtener estadísticas
-            $stmt = $conn->prepare("
-                SELECT 
-                    COUNT(*) as TotalSesiones,
-                    SUM(CASE WHEN Activa = 1 THEN 1 ELSE 0 END) as SesionesActivas,
-                    COUNT(DISTINCT IdUsuario) as UsuariosUnicos,
-                    COUNT(DISTINCT IdUbicacion) as UbicacionesUnicas,
-                    COUNT(DISTINCT IdDispositivo) as DispositivosUnicos,
-                    CONVERT(DATE, GETDATE()) as Fecha
-                FROM t_sesiones_dispositivos
-                WHERE CONVERT(DATE, FechaLogin) = CONVERT(DATE, GETDATE())
-            ");
-            
-            $stmt->execute();
-            $stats = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            echo json_encode([
-                'success' => true, 
-                'stats' => $stats
-            ]);
-            
-        } elseif ($action === 'get_user_sessions') {
-            // Obtener sesiones de un usuario específico
-            $userId = $_GET['user_id'] ?? '';
-            
-            if (empty($userId)) {
-                echo json_encode(['success' => false, 'error' => 'ID de usuario requerido']);
+            if (empty($IdUsuario) || empty($IdDispositivo)) {
+                echo json_encode([
+                    'success' => false, 
+                    'error' => 'IdUsuario e IdDispositivo son requeridos'
+                ], JSON_UNESCAPED_UNICODE);
                 exit;
             }
             
-            $stmt = $conn->prepare("
-                SELECT *
-                FROM t_sesiones_dispositivos
-                WHERE IdUsuario = ?
+            $stmt = $Conexion->prepare("
+                SELECT TOP 1 *
+                FROM t_sesiones_dispositivos 
+                WHERE IdUsuario = ? 
+                AND IdDispositivo = ? 
+                AND Activa = 1
                 ORDER BY FechaLogin DESC
-                LIMIT 50
             ");
             
-            $stmt->execute([$userId]);
-            $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt->execute([$IdUsuario, $IdDispositivo]);
+            $session = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            echo json_encode([
-                'success' => true, 
-                'sessions' => $sessions,
-                'count' => count($sessions)
-            ]);
+            if ($session) {
+                echo json_encode([
+                    'success' => true, 
+                    'hasActiveSession' => true,
+                    'session' => $session
+                ], JSON_UNESCAPED_UNICODE);
+            } else {
+                echo json_encode([
+                    'success' => true, 
+                    'hasActiveSession' => false,
+                    'message' => 'No hay sesión activa'
+                ], JSON_UNESCAPED_UNICODE);
+            }
             
         } else {
-            echo json_encode(['success' => false, 'error' => 'Acción no válida']);
+            echo json_encode([
+                'success' => false, 
+                'error' => 'Acción no válida para GET',
+                'available_actions' => [
+                    'get_active_sessions',
+                    'check_session'
+                ]
+            ], JSON_UNESCAPED_UNICODE);
         }
         
     } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        echo json_encode([
+            'success' => false, 
+            'error' => 'Error de base de datos',
+            'details' => $e->getMessage()
+        ], JSON_UNESCAPED_UNICODE);
     }
     
 } else {
-    echo json_encode(['success' => false, 'error' => 'Método no permitido']);
-}
-
-// Cerrar conexión
-if (isset($conn)) {
-    $conn = null;
+    echo json_encode([
+        'success' => false, 
+        'error' => 'Método no permitido',
+        'method' => $method
+    ], JSON_UNESCAPED_UNICODE);
 }
 ?>
