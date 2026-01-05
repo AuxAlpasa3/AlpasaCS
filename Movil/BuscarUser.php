@@ -1,16 +1,13 @@
 <?php
-// Movil/BuscarUser.php
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Device-Id, Device-Name, Device-Location, Device-Location-Id');
 
 Include '../api/db/conexion.php';
 
-// Obtener parámetros
 $usuario = $_GET['usuario'] ?? '';
 $password = $_GET['password'] ?? '';
 
-// Obtener headers del dispositivo
 $deviceId = $_SERVER['HTTP_DEVICE_ID'] ?? '';
 $deviceName = $_SERVER['HTTP_DEVICE_NAME'] ?? '';
 $deviceLocation = $_SERVER['HTTP_DEVICE_LOCATION'] ?? '';
@@ -22,7 +19,6 @@ if (empty($usuario) || empty($password)) {
 }
 
 try {
-    // Buscar usuario
     $sentencia = $Conexion->prepare("SELECT * FROM t_usuario WHERE Usuario = ? AND TipoUsuario IN (1,2,3,4,5) AND Estatus = 1");
     $sentencia->execute([$usuario]);
     $client = $sentencia->fetchAll(PDO::FETCH_OBJ);
@@ -37,19 +33,16 @@ try {
             if (password_verify($password, $row->Contrasenia)) {
                 $usuarioValido = true;
                 
-                // Actualizar última sesión en t_usuario
                 $sentenciaActualizar = $Conexion->prepare("
                     UPDATE t_usuario 
                     SET UltimaSesion = GETDATE() 
                     WHERE IdUsuario = ?");
                 $sentenciaActualizar->execute([$row->IdUsuario]);
                 
-                // REGISTRAR SESIÓN EN t_sesiones_dispositivos
                 if (!empty($deviceId)) {
                     registrarSesionDispositivo($Conexion, $row->IdUsuario, $deviceId, $deviceName, $deviceLocation, $deviceLocationId);
                 }
                 
-                // Preparar respuesta
                 array_push($datos, array(
                     'IdUsuario' => $row->IdUsuario,
                     'Usuario' => $row->Usuario,
@@ -60,8 +53,6 @@ try {
                     'Sesion' => $row->Sesion,
                     'UltimaSesion' => $row->UltimaSesion,
                     'CreateDate' => $row->CreateDate,
-                    'Correo' => $row->Correo,
-                    'NombreColaborador' => $row->NombreColaborador,
                     'DeviceInfo' => array(
                         'DeviceId' => $deviceId,
                         'DeviceName' => $deviceName,
