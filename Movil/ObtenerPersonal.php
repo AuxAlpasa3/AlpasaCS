@@ -17,7 +17,6 @@ if (empty($noEmpleado)) {
 }
 
 try {
-    // Consulta para obtener información del personal
     $sentencia = $Conexion->prepare("
         SELECT 
             t1.IdPersonal,
@@ -41,27 +40,6 @@ try {
     
     if (count($resultados) > 0) {
         $personal = $resultados[0];
-        
-        // Registrar log de consulta si se proporcionó IdUsuario
-        if (!empty($idUsuario)) {
-            try {
-                $sentenciaLog = $Conexion->prepare("
-                    INSERT INTO t_log_accesos (
-                        IdUsuario, 
-                        Accion, 
-                        Detalle, 
-                        FechaHora, 
-                        IdPersonalConsultado
-                    ) VALUES (?, 'CONSULTA_PERSONAL', ?, GETDATE(), ?)
-                ");
-                
-                $detalle = "Consulta información de personal: " . $personal->NoEmpleado . " - " . $personal->NombreCompleto;
-                $sentenciaLog->execute([$idUsuario, $detalle, $personal->IdPersonal]);
-            } catch (Exception $logError) {
-                // No interrumpir el flujo si falla el log
-                error_log('Error al registrar log de consulta: ' . $logError->getMessage());
-            }
-        }
         
         echo json_encode(array(
             'success' => true,
