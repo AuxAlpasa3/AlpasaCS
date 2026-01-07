@@ -33,7 +33,7 @@ try {
         INNER JOIN t_departamento as t3 ON t1.Departamento = t3.IdDepartamento
         INNER JOIN t_empresa as t4 ON t1.Empresa = t4.IdEmpresa
         INNER JOIN t_ubicacion as t5 ON t1.IdUbicacion = t5.IdUbicacion
-        WHERE t1.NoEmpleado = ? AND t1.Estatus = 1
+        WHERE t1.NoEmpleado = ? AND t1.Status = 1
     ");
     
     $sentencia->execute([$noEmpleado]);
