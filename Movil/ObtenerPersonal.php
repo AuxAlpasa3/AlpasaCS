@@ -5,8 +5,8 @@ header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 
 require_once '../api/db/conexion.php';
 
-$noEmpleado = $_GET['NoEmpleado'] ?? '';
-$idUsuario = $_GET['IdUsuario'] ?? '';
+$noEmpleado = $_POST['NoEmpleado'] ?? '';
+$idUsuario = $_POST['IdUsuario'] ?? '';
 
 if (empty($noEmpleado)) {
     echo json_encode(array(
