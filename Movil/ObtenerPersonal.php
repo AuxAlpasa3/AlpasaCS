@@ -41,6 +41,15 @@ try {
     if (count($resultados) > 0) {
         $personal = $resultados[0];
         
+        $sentenciaVehiculo = $Conexion->prepare("
+            SELECT IdVehiculo, Marca, Modelo, Num_Serie, Placas, Anio, Color, RutaFoto 
+            FROM t_vehiculos 
+            WHERE NoEmpleado = ?
+        ");
+        
+        $sentenciaVehiculo->execute([$noEmpleado]);
+        $vehiculos = $sentenciaVehiculo->fetchAll(PDO::FETCH_OBJ);
+        
         echo json_encode(array(
             'success' => true,
             'data' => array(
@@ -51,7 +60,8 @@ try {
                 'NomDepto' => $personal->NomDepto,
                 'NomEmpresa' => $personal->NomEmpresa,
                 'NomLargo' => $personal->NomLargo,
-                'RutaFoto' => $personal->RutaFoto
+                'RutaFoto' => $personal->RutaFoto,
+                'Vehiculos' => $vehiculos
             )
         ), JSON_UNESCAPED_UNICODE);
         
