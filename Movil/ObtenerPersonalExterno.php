@@ -57,7 +57,7 @@ try {
                 'NombreCompleto' => $personalExterno->NombreCompleto,
                 'Cargo' => $personalExterno->Cargo,
                 'EmpresaProcedencia' => $personalExterno->EmpresaProcedencia,
-                'NomLargo' => $personalExterno->NomLargo,
+                'AreaVisitaNombre' => $personalExterno->AreaVisitaNombre,
                 'RutaFoto' => $personalExterno->RutaFoto,
                 'vehiculosExterno' => $vehiculosExterno
             )
@@ -66,7 +66,7 @@ try {
     } else {
         echo json_encode(array(
             'success' => false,
-            'message' => 'No se encontró el personalExterno con número: ' . $idPersonalExterno
+            'message' => 'No se encontró el personal Externo con número: ' . $idPersonalExterno
         ), JSON_UNESCAPED_UNICODE);
     }
     
