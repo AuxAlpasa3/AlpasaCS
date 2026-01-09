@@ -17,15 +17,13 @@ if (empty($idProveedor)) {
 }
 
 try {
-    // 1. Obtener información principal del proveedor
     $sentencia = $Conexion->prepare("
         SELECT 
             IdProveedor,
             NombreProveedor,
             MotivoIngreso,
             Status,
-            Vigencia,
-            FechaRegistro
+            Vigencia
         FROM t_Proveedor 
         WHERE IdProveedor = ?
         AND Status = 1 
@@ -38,15 +36,13 @@ try {
     if (count($resultados) > 0) {
         $proveedor = $resultados[0];
         
-        // 2. Obtener personal del proveedor
         $sentenciaPersonal = $Conexion->prepare("
             SELECT 
                 IdPersonal,
                 IdProveedor,
                 CONCAT(Nombre,' ',ApPaterno,' ',ApMaterno) AS NombreCompleto,
                 RutaFoto,
-                Status,
-                FechaRegistro
+                Status
             FROM t_Proveedor_personal
             WHERE IdProveedor = ?
             AND Status = 1
@@ -56,7 +52,6 @@ try {
         $sentenciaPersonal->execute([$idProveedor]);
         $personal = $sentenciaPersonal->fetchAll(PDO::FETCH_OBJ);
         
-        // 3. Obtener vehículos del proveedor
         $sentenciaVehiculo = $Conexion->prepare("
             SELECT 
                 IdVehiculo,
@@ -68,8 +63,7 @@ try {
                 Anio,
                 Color,
                 RutaFoto,
-                Activo,
-                FechaRegistro
+                Activo
             FROM t_Proveedor_vehiculo
             WHERE IdProveedor = ?
             AND Activo = 1
@@ -79,41 +73,6 @@ try {
         $sentenciaVehiculo->execute([$idProveedor]);
         $vehiculos = $sentenciaVehiculo->fetchAll(PDO::FETCH_OBJ);
         
-        // 4. Obtener responsable del proveedor (si existe)
-        $sentenciaResponsable = $Conexion->prepare("
-            SELECT 
-                tp.IdPersonal,
-                CONCAT(tp.Nombre,' ',tp.ApPaterno,' ',tp.ApMaterno) AS NombreCompleto,
-                tp.CorreoElectronico,
-                tp.Telefono
-            FROM t_Proveedor tpv
-            LEFT JOIN t_personal tp ON tpv.IdPersonalResponsable = tp.IdPersonal
-            WHERE tpv.IdProveedor = ?
-        ");
-        
-        $sentenciaResponsable->execute([$idProveedor]);
-        $responsable = $sentenciaResponsable->fetch(PDO::FETCH_OBJ);
-        
-        // 5. Registrar en bitácora
-        $sentenciaBitacora = $Conexion->prepare("
-            INSERT INTO t_bitacora_movil (
-                IdUsuario,
-                Accion,
-                Detalle,
-                FechaHora,
-                Dispositivo,
-                IdProveedor
-            ) VALUES (?, ?, ?, GETDATE(), 'APP_MOVIL', ?)
-        ");
-        
-        $detalle = "Consulta de información de proveedor ID: " . $idProveedor;
-        $sentenciaBitacora->execute([
-            $idUsuario,
-            'CONSULTA_PROVEEDOR',
-            $detalle,
-            $idProveedor
-        ]);
-        
         echo json_encode(array(
             'success' => true,
             'data' => array(
@@ -122,10 +81,8 @@ try {
                 'MotivoIngreso' => $proveedor->MotivoIngreso,
                 'Status' => $proveedor->Status,
                 'Vigencia' => $proveedor->Vigencia,
-                'FechaRegistro' => $proveedor->FechaRegistro,
                 'Personal' => $personal,
-                'Vehiculos' => $vehiculos,
-                'Responsable' => $responsable
+                'Vehiculos' => $vehiculos
             )
         ), JSON_UNESCAPED_UNICODE);
         
