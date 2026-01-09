@@ -41,7 +41,7 @@ try {
         $personalExterno = $resultados[0];
         
         $sentenciaVehiculo = $Conexion->prepare("
-            SELECT IdVehiculo, Marca, Modelo, Placas, Anio, Color, RutaFoto 
+            SELECT IdVehiculoExterno, Marca, Modelo, Placas, Anio, Color, RutaFoto 
             FROM t_vehiculos_Externo
             WHERE idPersonalExterno = ? and Activo = 1
         ");
