@@ -24,7 +24,7 @@ try {
             CONCAT(t1.Nombre,' ',t1.ApPaterno,' ',t1.ApMaterno) as NombreCompleto,
             t1.Cargo,
             t1.EmpresaProcedencia,
-            t2.NomLargo,
+            t2.NomLargo as AreaVisitaNombre,
             t1.RutaFoto
         FROM t_personal_Externo as t1 
         INNER JOIN t_ubicacion as t2 ON t1.AreaVisita = t2.IdUbicacion
