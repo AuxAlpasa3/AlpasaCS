@@ -29,7 +29,7 @@ try {
         FROM t_personal_Externo as t1 
         INNER JOIN t_ubicacion as t2 ON t1.AreaVisita = t2.IdUbicacion
         INNER JOIN t_personal as t3 ON t1.IdPersonalResponsable = t3.IdPersonal
-        WHERE t1.IdPersonalExterno = $IdPersonalExterno
+        WHERE t1.IdPersonalExterno = ?
             AND t1.Status = 1 
             AND (t1.VigenciaAcceso >= GETDATE() OR t1.VigenciaAcceso IS NULL)
     ");
