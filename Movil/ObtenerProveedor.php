@@ -23,7 +23,8 @@ try {
             NombreProveedor,
             MotivoIngreso,
             Status,
-            Vigencia
+            Vigencia,
+            RutaFoto
         FROM t_Proveedor 
         WHERE IdProveedor = ?
         AND Status = 1 
@@ -80,6 +81,7 @@ try {
                 'NombreProveedor' => $proveedor->NombreProveedor,
                 'MotivoIngreso' => $proveedor->MotivoIngreso,
                 'Status' => $proveedor->Status,
+                'RutaFoto' => $proveedor->RutaFoto,
                 'Vigencia' => $proveedor->Vigencia,
                 'Personal' => $personal,
                 'Vehiculos' => $vehiculos
