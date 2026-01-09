@@ -44,7 +44,7 @@ try {
         $sentenciaVehiculo = $Conexion->prepare("
             SELECT IdVehiculo, Marca, Modelo, Num_Serie, Placas, Anio, Color, RutaFoto 
             FROM t_vehiculos 
-            WHERE NoEmpleado = ?
+            WHERE NoEmpleado = ? and Activo = 1
         ");
         
         $sentenciaVehiculo->execute([$noEmpleado]);
