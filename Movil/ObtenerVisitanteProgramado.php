@@ -28,9 +28,9 @@ try {
         FROM t_visitantes_programados as t1 
         INNER JOIN t_tipovisita as t2 on t1.TipoVisita=t2.IdTipoVisita
         INNER JOIN t_estadoCita as t3 on t1.EstadoCita=t3.IdEstadoCita
-        WHERE t1.IdVisitanteProgramado = ?
-        AND t1.EstadoCita in (1,2) AND t1.FechaProgramada>=GETDATE()
-        AND (t1.FechaVigencia >= GETDATE() OR t1.FechaVigencia IS NULL)");
+        WHERE t1.IdVisitanteProgramado =1
+        AND t1.EstadoCita in (1,2) AND t1.FechaProgramada>= CAST(GETDATE() AS DATE)
+        AND (t1.FechaVigencia >= CAST(GETDATE() AS DATE) OR t1.FechaVigencia IS NULL)");
     
     $sentencia->execute([$IdVisitanteProgramado]);
     $resultados = $sentencia->fetchAll(PDO::FETCH_OBJ);
