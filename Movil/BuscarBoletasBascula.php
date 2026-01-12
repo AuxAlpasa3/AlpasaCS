@@ -46,6 +46,7 @@ GROUP BY t1.IdBoletas, t1.Placas, t1.Chofer, t10.Cliente,
             $resultado[] = array(
                 'IdBoletas' => $row->IdBoletas,
                 'Placas' => $row->Placas,
+                'año' => $row->año,
                 'Chofer' => $row->Chofer,
                 'Cliente' => $row->Cliente,
                 'TipoTransporte' => $row->TipoTransporte,
