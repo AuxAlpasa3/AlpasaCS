@@ -28,43 +28,41 @@ try {
         throw new Exception('Datos no válidos');
     }
 
-    $requiredFields = ['IdPersonal', 'Ubicacion', 'NombreUbicacion', 'Usuario', 'IdUsuario', 'DispN', 'TipoTransporte'];
+    $requiredFields = ['IdPersonal', 'IdUsuario', 'TipoTransporte', 
+    'Ubicacion', 'IdUsuario', 'DispN'];
     foreach ($requiredFields as $field) {
         if (!isset($input[$field]) || empty($input[$field])) {
             throw new Exception("Campo requerido faltante: $field");
         }
     }
 
-    $idPersonal = $input['IdPersonal'];
-    $idUbicacion = $input['Ubicacion'];
-    $nombreUbicacion = $input['NombreUbicacion'];
-    $usuario = $input['Usuario'];
-    $idUsuario = $input['IdUsuario'];
-    $dispositivo = $input['DispN'];
-    $observaciones = isset($input['Observaciones']) && $input['Observaciones'] !== 'NULL' ? $input['Observaciones'] : '';
-    $notificarSupervisor = isset($input['NotificarSupervisor']) ? (bool)$input['NotificarSupervisor'] : false;
-    $tipoTransporte = $input['TipoTransporte'];
-    $idVehiculoTransporte = isset($input['IdVehiculoTransporte']) ? $input['IdVehiculoTransporte'] : '';
+    $DispN = $input['DispN'];
+    $IdPersonal = $input['IdPersonal'];
+    $IdUsuario = $input['IdUsuario'];
+    $Ubicacion = $input['Ubicacion'];
+    $TipoTransporte = $input['TipoTransporte'];
+
+    $IdVehiculoTransporte = isset($input['IdVehiculoTransporte']) ? $input['IdVehiculoTransporte'] : '';
+    $Observaciones = isset($input['Observaciones']) && $input['Observaciones'] !== 'NULL' ? $input['Observaciones'] : '';
+    $NotificarSupervisor = isset($input['NotificarSupervisor']) ? (bool)$input['NotificarSupervisor'] : false;
+
     
     $sqlPersonal = "SELECT 
-                        t1.IdPer,
+                        t1.IdPersonal,
                         t1.NoEmpleado,
-                        t1.NombreCompleto,
-                        t1.Nombre,
-                        t1.ApellidoPaterno,
-                        t1.ApellidoMaterno,
+                        concat(t1.Nombre,' ',t1.ApPaterno,' ',t1.ApMaterno) as NombreCompleto,
                         t1.Email,
                         t2.NomCargo,
                         t3.NomDepto,
                         t4.NomEmpresa
-                    FROM Personal t1
-                    LEFT JOIN Cargos t2 ON t1.IdCargo = t2.IdCargo
-                    LEFT JOIN Departamentos t3 ON t1.IdDepartamento = t3.IdDepartamento
-                    LEFT JOIN Empresas t4 ON t1.IdEmpresa = t4.IdEmpresa
-                    WHERE t1.IdPer = ?";
+                    FROM t_personal t1
+                    LEFT JOIN t_cargo t2 ON t1.Cargo = t2.IdCargo
+                    LEFT JOIN t_departamento t3 ON t1.Departamento = t3.IdDepartamento
+                    LEFT JOIN t_empresa t4 ON t1.Empresa = t4.IdEmpresa
+                    WHERE t1.IdPersonal ?";
     
     $stmtPersonal = $Conexion->prepare($sqlPersonal);
-    $stmtPersonal->bind_param("s", $idPersonal);
+    $stmtPersonal->bind_param("s", $IdPersonal);
     $stmtPersonal->execute();
     $resultPersonal = $stmtPersonal->get_result();
     
@@ -78,69 +76,55 @@ try {
     $Conexion->begin_transaction();
     
     try {
-        $folioMov = generarFolioMov($Conexion);
-        $fechaActual = date('Y-m-d');
-        $horaActual = date('H:i:s');
-        
+
         $sqlRegentPer = "INSERT INTO regentper (
-                            FolMov,
                             IdPer,
                             Ubicacion,
-                            TipoMov,
                             DispN,
                             Fecha,
                             TiempoMarcaje,
                             Observaciones,
                             Usuario,
                             Notificar
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        ) VALUES (?, ?, ?, GETDATE(), GETDATE(), ?, ?, ?)";
         
         $stmtRegentPer = $Conexion->prepare($sqlRegentPer);
-        $observacionesConTransporte = $observaciones . " | Transporte: " . obtenerDescripcionTransporte($tipoTransporte);
-        
         $stmtRegentPer->bind_param(
-            $folioMov,
-            $idPersonal,
-            $nombreUbicacion,
-            1,
-            $dispositivo,
-            $fechaActual,
-            $horaActual,
-            $observacionesConTransporte,
+            $IdPersonal,
+            $Ubicacion,
+            $DispN,
+            $Observaciones,
             $usuario,
-            $notificarSupervisor ? 'SI' : 'NO'
+            $NotificarSupervisor ? 1 : 0
         );
         
         if (!$stmtRegentPer->execute()) {
             throw new Exception('Error al registrar entrada: ' . $stmtRegentPer->error);
         }
         
-        $idMov = $stmtRegentPer->insert_id;
+        $IdMov = $stmtRegentPer->insert_id;
         $stmtRegentPer->close();
         
         $sqlRegentSalPer = "INSERT INTO regentsalper (
-                                IdMov,
                                 IdPer,
                                 IdUbicacion,
                                 FolMovEnt,
                                 FechaEntrada,
                                 StatusRegistro
-                            ) VALUES (?, ?, ?, ?, GETDATE(), 1)";
+                            ) VALUES (?, ?, ?, GETDATE(), 1)";
         
         $stmtRegentSalPer = $Conexion->prepare($sqlRegentSalPer);
         $stmtRegentSalPer->bind_param(
-            "ssss",
-            $idMov,
-            $idPersonal,
-            $idUbicacion,
-            $folioMov
+            $IdPersonal,
+            $Ubicacion,
+            $IdMov
         );
         
         if (!$stmtRegentSalPer->execute()) {
             throw new Exception('Error al registrar entrada en salper: ' . $stmtRegentSalPer->error);
         }
         
-        $idEntSal = $stmtRegentSalPer->insert_id;
+        $IdEntSal = $stmtRegentSalPer->insert_id;
         $stmtRegentSalPer->close();
         
         $fotosProcesadas = [];
@@ -149,12 +133,13 @@ try {
                                     IdEntSal,
                                     FechaIngreso,
                                     Tipo,
-                                    Ubicacion,
+                                    TipoMov,
+                                    IdUsuario,
                                     Estatus
-                                ) VALUES (?, GETDATE(), 'Entrada', ?, 'Activo')";
+                                ) VALUES (?, GETDATE(), 'Personal', 1, ?, 1)";
             
             $stmtFotoEncabezado = $Conexion->prepare($sqlFotoEncabezado);
-            $stmtFotoEncabezado->bind_param("ss", $idEntSal, $nombreUbicacion);
+            $stmtFotoEncabezado->bind_param($IdEntSal, $IdUsuario);
             
             if (!$stmtFotoEncabezado->execute()) {
                 throw new Exception('Error al crear encabezado de fotos: ' . $stmtFotoEncabezado->error);
@@ -175,22 +160,19 @@ try {
                     $base64Data = $fotoData['base64'];
                     $nombreFoto = $fotoData['nombre'] . '.jpg';
                     
-                    // Decodificar base64
                     $imagenDecodificada = base64_decode($base64Data);
                     
                     if ($imagenDecodificada === false) {
-                        error_log("Error decodificando foto $index para acceso $idEntSal");
+                        error_log("Error decodificando foto $index para acceso $IdEntSal");
                         continue;
                     }
                     
                     $rutaCompleta = $directorioFotos . $nombreFoto;
                     
-                    // Guardar imagen en el servidor
                     if (file_put_contents($rutaCompleta, $imagenDecodificada)) {
                         $rutaRelativa = 'fotos_accesos/' . date('Y') . '/' . date('m') . '/' . date('d') . '/' . $nombreFoto;
                         
                         $sqlFotoDetalle = "INSERT INTO T_fotografia_Detalle (
-                                            IdFotoEntSal,
                                             IdFotografiaRef,
                                             NombreFoto,
                                             RutaFoto,
@@ -199,8 +181,7 @@ try {
                         
                         $stmtFotoDetalle = $Conexion->prepare($sqlFotoDetalle);
                         $stmtFotoDetalle->bind_param(
-                            "iissi",
-                            $idEntSal,
+                            $IdEntSal,
                             $idFotografias,
                             $nombreFoto,
                             $rutaRelativa,
@@ -209,7 +190,7 @@ try {
                         
                         if ($stmtFotoDetalle->execute()) {
                             $fotosProcesadas[] = $nombreFoto;
-                            $nextIdFoto++; // Incrementar para la siguiente foto
+                            $nextIdFoto++; 
                         }
                         
                         $stmtFotoDetalle->close();
@@ -217,21 +198,52 @@ try {
                 }
             }
         }
-        
-        if ($notificarSupervisor) {
+
+        if ($TipoTransporte === 2 && !empty($IdVehiculoTransporte)) {
+            $sqlRegentVeh = "INSERT INTO regentveh (
+                                IdVeh,
+                                Ubicacion,
+                                DispN,
+                                Fecha,
+                                TiempoMarcaje,
+                                Observaciones,
+                                Usuario,
+                                Notificar
+                            ) VALUES (?, ?, ?, GETDATE(), GETDATE(), ?, ?, ?)";
+            
+            $stmtRegentVeh = $Conexion->prepare($sqlRegentVeh);
+            $stmtRegentVeh->bind_param(
+                $IdVehiculoTransporte,
+                $Ubicacion,
+                $DispN,
+                $Observaciones,
+                $usuario,
+                $NotificarSupervisor ? 1 : 0
+            );
+            
+            if (!$stmtRegentVeh->execute()) {
+                throw new Exception('Error al registrar entrada de vehiculo: ' . $stmtRegentVeh->error);
+            }
+            
+            $IdMovVehiculo = $stmtRegentVeh->insert_id;
+            $stmtFotoEncabezado->close();
+        }
+
+        if ($NotificarSupervisor === 1) {
             $sqlSupervisor = "SELECT 
                                 Concat(Nombre,' ',ApPaterno,' ',ApMaterno) as NombreCompleto,
                                 Email, Contacto
-                                FROM t_personal where IdPersonal= ?"; 
+                                FROM t_personal where IdPersonal = 
+                                (Select IdSupervisor from t_personal where IdPersonal = ?)"; 
                               
             $stmtSupervisor = $Conexion->prepare($sqlSupervisor);
-            $stmtSupervisor->bind_param("s", $idPersonal);
+            $stmtSupervisor->bind_param( $IdPersonal);
             $stmtSupervisor->execute();
+            
             $resultSupervisor = $stmtSupervisor->get_result();
             
             if ($resultSupervisor->num_rows > 0) {
                 $supervisor = $resultSupervisor->fetch_assoc();
-                
                 // Enviar correo
                 $asunto = "Registro de Entrada - " . $personal['NombreCompleto'];
                 $mensaje = "
@@ -241,13 +253,12 @@ try {
                     <p><strong>Empresa:</strong> " . $personal['NomEmpresa'] . "</p>
                     <p><strong>Departamento:</strong> " . $personal['NomDepto'] . "</p>
                     <p><strong>Cargo:</strong> " . $personal['NomCargo'] . "</p>
-                    <p><strong>Ubicación:</strong> " . $nombreUbicacion . "</p>
-                    <p><strong>Tipo de Transporte:</strong> " . obtenerDescripcionTransporteCompleta($tipoTransporte) . "</p>
-                    <p><strong>Observaciones:</strong> " . $observaciones . "</p>
+                    <p><strong>Ubicación:</strong> " . $Ubicacion . "</p>
+                    <p><strong>Observaciones:</strong> " . $Observaciones . "</p>
                     <p><strong>Fecha:</strong> " . $fechaActual . "</p>
                     <p><strong>Hora de Entrada:</strong> " . $horaActual . "</p>
                     <p><strong>Registrado por:</strong> " . $usuario . "</p>
-                    <p><strong>Dispositivo:</strong> " . $dispositivo . "</p>
+                    <p><strong>DispN:</strong> " . $DispN . "</p>
                 ";
                 
             }
@@ -255,14 +266,15 @@ try {
             $stmtSupervisor->close();
         }
         
+        
         $Conexion->commit();
         
         $response['success'] = true;
         $response['message'] = 'Acceso registrado correctamente';
         $response['data'] = [
             'folioMov' => $folioMov,
-            'idMov' => $idMov,
-            'idEntSal' => $idEntSal,
+            'IdMov' => $IdMov,
+            'IdEntSal' => $IdEntSal,
             'fecha' => $fechaActual,
             'hora' => $horaActual,
             'personal' => [
@@ -270,10 +282,7 @@ try {
                 'noEmpleado' => $personal['NoEmpleado'],
                 'empresa' => $personal['NomEmpresa']
             ],
-            'ubicacion' => $nombreUbicacion,
-            'tipoTransporte' => obtenerDescripcionTransporteCompleta($tipoTransporte),
-            'fotosProcesadas' => count($fotosProcesadas),
-            'notificacionEnviada' => $notificarSupervisor
+            'IdUsuario' => $Ubicacion,
         ];
         
     } catch (Exception $e) {
@@ -293,21 +302,8 @@ try {
 
 echo json_encode($response);
 
-function generarFolioMov($Conexion) {
-    $prefijo = 'ENT';
-    $fecha = date('Ymd');
-    
-    $sql = "SELECT COUNT(*) as total FROM regentper WHERE DATE(Fecha) = CURDATE() AND FolMov LIKE 'ENT-%'";
-    $result = $Conexion->query($sql);
-    $row = $result->fetch_assoc();
-    $secuencia = $row['total'] + 1;
-    
-    return sprintf('%s-%s-%04d', $prefijo, $fecha, $secuencia);
-}
 
 
-
-// Función para enviar correo (implementar según necesidades)
 function enviarCorreo($destinatario, $asunto, $mensaje) {
     // Implementación de envío de correo
     // Puedes usar PHPMailer, mail() nativo, o un servicio de correo

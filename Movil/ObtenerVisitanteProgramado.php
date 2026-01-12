@@ -49,7 +49,7 @@ try {
             FROM t_detalle_visitantes
             WHERE IdVisitanteProgramado = ?
             ORDER BY Nombre, ApPaterno, ApMaterno
-        ");
+            ");
 
         $sentenciaPersonal->execute([$IdVisitanteProgramado]);
         $personal = $sentenciaPersonal->fetchAll(PDO::FETCH_OBJ);
