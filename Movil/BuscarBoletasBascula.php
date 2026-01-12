@@ -6,18 +6,32 @@ header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 require_once '../api/db/conexion2.php';
 
 try {
-    $sql = "SELECT DISTINCT(t1.IdBoletas) as IdBoletas,
-                   t1.Placas,
-                   t1.Chofer,
-                   t10.Cliente,
-                   t7.TipoTransporte,
-                   t8.Descripcion
-            FROM t_boleta_enc as t1 
-            INNER JOIN t_boleta_det as t2 ON t1.Idboletas = t2.IdBoletasEnc
-            LEFT JOIN t_tipoTransporte as t7 ON t1.TipoTransporte = t7.IdTipoTransporte
-            LEFT JOIN t_producto as t8 ON t2.Producto = t8.IdProducto
-            INNER JOIN t_cliente as t10 ON t1.Cliente = t10.IdCliente
-            WHERE t1.Estatus = 0";
+        $sql = "SELECT t1.IdBoletas,
+        t1.Placas,
+        t1.Chofer,
+        t10.Cliente,
+        t7.TipoTransporte,
+        (SELECT STRING_AGG(Descripcion, ', ') WITHIN GROUP (ORDER BY Descripcion ASC)
+            FROM (SELECT DISTINCT t8.Descripcion
+                FROM t_boleta_det t2b
+                LEFT JOIN t_producto t8 ON t2b.Producto = t8.IdProducto
+                WHERE t2b.IdBoletasEnc = t1.Idboletas) AS productos) as Descripcion,
+        t9.Transportista,
+        t11.Ubicacion as Origen,
+        t12.Ubicacion as Destino,
+        (SELECT STRING_AGG(Placas, ', ') WITHIN GROUP (ORDER BY Placas ASC)
+            FROM (SELECT DISTINCT t2c.Placas
+                FROM t_boleta_det t2c
+                WHERE t2c.IdBoletasEnc = t1.Idboletas) AS placas) as PlacasRemolque
+    FROM t_boleta_enc as t1 
+    LEFT JOIN t_tipoTransporte as t7 ON t1.TipoTransporte = t7.IdTipoTransporte
+    LEFT JOIN t_transportista as t9 on t1.Transportista = t9.IdTransportista
+    INNER JOIN t_cliente as t10 ON t1.Cliente = t10.IdCliente
+    INNER JOIN t_ubicacion as t11 on t1.Origen = t11.IdUbicacion
+    INNER JOIN t_ubicacion as t12 on t1.Destino = t12.IdUbicacion
+    WHERE t1.Estatus = 0
+    GROUP BY t1.IdBoletas, t1.Placas, t1.Chofer, t10.Cliente, 
+            t7.TipoTransporte, t9.Transportista, t11.Ubicacion, t12.Ubicacion";
     
     $sentencia = $Conexion->prepare($sql);
     $sentencia->execute();
@@ -33,7 +47,11 @@ try {
                 'Chofer' => $row->Chofer,
                 'Cliente' => $row->Cliente,
                 'TipoTransporte' => $row->TipoTransporte,
-                'Descripcion' => $row->Descripcion
+                'Descripcion' => $row->Descripcion,
+                'Transportista' => $row->Transportista,
+                'Origen' => $row->Origen,
+                'Destino' => $row->Destino,
+                'PlacasRemolque' => $row->PlacasRemolque
             );
         }
         
