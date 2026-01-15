@@ -9,7 +9,7 @@ $VERSION = getenv('VERSION');
 
 date_default_timezone_set($ZonaHoraria);
 //define('base_url', "https://intranet.alpasamx.com/" . $VERSION . "/");
-const base_url = "https://localhost/AlpasaCS/";
+       const base_url = "http://localhost/AlpasaCS/";
 
 try {
     $Conexion = new PDO(
