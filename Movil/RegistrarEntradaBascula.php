@@ -89,8 +89,7 @@ try {
         'data' => array(
             'IdBoletasEnc' => $IdBoletasEnc,
             'UUID' => $UUID,
-            'FechaEntrada' => date('Y-m-d H:i:s'),
-            'Observaciones' => $Observaciones
+            'FechaEntrada' => date('Y-m-d H:i:s')
         )
     ), JSON_UNESCAPED_UNICODE);
     
