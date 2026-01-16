@@ -4,7 +4,7 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 
-require_once '../api/db/conexion.php';
+require_once '../api/db/conexion2.php';
 
 $data = json_decode(file_get_contents('php://input'), true);
 $IdBoletas = isset($data['IdBoletas']) ? $data['IdBoletas'] : '';
