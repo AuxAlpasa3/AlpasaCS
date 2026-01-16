@@ -8,18 +8,18 @@ require_once '../api/db/conexion2.php';
 
 $data = json_decode(file_get_contents('php://input'), true);
 
-$IdBoletas = isset($data['IdBoletas']) ? $data['IdBoletas'] : '';
+$IdBoletasEnc = isset($data['IdBoletasEnc']) ? $data['IdBoletasEnc'] : '';
 $UUID = isset($data['UUID']) ? $data['UUID'] : '';
 
-if (empty($IdBoletas) && isset($_POST['IdBoletas'])) {
-    $IdBoletas = $_POST['IdBoletas'];
+if (empty($IdBoletasEnc) && isset($_POST['IdBoletasEnc'])) {
+    $IdBoletasEnc = $_POST['IdBoletasEnc'];
     $UUID = $_POST['UUID'] ?? '';
 } 
 
-if (empty($IdBoletas) || empty($UUID)) {
+if (empty($IdBoletasEnc) || empty($UUID)) {
     echo json_encode(array(
         'success' => false,
-        'message' => 'Faltan datos requeridos: IdBoletas y UUID son obligatorios'
+        'message' => 'Faltan datos requeridos: IdBoletasEnc y UUID son obligatorios'
     ), JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -28,12 +28,12 @@ try {
     $Conexion->beginTransaction();
     
     $sentenciaVerificar = $Conexion->prepare("
-        SELECT IdBoletas, Estatus, IdBoletasEnc 
+        SELECT IdBoletasEnc, Estatus, IdBoletasEnc 
         FROM t_boleta_enc 
-        WHERE IdBoletas = ? AND Estatus = 0
+        WHERE IdBoletasEnc = ? AND Estatus = 0
     ");
     
-    $sentenciaVerificar->execute([$IdBoletas]);
+    $sentenciaVerificar->execute([$IdBoletasEnc]);
     $boleta = $sentenciaVerificar->fetch(PDO::FETCH_OBJ);
     
     if (!$boleta) {
@@ -66,11 +66,11 @@ try {
     
     $sentenciaUpdateEnc = $Conexion->prepare("
         UPDATE t_boleta_enc 
-        SET Estatus = 1 
-        WHERE IdBoletas = ?
+        SET Estatus = 1 , FechaLlegada = GETDATE(), HoraLlegada = CONVERT(VARCHAR, GETDATE(), 8)
+        WHERE IdBoletasEnc = ?
     ");
     
-    $resultadoUpdateEnc = $sentenciaUpdateEnc->execute([$IdBoletas]);
+    $resultadoUpdateEnc = $sentenciaUpdateEnc->execute([$IdBoletasEnc]);
     
     if (!$resultadoUpdateEnc) {
         $Conexion->rollBack();
@@ -87,7 +87,7 @@ try {
         'success' => true,
         'message' => 'Entrada registrada correctamente',
         'data' => array(
-            'IdBoletas' => $IdBoletas,
+            'IdBoletasEnc' => $IdBoletasEnc,
             'UUID' => $UUID,
             'FechaEntrada' => date('Y-m-d H:i:s'),
             'Observaciones' => $Observaciones
