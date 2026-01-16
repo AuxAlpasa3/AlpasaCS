@@ -22,8 +22,8 @@ if (empty($IdBoletas)) {
 }
 
 try {
-    $sentencia = $Conexion->prepare("
-        SELECT 
+    $sentencia = $Conexion->prepare("SELECT 
+            t1.IdBoletasEnc,
             t1.IdBoletas,
             t1.Placas,
             t1.Chofer,
@@ -52,7 +52,7 @@ try {
           AND t1.FechaCita >= CAST(GETDATE() AS DATE) 
           AND t1.FechaCita < DATEADD(DAY, 1, CAST(GETDATE() AS DATE))  
           AND t1.IdBoletas = ?
-        GROUP BY t1.IdBoletas, t1.Placas, t1.Chofer, t10.Cliente, 
+        GROUP BY t1.IdBoletasEnc,t1.IdBoletas, t1.Placas, t1.Chofer, t10.Cliente, 
                  t7.TipoTransporte, t9.Transportista, t11.Ubicacion, t12.Ubicacion, t1.FechaCita
     ");
     
@@ -62,8 +62,8 @@ try {
     if (count($resultados) > 0) {
         $boleta = $resultados[0];
         
-        // Formatear los datos para la respuesta
         $datosBoleta = array(
+            'IdBoletasEnc' => $boleta->IdBoletasEnc,
             'IdBoletas' => $boleta->IdBoletas,
             'año' => $boleta->año,
             'Placas' => $boleta->Placas,
