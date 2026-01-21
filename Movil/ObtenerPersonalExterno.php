@@ -27,7 +27,7 @@ try {
             t2.NomLargo as AreaVisitaNombre,
             t1.RutaFoto
         FROM t_personal_Externo as t1 
-        INNER JOIN t_ubicacion as t2 ON t1.AreaVisita = t2.IdUbicacion
+        LEFT JOIN t_ubicacion as t2 ON t1.AreaVisita = t2.IdUbicacion
         INNER JOIN t_personal as t3 ON t1.IdPersonalResponsable = t3.IdPersonal
         WHERE t1.IdPersonalExterno = ?
             AND t1.Status = 1 
