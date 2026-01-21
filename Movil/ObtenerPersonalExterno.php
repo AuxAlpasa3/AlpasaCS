@@ -17,18 +17,18 @@ if (empty($idPersonalExterno)) {
 }
 
 try {
-    $sentencia = $Conexion->prepare("
-        SELECT 
+    $sentencia = $Conexion->prepare("SELECT 
             t1.IdPersonalExterno,
             t1.NumeroIdentificacion, 
             CONCAT(t1.Nombre,' ',t1.ApPaterno,' ',t1.ApMaterno) as NombreCompleto,
-            t1.Cargo,
+            t4.NomCargo,
             t1.EmpresaProcedencia,
-            t2.NomLargo as AreaVisitaNombre,
+            (CASE WHEN t1.AreaVisita=NULL THEN 'TODAS' WHEN t1.AreaVisita=0 THEN 'TODAS' ELSE t2.NomLargo END) as AreaVisitaNombre,
             t1.RutaFoto
         FROM t_personal_Externo as t1 
         LEFT JOIN t_ubicacion as t2 ON t1.AreaVisita = t2.IdUbicacion
         INNER JOIN t_personal as t3 ON t1.IdPersonalResponsable = t3.IdPersonal
+        INNER JOIN t_cargoExterno as t4 on t1.Cargo=t4.IdCargo
         WHERE t1.IdPersonalExterno = ?
             AND t1.Status = 1 
             AND (t1.VigenciaAcceso >= GETDATE() OR t1.VigenciaAcceso IS NULL)
