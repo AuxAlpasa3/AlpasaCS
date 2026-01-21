@@ -1,7 +1,6 @@
 <?php
 include '../../api/db/conexion.php';
 
-// Obtener parámetros de DataTables
 $draw = $_POST['draw'] ?? 1;
 $start = $_POST['start'] ?? 0;
 $length = $_POST['length'] ?? 10;
@@ -9,7 +8,6 @@ $searchValue = $_POST['search']['value'] ?? '';
 $orderColumnIndex = $_POST['order'][0]['column'] ?? 0;
 $orderDirection = $_POST['order'][0]['dir'] ?? 'asc';
 
-// Obtener filtros personalizados desde Catalogos.php
 $noempleado = $_POST['noempleado'] ?? '';
 $nombre = $_POST['nombre'] ?? '';
 $cargo = $_POST['cargo'] ?? '';
@@ -39,15 +37,13 @@ $orderColumn = $columns[$orderColumnIndex] ?? 't1.IdPersonal';
 $orderDirection = ($orderDirection == 'desc') ? 'DESC' : 'ASC';
 
 try {
-    // Consulta base sin filtros WHERE para contar total
     $queryCountTotal = "SELECT COUNT(*) as total 
                        FROM t_Personal as t1 
-                       WHERE NoEmpleado > 0 AND t1.tipoPersonal = 1";
+                       WHERE NoEmpleado > 0 AND t1.status = 1";
     
     $stmtCountTotal = $Conexion->query($queryCountTotal);
     $totalRecords = $stmtCountTotal->fetch(PDO::FETCH_ASSOC)['total'];
     
-    // Consulta base para datos
     $queryBase = "SELECT t1.IdPersonal,t1.NoEmpleado,t1.RutaFoto,t1.Nombre,t1.ApPaterno,t1.ApMaterno,
                          t1.Cargo,t1.Departamento,t1.Empresa,t1.Status,t1.IdUbicacion,
                          (CASE when t1.Cargo=0 then 'Sin Cargo' else t3.NomCargo END) AS NomCargo, 
@@ -60,13 +56,12 @@ try {
                   LEFT JOIN t_cargo as t3 on t1.Cargo=t3.IdCargo 
                   LEFT JOIN t_departamento as t4 on t4.IdDepartamento=t1.Departamento 
                   LEFT JOIN t_ubicacion as t5 on t5.IdUbicacion =t1.IdUbicacion
-                  WHERE NoEmpleado > 0 AND t1.tipoPersonal = 1";
+                  WHERE NoEmpleado > 0 AND t1.status = 1";
     
     $queryFiltered = $queryBase;
     $searchParams = [];
     $paramCount = 0;
     
-    // Aplicar filtro de búsqueda general de DataTables
     if (!empty($searchValue)) {
         $paramName = ":search_" . $paramCount++;
         $queryFiltered .= " AND (t1.NoEmpleado LIKE $paramName 
@@ -245,7 +240,6 @@ try {
             'Empresa' => htmlspecialchars($Personal->NomEmpresa),
             'Estatus' => '<span class="badge ' . $badge_class . ' p-2">' . $badge_text . '</span>',
             'Ubicacion' => htmlspecialchars($Personal->NomCorto),
-            // MANTENIENDO EL BOTÓN DE DESCARGA ORIGINAL
             'Acceso' => '<a href="GenerarDoc?ID=' . $Personal->IdPersonal . '" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-download"></i> Descargar</a>',
             'Acciones' => '
                 <div class="btn-group" role="group">

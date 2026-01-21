@@ -5,10 +5,10 @@ header('Content-Type: application/json; charset=utf-8');
 
 try {
     $sql = "SELECT 
-                IdPersonal as id, 
+                IdPersonalExterno as id, 
                 CONCAT(Nombre, ' ', ApPaterno, ' ', ApMaterno) as nombre,
-                IdPersonal as codigo
-            FROM t_personal 
+                NumeroIdentificacion as codigo
+            FROM t_personal_externo 
             WHERE Status = 1 
             ORDER BY Nombre, ApPaterno, ApMaterno";
     

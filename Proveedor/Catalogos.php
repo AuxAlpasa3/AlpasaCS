@@ -6,7 +6,7 @@ include '../templates/head.php';
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0 fw-bold" style="color: #d94f00">Catálogo de Personal Externo</h1>
+                    <h1 class="m-0 fw-bold" style="color: #d94f00">Catálogo de Proveedor</h1>
                 </div>
             </div>
         </div>
@@ -22,23 +22,23 @@ include '../templates/head.php';
                 <div class="card-body">
                     <!-- Filtros -->
                     <div class="row mb-3">
-                        <!-- No. Identificación -->
+                        <!-- No. Empleado -->
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>No. Identificación:</label>
-                                <input type="text" id="filtro-numeroIdentificacion" class="form-control" style="border-color: #d94f00;" placeholder="Ej: EXT-001">
+                                <label>No. Empleado:</label>
+                                <input type="text" id="filtro-noempleado" class="form-control" style="border-color: #d94f00;" placeholder="Ej: 00123">
                             </div>
                         </div>
                         
                         <!-- Nombre Completo -->
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <div class="form-group">
-                                <label>Nombre:</label>
-                                <input type="text" id="filtro-nombre" class="form-control" style="border-color: #d94f00;" placeholder="Buscar por nombre">
+                                <label>Nombre Completo:</label>
+                                <input type="text" id="filtro-nombre" class="form-control" style="border-color: #d94f00;" placeholder="Nombre y/o apellidos">
                             </div>
                         </div>
                         
-                        <!-- Cargo -->
+                        <!-- Cargo con Select2 -->
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label>Cargo:</label>
@@ -48,21 +48,22 @@ include '../templates/head.php';
                             </div>
                         </div>
                         
-                        <!-- Área de Visita -->
+                        <!-- Departamento con Select2 -->
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>Área de Visita:</label>
-                                <select id="filtro-areaVisita" class="form-control select2-areaVisita" style="border-color: #d94f00; width: 100%;">
-                                    <option value="">Todas</option>
+                                <label>Departamento:</label>
+                                <select id="filtro-departamento" class="form-control select2-departamento" style="border-color: #d94f00; width: 100%;">
+                                    <option value="">Todos</option>
                                 </select>
                             </div>
                         </div>
-                         <!-- Personal Responsable -->
+                        
+                        <!-- Ubicación con Select2 -->
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>Personal Responsable:</label>
-                                <select id="filtro-personalResponsable" class="form-control select2-personalResponsable" style="border-color: #d94f00; width: 100%;">
-                                    <option value="">Todos</option>
+                                <label>Ubicación:</label>
+                                <select id="filtro-ubicacion" class="form-control select2-ubicacion" style="border-color: #d94f00; width: 100%;">
+                                    <option value="">Todas</option>
                                 </select>
                             </div>
                         </div>
@@ -78,18 +79,26 @@ include '../templates/head.php';
                     </div>
                     
                     <div class="row mb-4">
-                       
-                        
                         <!-- Estatus -->
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label>Estatus:</label>
                                 <select id="filtro-estatus" class="form-control" style="border-color: #d94f00;">
                                     <option value="">Todos</option>
-                                    <option value="1">Activo</option>
-                                    <option value="0">Inactivo</option>
-                                    <option value="2">Baja</option>
-                                    <option value="3">Vacaciones</option>
+                                    <option value="Activo">Activo</option>
+                                    <option value="Inactivo">Inactivo</option>
+                                    <option value="Baja">Baja</option>
+                                    <option value="Vacaciones">Vacaciones</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Empresa -->
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Empresa:</label>
+                                <select id="filtro-empresa" class="form-control select2-empresa" style="border-color: #d94f00; width: 100%;">
+                                    <option value="">Todas</option>
                                 </select>
                             </div>
                         </div>
@@ -125,14 +134,14 @@ include '../templates/head.php';
                         <div class="spinner-border text-primary" role="status">
                             <span class="sr-only">Cargando...</span>
                         </div>
-                        <p class="mt-2 text-primary">Cargando Personal Externo...</p>
+                        <p class="mt-2 text-primary">Cargando Proveedor...</p>
                     </div>
                     
                     <!-- Botón añadir nuevo -->
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <button type="button" class="btn-nuevo btn btn-primary btn-g" style="background-color: #d94f00; border-color: #d94f00;">
-                                <i class="fa fa-plus"></i> Añadir Nuevo Personal Externo
+                                <i class="fa fa-plus"></i> Añadir Nuevo Proveedor
                             </button>
                         </div>
                     </div>
@@ -140,22 +149,19 @@ include '../templates/head.php';
                     <div id="notification-area" class="mt-3"></div>
                     
                     <div class="table-responsive pt-2">
-                        <table class="table table-bordered table-striped" id="dataTablePersonalExterno">
+                        <table class="table table-bordered table-striped" id="dataTableProveedor">
                             <thead>
                                 <tr>
-                                    <th>No. Identificación</th>
+                                    <th>NoEmpleado</th>
                                     <th>Foto</th>
                                     <th>Nombre</th>
                                     <th>Apellido Paterno</th>
                                     <th>Apellido Materno</th>
-                                    <th>Empresa</th>
                                     <th>Cargo</th>
-                                    <th>Área Visita</th>
-                                    <th>Personal Responsable</th>
-                                    <th>Email</th>
-                                    <th>Teléfono</th>
-                                    <th>Vigencia Acceso</th>
+                                    <th>Departamento</th>
+                                    <th>Empresa</th>
                                     <th>Estatus</th>
+                                    <th>Ubicación</th>
                                     <th>Acceso</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -167,18 +173,17 @@ include '../templates/head.php';
                 </div>
             </div>
             
-            <!-- Modal para ver foto -->
             <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="photoModalLabel">Foto del Personal Externo</h5>
+                            <h5 class="modal-title" id="photoModalLabel">Foto del Empleado</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div class="modal-body text-center">
-                            <img id="modalPhoto" src="" alt="Foto" class="img-fluid" style="max-height: 70vh;">
+                            <img id="modalPhoto" src="" alt="Foto del empleado" class="img-fluid" style="max-height: 70vh;">
                             <p id="modalEmployeeName" class="mt-3 font-weight-bold"></p>
                         </div>
                         <div class="modal-footer">
@@ -188,7 +193,6 @@ include '../templates/head.php';
                 </div>
             </div>
             
-            <!-- Contenedor para modales dinámicos -->
             <div id="modal-container"></div>
         </div>
     </section>
@@ -243,6 +247,7 @@ $(document).ready(function() {
         }, 5000);
     }
     
+    // Función para cargar datos iniciales de filtros
     function cargarDatosFiltros() {
         // Cargar cargos
         $.ajax({
@@ -262,7 +267,8 @@ $(document).ready(function() {
                     });
                     
                     select.select2({
-                        theme: 'bootstrap4',
+                        theme: 'bootstrap-5',
+                        language: 'es',
                         placeholder: 'Seleccionar cargo...',
                         allowClear: true,
                         width: '100%'
@@ -271,47 +277,24 @@ $(document).ready(function() {
             },
             error: function() {
                 $('#filtro-cargo').html('<option value="">Error al cargar</option>');
+                $('#filtro-cargo').select2({
+                    theme: 'bootstrap-5',
+                    language: 'es',
+                    placeholder: 'Error al cargar datos',
+                    allowClear: true,
+                    width: '100%'
+                });
             }
         });
         
-        // Cargar áreas de visita
+        // Cargar departamentos
         $.ajax({
-            url: 'Controlador/ajax_get_areasVisita.php',
+            url: 'Controlador/ajax_get_departamentos.php',
             type: 'GET',
             dataType: 'json',
             success: function(data) {
                 if (!data.error && Array.isArray(data)) {
-                    var select = $('#filtro-areaVisita');
-                    select.empty();
-                    select.append('<option value="">Todas</option>');
-                    
-                    $.each(data, function(index, item) {
-                        if (item && item.id && item.nombre) {
-                            select.append('<option value="' + item.id + '">' + item.nombre + '</option>');
-                        }
-                    });
-                    
-                    select.select2({
-                        theme: 'bootstrap4',
-                        placeholder: 'Seleccionar área...',
-                        allowClear: true,
-                        width: '100%'
-                    });
-                }
-            },
-            error: function() {
-                $('#filtro-areaVisita').html('<option value="">Error al cargar</option>');
-            }
-        });
-        
-        // Cargar personal responsable
-        $.ajax({
-            url: 'Controlador/ajax_get_personalResponsable.php',
-            type: 'GET',
-            dataType: 'json',
-            success: function(data) {
-                if (!data.error && Array.isArray(data)) {
-                    var select = $('#filtro-personalResponsable');
+                    var select = $('#filtro-departamento');
                     select.empty();
                     select.append('<option value="">Todos</option>');
                     
@@ -322,42 +305,128 @@ $(document).ready(function() {
                     });
                     
                     select.select2({
-                        theme: 'bootstrap4',
-                        placeholder: 'Seleccionar responsable...',
+                        theme: 'bootstrap-5',
+                        language: 'es',
+                        placeholder: 'Seleccionar departamento...',
                         allowClear: true,
                         width: '100%'
                     });
                 }
             },
             error: function() {
-                $('#filtro-personalResponsable').html('<option value="">Error al cargar</option>');
+                $('#filtro-departamento').html('<option value="">Error al cargar</option>');
+                $('#filtro-departamento').select2({
+                    theme: 'bootstrap-5',
+                    language: 'es',
+                    placeholder: 'Error al cargar datos',
+                    allowClear: true,
+                    width: '100%'
+                });
+            }
+        });
+        
+        // Cargar ubicaciones
+        $.ajax({
+            url: 'Controlador/ajax_get_ubicaciones.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                if (!data.error && Array.isArray(data)) {
+                    var select = $('#filtro-ubicacion');
+                    select.empty();
+                    select.append('<option value="">Todas</option>');
+                    
+                    $.each(data, function(index, item) {
+                        if (item && item.id && item.nombre) {
+                            select.append('<option value="' + item.id + '">' + item.nombre + '</option>');
+                        }
+                    });
+                    
+                    select.select2({
+                        theme: 'bootstrap-5',
+                        language: 'es',
+                        placeholder: 'Seleccionar ubicación...',
+                        allowClear: true,
+                        width: '100%'
+                    });
+                }
+            },
+            error: function() {
+                $('#filtro-ubicacion').html('<option value="">Error al cargar</option>');
+                $('#filtro-ubicacion').select2({
+                    theme: 'bootstrap-5',
+                    language: 'es',
+                    placeholder: 'Error al cargar datos',
+                    allowClear: true,
+                    width: '100%'
+                });
+            }
+        });
+        
+        // Cargar empresas
+        $.ajax({
+            url: 'Controlador/ajax_get_empresas.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                if (!data.error && Array.isArray(data)) {
+                    var select = $('#filtro-empresa');
+                    select.empty();
+                    select.append('<option value="">Todas</option>');
+                    
+                    $.each(data, function(index, item) {
+                        if (item && item.id && item.nombre) {
+                            select.append('<option value="' + item.id + '">' + item.nombre + '</option>');
+                        }
+                    });
+                    
+                    select.select2({
+                        theme: 'bootstrap-5',
+                        language: 'es',
+                        placeholder: 'Seleccionar empresa...',
+                        allowClear: true,
+                        width: '100%'
+                    });
+                }
+            },
+            error: function() {
+                $('#filtro-empresa').html('<option value="">Error al cargar</option>');
+                $('#filtro-empresa').select2({
+                    theme: 'bootstrap-5',
+                    language: 'es',
+                    placeholder: 'Error al cargar datos',
+                    allowClear: true,
+                    width: '100%'
+                });
             }
         });
     }
     
     // Inicializar DataTable
     function inicializarDataTable() {
-        if ($.fn.DataTable.isDataTable('#dataTablePersonalExterno')) {
+        // Destruir DataTable si ya existe
+        if ($.fn.DataTable.isDataTable('#dataTableProveedor')) {
             if (dataTable) {
                 dataTable.destroy();
             }
-            $('#dataTablePersonalExterno').removeClass('dataTable no-footer');
+            $('#dataTableProveedor').removeClass('dataTable no-footer');
         }
         
-        dataTable = $('#dataTablePersonalExterno').DataTable({
+        dataTable = $('#dataTableProveedor').DataTable({
             "processing": true,
             "serverSide": true,
             "ajax": {
-                "url": "Controlador/Obtener_PersonalExterno.php",
+                "url": "Controlador/Obtener_Proveedor.php",
                 "type": "POST",
                 "data": function(d) {
                     // Agregar filtros a la solicitud AJAX
-                    d.numeroIdentificacion = $('#filtro-numeroIdentificacion').val();
+                    d.noempleado = $('#filtro-noempleado').val();
                     d.nombre = $('#filtro-nombre').val();
                     d.cargo = $('#filtro-cargo').val();
-                    d.areaVisita = $('#filtro-areaVisita').val();
-                    d.personalResponsable = $('#filtro-personalResponsable').val();
+                    d.departamento = $('#filtro-departamento').val();
+                    d.ubicacion = $('#filtro-ubicacion').val();
                     d.estatus = $('#filtro-estatus').val();
+                    d.empresa = $('#filtro-empresa').val();
                 },
                 "dataType": "json",
                 "error": function(xhr, error, thrown) {
@@ -368,10 +437,10 @@ $(document).ready(function() {
             },
             "columns": [
                 { 
-                    "data": "NumeroIdentificacion",
+                    "data": "NoEmpleado",
                     "className": "text-center"
                 },
-                 { 
+                { 
                     "data": "Foto",
                     "orderable": false,
                     "searchable": false,
@@ -380,52 +449,26 @@ $(document).ready(function() {
                 { "data": "Nombre" },
                 { "data": "ApPaterno" },
                 { "data": "ApMaterno" },
-                { "data": "EmpresaProcedencia" },
                 { "data": "Cargo" },
-                { "data": "AreaVisita" },
-                { "data": "PersonalResponsable" },
-                { "data": "Email" },
-                { "data": "Telefono" },
-                { "data": "VigenciaAcceso" },
+                { "data": "Departamento" },
+                { "data": "Empresa" },
                 { 
-                    "data": "Status",
+                    "data": "Estatus",
                     "className": "text-center",
+                    // MOSTRAR EL HTML QUE VIENE DEL SERVIDOR (ya incluye el badge)
                     "render": function(data, type, row) {
-                        var badgeClass = '';
-                        var statusText = '';
-                        
-                        if (data == '1' || data == 'Activo') {
-                            badgeClass = 'badge-success';
-                            statusText = 'Activo';
-                        } else if (data == '0' || data == 'Inactivo') {
-                            badgeClass = 'badge-danger';
-                            statusText = 'Inactivo';
-                        } else if (data == '2' || data == 'Baja') {
-                            badgeClass = 'badge-secondary';
-                            statusText = 'Baja';
-                        } else if (data == '3' || data == 'Vacaciones') {
-                            badgeClass = 'badge-warning';
-                            statusText = 'Vacaciones';
-                        } else {
-                            badgeClass = 'badge-info';
-                            statusText = data || 'Desconocido';
-                        }
-                        
-                        return '<span class="badge ' + badgeClass + '">' + statusText + '</span>';
+                        return data;
                     }
                 },
+                { "data": "Ubicacion" },
                 { 
                     "data": "Acceso",
                     "orderable": false,
                     "searchable": false,
                     "className": "text-center",
+                    // MOSTRAR EL HTML QUE VIENE DEL SERVIDOR (el botón de descarga)
                     "render": function(data, type, row) {
-                        if (row.IdPersonalExterno) {
-                            return '<a href="Controlador/GenerarDoc.php?id=' + row.IdPersonalExterno + '" ' +
-                                   'class="btn btn-sm btn-info" title="Generar Documento de Acceso" target="_blank">' +
-                                   '<i class="fas fa-file-alt"></i></a>';
-                        }
-                        return '';
+                        return data;
                     }
                 },
                 { 
@@ -434,23 +477,7 @@ $(document).ready(function() {
                     "searchable": false,
                     "className": "text-center",
                     "render": function(data, type, row) {
-                        var acciones = '';
-                        
-                        if (row.IdPersonalExterno) {
-                            acciones += '<button class="btn btn-sm btn-warning btn-editar mr-1" ' +
-                                       'data-id="' + row.IdPersonalExterno + '" title="Editar">' +
-                                       '<i class="fas fa-edit"></i></button>';
-                            
-                            acciones += '<button class="btn btn-sm btn-secondary btn-cambiar-estatus mr-1" ' +
-                                       'data-id="' + row.IdPersonalExterno + '" title="Cambiar Estatus">' +
-                                       '<i class="fas fa-exchange-alt"></i></button>';
-                            
-                            acciones += '<button class="btn btn-sm btn-danger btn-eliminar" ' +
-                                       'data-id="' + row.IdPersonalExterno + '" title="Eliminar">' +
-                                       '<i class="fas fa-trash"></i></button>';
-                        }
-                        
-                        return acciones;
+                        return data;
                     }
                 }
             ],
@@ -513,17 +540,18 @@ $(document).ready(function() {
                 conf: {
                     extend: 'excelHtml5',
                     text: 'Excel',
-                    title: 'Catalogo_Personal_Externo_' + new Date().toISOString().split('T')[0],
+                    title: 'Catalogo_Proveedor_' + new Date().toISOString().split('T')[0],
                     exportOptions: {
-                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                         modifier: {
                             page: 'all'
                         }
                     },
-                    filename: 'catalogo_personal_externo_' + new Date().toISOString().split('T')[0],
+                    filename: 'catalogo_Proveedor_' + new Date().toISOString().split('T')[0],
                     customize: function(xlsx) {
                         var sheet = xlsx.xl.worksheets['sheet1.xml'];
                         
+                        // Agregar fecha al archivo
                         $('row:first c', sheet).attr('s', '2');
                         $('row:eq(1) c', sheet).each(function() {
                             if ($(this).is(':first-child')) {
@@ -542,6 +570,7 @@ $(document).ready(function() {
         }, 1000);
     }
     
+    // Función para exportar a PDF
     function exportarPDF() {
         if (!dataTable || dataTable.rows().count() === 0) {
             showNotification('No hay datos para exportar', 'warning');
@@ -550,16 +579,17 @@ $(document).ready(function() {
         
         showNotification('Generando archivo PDF...', 'info');
         
+        // Crear DataTable temporal para exportar
         $.fn.dataTable.ext.buttons.pdfHtml5.action.call(
             { 
                 node: $('#btn-export-pdf')[0],
                 conf: {
                     extend: 'pdfHtml5',
                     text: 'PDF',
-                    title: 'Catálogo de Personal Externo',
+                    title: 'Catálogo de Proveedor',
                     message: 'Fecha: ' + new Date().toLocaleDateString(),
                     exportOptions: {
-                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                         modifier: {
                             page: 'all'
                         }
@@ -577,7 +607,7 @@ $(document).ready(function() {
                         
                         // Agregar encabezado
                         doc.content.splice(0, 0, {
-                            text: 'Catálogo de Personal Externo',
+                            text: 'Catálogo de Proveedor',
                             fontSize: 16,
                             alignment: 'center',
                             color: '#d94f00',
@@ -588,12 +618,13 @@ $(document).ready(function() {
                         var filtros = 'Filtros aplicados: ';
                         var filtrosArray = [];
                         
-                        if ($('#filtro-numeroIdentificacion').val()) filtrosArray.push('No. Identificación: ' + $('#filtro-numeroIdentificacion').val());
+                        if ($('#filtro-noempleado').val()) filtrosArray.push('No. Empleado: ' + $('#filtro-noempleado').val());
                         if ($('#filtro-nombre').val()) filtrosArray.push('Nombre: ' + $('#filtro-nombre').val());
-                       if ($('#filtro-cargo').val()) filtrosArray.push('Cargo: ' + $('#filtro-cargo option:selected').text());
-                        if ($('#filtro-areaVisita').val()) filtrosArray.push('Área: ' + $('#filtro-areaVisita option:selected').text());
-                        if ($('#filtro-personalResponsable').val()) filtrosArray.push('Responsable: ' + $('#filtro-personalResponsable option:selected').text());
-                        if ($('#filtro-estatus').val()) filtrosArray.push('Estatus: ' + $('#filtro-estatus option:selected').text());
+                        if ($('#filtro-cargo').val()) filtrosArray.push('Cargo: ' + $('#filtro-cargo option:selected').text());
+                        if ($('#filtro-departamento').val()) filtrosArray.push('Depto: ' + $('#filtro-departamento option:selected').text());
+                        if ($('#filtro-ubicacion').val()) filtrosArray.push('Ubicación: ' + $('#filtro-ubicacion option:selected').text());
+                        if ($('#filtro-estatus').val()) filtrosArray.push('Estatus: ' + $('#filtro-estatus').val());
+                        if ($('#filtro-empresa').val()) filtrosArray.push('Empresa: ' + $('#filtro-empresa option:selected').text());
                         
                         if (filtrosArray.length > 0) {
                             filtros += filtrosArray.join(' | ');
@@ -634,9 +665,9 @@ $(document).ready(function() {
                 conf: {
                     extend: 'print',
                     text: 'Imprimir',
-                    title: 'Catálogo de Personal Externo',
+                    title: 'Catálogo de Proveedor',
                     exportOptions: {
-                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                         modifier: {
                             page: 'all'
                         }
@@ -651,7 +682,7 @@ $(document).ready(function() {
                         // Agregar encabezado con información
                         $(win.document.body).prepend(
                             '<div style="text-align: center; margin-bottom: 20px;">' +
-                            '<h1 style="color: #d94f00;">Catálogo de Personal Externo</h1>' +
+                            '<h1 style="color: #d94f00;">Catálogo de Proveedor</h1>' +
                             '<p><strong>Fecha:</strong> ' + new Date().toLocaleDateString() + '</p>' +
                             '<p><strong>Hora:</strong> ' + new Date().toLocaleTimeString() + '</p>' +
                             '</div>'
@@ -662,12 +693,13 @@ $(document).ready(function() {
                             '<strong>Filtros aplicados:</strong> ';
                         var filtrosArray = [];
                         
-                        if ($('#filtro-numeroIdentificacion').val()) filtrosArray.push('No. Identificación: ' + $('#filtro-numeroIdentificacion').val());
+                        if ($('#filtro-noempleado').val()) filtrosArray.push('No. Empleado: ' + $('#filtro-noempleado').val());
                         if ($('#filtro-nombre').val()) filtrosArray.push('Nombre: ' + $('#filtro-nombre').val());
                         if ($('#filtro-cargo').val()) filtrosArray.push('Cargo: ' + $('#filtro-cargo option:selected').text());
-                        if ($('#filtro-areaVisita').val()) filtrosArray.push('Área: ' + $('#filtro-areaVisita option:selected').text());
-                        if ($('#filtro-personalResponsable').val()) filtrosArray.push('Responsable: ' + $('#filtro-personalResponsable option:selected').text());
-                        if ($('#filtro-estatus').val()) filtrosArray.push('Estatus: ' + $('#filtro-estatus option:selected').text());
+                        if ($('#filtro-departamento').val()) filtrosArray.push('Depto: ' + $('#filtro-departamento option:selected').text());
+                        if ($('#filtro-ubicacion').val()) filtrosArray.push('Ubicación: ' + $('#filtro-ubicacion option:selected').text());
+                        if ($('#filtro-estatus').val()) filtrosArray.push('Estatus: ' + $('#filtro-estatus').val());
+                        if ($('#filtro-empresa').val()) filtrosArray.push('Empresa: ' + $('#filtro-empresa option:selected').text());
                         
                         if (filtrosArray.length > 0) {
                             filtros += filtrosArray.join(' | ');
@@ -732,27 +764,28 @@ $(document).ready(function() {
     });
     
     $('#btn-limpiar-filtros').click(function() {
-        $('#filtro-numeroIdentificacion').val('');
+        $('#filtro-noempleado').val('');
         $('#filtro-nombre').val('');
         $('#filtro-cargo').val('').trigger('change');
-        $('#filtro-areaVisita').val('').trigger('change');
-        $('#filtro-personalResponsable').val('').trigger('change');
+        $('#filtro-departamento').val('').trigger('change');
+        $('#filtro-ubicacion').val('').trigger('change');
         $('#filtro-estatus').val('');
+        $('#filtro-empresa').val('').trigger('change');
         
         dataTable.ajax.reload();
         showNotification('Filtros limpiados', 'info');
     });
     
     // Event Listeners para búsqueda al presionar Enter
-    $('#filtro-numeroIdentificacion, #filtro-nombre').keypress(function(e) {
+    $('#filtro-noempleado, #filtro-nombre').keypress(function(e) {
         if (e.which == 13) {
             dataTable.ajax.reload();
         }
     });
     
-    // Funciones para modal de fotos
+    // Funciones existentes para modal de fotos y otros eventos
     function initEvents() {
-        $('.thumbnail-image').off('click').on('click', function(e) {
+        $('.thumbnail-image, .view-photo-link').off('click').on('click', function(e) {
             e.preventDefault();
             
             var fullImage = $(this).data('full-image');
@@ -767,46 +800,17 @@ $(document).ready(function() {
     }
     
     $(document).on('click', '.btn-nuevo', function() {
-        loadModal('Modales/Nuevo.php', '#NuevoPersonalExterno', 'nuevo');
+        loadModal('Modales/Nuevo.php', '#NuevoProveedor', 'nuevo');
     });
     
     $(document).on('click', '.btn-editar', function() {
         var id = $(this).data('id');
-        loadModal('Modales/Modificar.php?IdPersonalExterno=' + id, '#ModificarPersonalExterno', 'editar');
+        loadModal('Modales/Modificar.php?IdProveedor=' + id, '#ModificarProveedor', 'editar');
     });
     
     $(document).on('click', '.btn-cambiar-estatus', function() {
         var id = $(this).data('id');
-        loadModal('Modales/CambiarEstatus.php?IdPersonalExterno=' + id, '#CambiarEstatusPersonalExterno', 'cambiar_estatus');
-    });
-    
-    $(document).on('click', '.btn-eliminar', function() {
-        var id = $(this).data('id');
-        var nombre = $(this).closest('tr').find('td:nth-child(3)').text();
-        var apPaterno = $(this).closest('tr').find('td:nth-child(4)').text();
-        var apMaterno = $(this).closest('tr').find('td:nth-child(5)').text();
-        var nombreCompleto = nombre + ' ' + apPaterno + ' ' + apMaterno;
-        
-        if (confirm('¿Está seguro de eliminar al personal externo: ' + nombreCompleto + '?\nEsta acción no se puede deshacer.')) {
-            $.ajax({
-                url: 'Controlador/Eliminar_PersonalExterno.php',
-                type: 'POST',
-                data: { id: id },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        showNotification(response.message, 'success');
-                        dataTable.ajax.reload(null, false);
-                    } else {
-                        showNotification(response.message, 'error');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    showNotification('Error al eliminar el registro: ' + error, 'error');
-                    console.error('Error:', xhr.responseText);
-                }
-            });
-        }
+        loadModal('Modales/CambiarEstatus.php?IdProveedor=' + id, '#CambiarEstatusProveedor', 'cambiar_estatus');
     });
     
     function loadModal(url, modalId, actionType) {
@@ -832,7 +836,7 @@ $(document).ready(function() {
         });
     }
     
-    $(document).on('submit', '#formNuevoPersonalExterno, #formModificarPersonalExterno, #formCambiarEstatusPersonalExterno', function(e) {
+    $(document).on('submit', '#formNuevoProveedor, #formModificarProveedor, #formCambiarEstatusProveedor', function(e) {
         e.preventDefault();
         var form = $(this);
         var formData = new FormData(this);
@@ -856,7 +860,7 @@ $(document).ready(function() {
                     $('.modal').modal('hide');
                     dataTable.ajax.reload(null, false);
                     
-                    if (form.attr('id') === 'formNuevoPersonalExterno') {
+                    if (form.attr('id') === 'formNuevoProveedor') {
                         form[0].reset();
                         if ($.fn.select2) {
                             form.find('select').val(null).trigger('change');
@@ -918,26 +922,26 @@ $(document).ready(function() {
     left: 0;
 }
 
-.select2-container--bootstrap4 {
+.select2-container--bootstrap-5 {
     width: 100% !important;
 }
 
-.select2-container--bootstrap4 .select2-selection {
+.select2-container--bootstrap-5 .select2-selection {
     min-height: 38px;
     border: 1px solid #ced4da !important;
     border-radius: 0.25rem !important;
 }
 
-.select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
     line-height: 36px;
     padding-left: 12px;
 }
 
-.select2-container--bootstrap4 .select2-selection--single {
+.select2-container--bootstrap-5 .select2-selection--single {
     height: 38px;
 }
 
-.select2-container--bootstrap4 .select2-dropdown {
+.select2-container--bootstrap-5 .select2-dropdown {
     border-color: #ced4da;
     border-radius: 0.25rem;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
@@ -1058,29 +1062,19 @@ $(document).ready(function() {
     border-color: #1e7e34;
 }
 
-.table .btn-danger {
-    background-color: #dc3545;
-    border-color: #dc3545;
-}
-
-.table .btn-danger:hover {
-    background-color: #c82333;
-    border-color: #bd2130;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
     .badge { font-size: 0.75em !important; }
     
-    .select2-container--bootstrap4 .select2-selection {
+    .select2-container--bootstrap-5 .select2-selection {
         min-height: 42px;
     }
     
-    .select2-container--bootstrap4 .select2-selection--single {
+    .select2-container--bootstrap-5 .select2-selection--single {
         height: 42px;
     }
     
-    .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+    .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
         line-height: 40px;
     }
     
@@ -1124,9 +1118,7 @@ $(document).ready(function() {
     .thumbnail-image,
     .view-photo-link,
     .btn-editar,
-    .btn-cambiar-estatus,
-    .btn-eliminar,
-    .btn-info {
+    .btn-cambiar-estatus {
         display: none !important;
     }
     
@@ -1150,11 +1142,6 @@ $(document).ready(function() {
     }
     
     .table .btn {
-        display: none !important;
-    }
-    
-    .table td:last-child,
-    .table th:last-child {
         display: none !important;
     }
     
