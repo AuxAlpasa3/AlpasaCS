@@ -21,7 +21,7 @@ try {
             t1.IdPersonalExterno,
             t1.NumeroIdentificacion, 
             CONCAT(t1.Nombre,' ',t1.ApPaterno,' ',t1.ApMaterno) as NombreCompleto,
-            t4.NomCargo,
+            t4.NomCargo as Cargo,
             t1.EmpresaProcedencia,
             (CASE WHEN t1.AreaVisita=NULL THEN 'TODAS' WHEN t1.AreaVisita=0 THEN 'TODAS' ELSE t2.NomLargo END) as AreaVisitaNombre,
             t1.RutaFoto
@@ -31,8 +31,7 @@ try {
         INNER JOIN t_cargoExterno as t4 on t1.Cargo=t4.IdCargo
         WHERE t1.IdPersonalExterno = ?
             AND t1.Status = 1 
-            AND (t1.VigenciaAcceso >= GETDATE() OR t1.VigenciaAcceso IS NULL)
-    ");
+            AND (t1.VigenciaAcceso >= GETDATE() OR t1.VigenciaAcceso IS NULL)");
     
     $sentencia->execute([$idPersonalExterno]);
     $resultados = $sentencia->fetchAll(PDO::FETCH_OBJ);
