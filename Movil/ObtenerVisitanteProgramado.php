@@ -88,7 +88,7 @@ try {
     } else {
         echo json_encode(array(
             'success' => false,
-            'message' => 'No se encontró el visitante con ID: ' . $IdVisitanteProgramado . ' o su acceso no está vigente'
+            'message' => 'No se encontró el visitante con ID: ' . $IdVisitanteProgramado . ' o su acceso no está vigente, favor de validar con Administrador'
         ), JSON_UNESCAPED_UNICODE);
     }
     
