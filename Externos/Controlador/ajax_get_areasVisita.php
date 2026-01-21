@@ -4,15 +4,15 @@ include '../../api/db/conexion.php';
 header('Content-Type: application/json');
 
 try {
-    $query = "SELECT DISTINCT 
-        CASE 
-            WHEN t1.Cargo IS NULL THEN 'Sin Limite de Acceso'
-            ELSE t2.NomLargo 
-        END AS Cargo
-FROM t_personal_externo as t1 
-INNER JOIN t_ubicacion_interna as t2 ON t1.AreaVisita = t2.IdUbicacion
-ORDER BY NomLargo ASC";
-    
+        $query = "SELECT DISTINCT 
+            CASE 
+                WHEN t1.Cargo IS NULL THEN 'Sin Limite de Acceso'
+                ELSE t2.NomLargo 
+            END AS Cargo
+    FROM t_personal_externo as t1 
+    INNER JOIN t_ubicacion_interna as t2 ON t1.AreaVisita = t2.IdUbicacion
+    ORDER BY NomLargo ASC";
+        
     $stmt = $Conexion->query($query);
     $areas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
