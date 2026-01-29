@@ -37,18 +37,20 @@ try {
 
     $IdPersonal = $input['IdPersonal'];
 
-    $sqlMovimientoPendiente = "SELECT 
-                                    res.IdMovEnTSal,
-                                    res.FolMovEnt,
-                                    res.FechaEntrada,
-                                    res.IdUbicacion as UbicacionAnterior,
-                                    u.NombreLargo as NombreUbicacionAnterior,
-                                    FORMAT(res.FechaEntrada, 'HH:mm:ss') as HoraEntrada
-                                FROM regentsalper res
-                                LEFT JOIN t_ubicaciones u ON res.IdUbicacion = u.IdUbicacion
-                                WHERE res.IdPer = :IdPersonal 
-                                AND res.FolMovSal IS NULL 
-                                AND res.StatusRegistro = 1";
+    $sqlMovimientoPendiente = "SELECT
+                            t1.IdMovEnTSal,
+                            t1.FolMovEnt,
+                            t1.FechaEntrada,
+                            t1.IdUbicacion as UbicacionAnterior,
+                            t2.NomLargo as NombreUbicacionAnterior,
+                            FORMAT(t1.FechaEntrada, 'HH:mm:ss') as HoraEntrada
+                            FROM
+                            regentsalper as t1
+                            LEFT JOIN t_ubicacion_interna as t2
+                            on t1.IdUbicacion=t2.IdUbicacion
+                            where t1.IdPer=:IdPersonal 
+                            and t1.FolMovSal IS NULL
+                            and t1.StatusRegistro=1";
     
     $stmtMovimiento = $Conexion->prepare($sqlMovimientoPendiente);
     $stmtMovimiento->bindParam(':IdPersonal', $IdPersonal, PDO::PARAM_STR);
