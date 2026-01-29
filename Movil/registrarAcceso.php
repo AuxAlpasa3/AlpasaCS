@@ -42,7 +42,7 @@ try {
     $TipoTransporte = $input['TipoTransporte'];
     $usuario = $input['IdUsuario'];
 
-    $IdVehiculoTransporte = isset($input['IdVehiculoTransporte']) ? $input['IdVehiculoTransporte'] : '';
+    // Ya no necesitamos IdVehiculoTransporte
     $Observaciones = isset($input['Observaciones']) && $input['Observaciones'] !== 'NULL' ? $input['Observaciones'] : '';
     $NotificarSupervisor = isset($input['NotificarSupervisor']) ? (bool)$input['NotificarSupervisor'] : false;
 
@@ -70,6 +70,7 @@ try {
     
     $personal = $stmtPersonal->fetch(PDO::FETCH_ASSOC);
     
+    // Buscar si hay movimiento pendiente (sin salida)
     $sqlValidacionMovimiento = "SELECT * FROM regentsalper WHERE IdPer = :IdPersonal AND FolMovSal IS NULL AND StatusRegistro = 1";
     $stmtValidacion = $Conexion->prepare($sqlValidacionMovimiento);
     $stmtValidacion->bindParam(':IdPersonal', $IdPersonal, PDO::PARAM_STR);
@@ -86,11 +87,10 @@ try {
             $fechaActual = date('Y-m-d H:i:s');
             $horaActual = date('H:i:s');
             
+            // Insertar en regsalper (SALIDA)
             $sqlSalidaRegentPer = "INSERT INTO regsalper (
-                                    IdFolEnt,
                                     IdPer,
                                     Ubicacion,
-                                    TipoMov,
                                     DispN,
                                     Fecha,
                                     TiempoMarcaje,
@@ -98,13 +98,13 @@ try {
                                     Observaciones,
                                     Usuario,
                                     Notificar
-                                ) VALUES (:IdFolEnt,:IdPer, :Ubicacion,2, :DispN, GETDATE(), GETDATE(),:TipoVehiculo, :Observaciones, :Usuario, :Notificar)";
+                                ) VALUES (:IdPer, :Ubicacion, :DispN, GETDATE(), GETDATE(), :TipoVehiculo, :Observaciones, :Usuario, :Notificar)";
             
             $stmtSalidaRegentPer = $Conexion->prepare($sqlSalidaRegentPer);
-            $stmtSalidaRegentPer->bindParam(':IdFolEnt', $movimientoPendiente['FolMovEnt'], PDO::PARAM_INT);
             $stmtSalidaRegentPer->bindParam(':IdPer', $IdPersonal, PDO::PARAM_STR);
             $stmtSalidaRegentPer->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
             $stmtSalidaRegentPer->bindParam(':DispN', $DispN, PDO::PARAM_STR);
+            $stmtSalidaRegentPer->bindParam(':TipoVehiculo', $TipoTransporte, PDO::PARAM_INT);
             $stmtSalidaRegentPer->bindParam(':Observaciones', 'Salida automática por nueva entrada', PDO::PARAM_STR);
             $stmtSalidaRegentPer->bindParam(':Usuario', $usuario, PDO::PARAM_STR);
             $stmtSalidaRegentPer->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
@@ -115,6 +115,7 @@ try {
             
             $IdMovSalida = $Conexion->lastInsertId();
             
+            // Calcular tiempo transcurrido
             $fechaEntrada = $movimientoPendiente['FechaEntrada'];
             
             $sqlCalcularTiempo = "SELECT 
@@ -134,7 +135,7 @@ try {
             // Formatear tiempo como HH:MM:SS
             $tiempoFormateado = sprintf("%02d:%02d:%02d", $horasTotales, $minutosRestantes, $segundos % 60);
             
-            // 3. Actualizar regentsalper con información de salida
+            // Actualizar regentsalper con información de salida
             $sqlActualizarSalper = "UPDATE regentsalper SET 
                                     FolMovSal = :FolMovSal,
                                     FechaSalida = GETDATE(),
@@ -153,32 +154,6 @@ try {
             
             if (!$stmtActualizarSalper->execute()) {
                 throw new Exception('Error al actualizar registro de salida: ' . implode(', ', $stmtActualizarSalper->errorInfo()));
-            }
-            
-            // 4. Registrar vehículo si es necesario para la salida
-            if ($TipoTransporte == 2 && !empty($IdVehiculoTransporte)) {
-                $sqlSalidaRegentVeh = "INSERT INTO regentveh (
-                                        IdVeh,
-                                        Ubicacion,
-                                        DispN,
-                                        Fecha,
-                                        TiempoMarcaje,
-                                        Observaciones,
-                                        Usuario,
-                                        Notificar,
-                                        TipoMov
-                                    ) VALUES (:IdVeh, :Ubicacion, :DispN, GETDATE(), GETDATE(), 'Salida automática por nueva entrada', :Usuario, :Notificar, 2)";
-                
-                $stmtSalidaRegentVeh = $Conexion->prepare($sqlSalidaRegentVeh);
-                $stmtSalidaRegentVeh->bindParam(':IdVeh', $IdVehiculoTransporte, PDO::PARAM_STR);
-                $stmtSalidaRegentVeh->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
-                $stmtSalidaRegentVeh->bindParam(':DispN', $DispN, PDO::PARAM_STR);
-                $stmtSalidaRegentVeh->bindParam(':Usuario', $usuario, PDO::PARAM_STR);
-                $stmtSalidaRegentVeh->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
-                
-                if (!$stmtSalidaRegentVeh->execute()) {
-                    throw new Exception('Error al registrar salida de vehiculo: ' . implode(', ', $stmtSalidaRegentVeh->errorInfo()));
-                }
             }
             
             $Conexion->commit();
@@ -207,25 +182,52 @@ try {
         $fechaActual = date('Y-m-d');
         $horaActual = date('H:i:s');
 
+        // Determinar IdFolEnt (si hubo salida automática)
+        $IdFolEnt = null;
+        if ($salidaRegistrada && isset($IdMovSalida)) {
+            $IdFolEnt = $IdMovSalida;
+        }
+
+        // Insertar en regentper (ENTRADA)
         $sqlRegentPer = "INSERT INTO regentper (
                             IdPer,
                             Ubicacion,
+                            TipoMov,
                             DispN,
                             Fecha,
                             TiempoMarcaje,
+                            TipoVehiculo,
                             Observaciones,
                             Usuario,
-                            Notificar,
-                            TipoMov
-                        ) VALUES (:IdPer, :Ubicacion, :DispN, GETDATE(), GETDATE(), :Observaciones, :Usuario, :Notificar, 1)";
+                            Notificar" . 
+                            ($IdFolEnt ? ", IdFolEnt" : "") . "
+                        ) VALUES (
+                            :IdPer, 
+                            :Ubicacion, 
+                            :TipoMov, 
+                            :DispN, 
+                            GETDATE(), 
+                            GETDATE(), 
+                            :TipoVehiculo, 
+                            :Observaciones, 
+                            :Usuario, 
+                            :Notificar" .
+                            ($IdFolEnt ? ", :IdFolEnt" : "") . "
+                        )";
         
         $stmtRegentPer = $Conexion->prepare($sqlRegentPer);
         $stmtRegentPer->bindParam(':IdPer', $IdPersonal, PDO::PARAM_STR);
         $stmtRegentPer->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
+        $stmtRegentPer->bindParam(':TipoMov', $TipoTransporte, PDO::PARAM_INT); // TipoMov = TipoTransporte para entrada
         $stmtRegentPer->bindParam(':DispN', $DispN, PDO::PARAM_STR);
+        $stmtRegentPer->bindParam(':TipoVehiculo', $TipoTransporte, PDO::PARAM_INT);
         $stmtRegentPer->bindParam(':Observaciones', $Observaciones, PDO::PARAM_STR);
         $stmtRegentPer->bindParam(':Usuario', $usuario, PDO::PARAM_STR);
         $stmtRegentPer->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
+        
+        if ($IdFolEnt) {
+            $stmtRegentPer->bindParam(':IdFolEnt', $IdFolEnt, PDO::PARAM_INT);
+        }
         
         if (!$stmtRegentPer->execute()) {
             throw new Exception('Error al registrar entrada: ' . implode(', ', $stmtRegentPer->errorInfo()));
@@ -322,35 +324,6 @@ try {
                     }
                 }
             }
-        }
-
-        // Registrar vehículo si es necesario para la nueva entrada
-        if ($TipoTransporte == 2 && !empty($IdVehiculoTransporte)) {
-            $sqlRegentVeh = "INSERT INTO regentveh (
-                                IdVeh,
-                                Ubicacion,
-                                DispN,
-                                Fecha,
-                                TiempoMarcaje,
-                                Observaciones,
-                                Usuario,
-                                Notificar,
-                                TipoMov
-                            ) VALUES (:IdVeh, :Ubicacion, :DispN, GETDATE(), GETDATE(), :Observaciones, :Usuario, :Notificar, 1)";
-            
-            $stmtRegentVeh = $Conexion->prepare($sqlRegentVeh);
-            $stmtRegentVeh->bindParam(':IdVeh', $IdVehiculoTransporte, PDO::PARAM_STR);
-            $stmtRegentVeh->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
-            $stmtRegentVeh->bindParam(':DispN', $DispN, PDO::PARAM_STR);
-            $stmtRegentVeh->bindParam(':Observaciones', $Observaciones, PDO::PARAM_STR);
-            $stmtRegentVeh->bindParam(':Usuario', $usuario, PDO::PARAM_STR);
-            $stmtRegentVeh->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
-            
-            if (!$stmtRegentVeh->execute()) {
-                throw new Exception('Error al registrar entrada de vehiculo: ' . implode(', ', $stmtRegentVeh->errorInfo()));
-            }
-            
-            $IdMovVehiculo = $Conexion->lastInsertId();
         }
 
         if ($NotificarSupervisor) {

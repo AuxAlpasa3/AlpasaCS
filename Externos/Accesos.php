@@ -352,7 +352,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Función para inicializar DataTable SIN botones
         function inicializarDataTable() {
             console.log('Inicializando DataTable SIN botones...');
             
@@ -374,7 +373,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Tabla tiene datos?', hasData);
             
-            // Destruir DataTable si ya existe
             if ($.fn.DataTable.isDataTable('#dataTableMovimientos')) {
                 if (dataTable) {
                     dataTable.destroy();
@@ -386,7 +384,6 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
                 try {
                     if (hasData) {
-                        // Configurar DataTable SIN botones en el DOM
                         dataTable = $('#dataTableMovimientos').DataTable({
                             "language": {
                                 "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json",
@@ -411,7 +408,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             "order": [[0, "desc"]],
                             "pageLength": 25,
                             "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
-                            // DOM SIN la letra 'B' (sin botones)
                             "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
                                    "<'row'<'col-sm-12'tr>>" +
                                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
@@ -419,7 +415,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 console.log('DataTable inicializado correctamente SIN botones');
                                 $('#loading').hide();
                                 
-                                // Guardar datos actuales
                                 currentData = dataTable.data().toArray();
                                 
                                 showNotification('Tabla cargada correctamente. Usa los botones de exportación en la parte superior.', 'success');
@@ -466,7 +461,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 100);
         }
         
-        // Función para exportar a Excel usando DataTables pero de forma manual
         function exportarExcelDataTable() {
             if (!dataTable || !$.fn.DataTable.isDataTable('#dataTableMovimientos')) {
                 showNotification('La tabla no está inicializada', 'warning');
@@ -480,7 +474,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             showNotification('Generando archivo Excel...', 'info');
             
-            // Crear un DataTable temporal solo para exportar
             $.fn.dataTable.ext.buttons.excelHtml5.action.call(
                 { 
                     node: $('#btn-export-excel')[0],

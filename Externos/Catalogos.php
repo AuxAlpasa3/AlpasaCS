@@ -89,7 +89,6 @@ include '../templates/head.php';
                                     <option value="1">Activo</option>
                                     <option value="0">Inactivo</option>
                                     <option value="2">Baja</option>
-                                    <option value="3">Vacaciones</option>
                                 </select>
                             </div>
                         </div>
@@ -351,7 +350,6 @@ $(document).ready(function() {
                 "url": "Controlador/Obtener_PersonalExterno.php",
                 "type": "POST",
                 "data": function(d) {
-                    // Agregar filtros a la solicitud AJAX
                     d.numeroIdentificacion = $('#filtro-numeroIdentificacion').val();
                     d.nombre = $('#filtro-nombre').val();
                     d.cargo = $('#filtro-cargo').val();
@@ -403,9 +401,6 @@ $(document).ready(function() {
                         } else if (data == '2' || data == 'Baja') {
                             badgeClass = 'badge-secondary';
                             statusText = 'Baja';
-                        } else if (data == '3' || data == 'Vacaciones') {
-                            badgeClass = 'badge-warning';
-                            statusText = 'Vacaciones';
                         } else {
                             badgeClass = 'badge-info';
                             statusText = data || 'Desconocido';
@@ -497,7 +492,6 @@ $(document).ready(function() {
         });
     }
     
-    // Función para exportar a Excel
     function exportarExcel() {
         if (!dataTable || dataTable.rows().count() === 0) {
             showNotification('No hay datos para exportar', 'warning');
@@ -506,7 +500,6 @@ $(document).ready(function() {
         
         showNotification('Generando archivo Excel...', 'info');
         
-        // Crear DataTable temporal para exportar
         $.fn.dataTable.ext.buttons.excelHtml5.action.call(
             { 
                 node: $('#btn-export-excel')[0],

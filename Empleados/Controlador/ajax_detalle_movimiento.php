@@ -14,7 +14,6 @@ if (empty($tipo) || empty($idMov)) {
 }
 
 try {
-    // Consulta principal del movimiento
     if ($tipo == 'entrada') {
         $sql = "SELECT * FROM regentper WHERE FolMov = :idMov";
     } else {
@@ -26,7 +25,6 @@ try {
     $stmt->execute();
     $detalle = $stmt->fetch(PDO::FETCH_OBJ);
     
-    // Consulta para obtener las fotografías
     $sqlFotosEnc = "SELECT idfotografias FROM t_fotografias_encabezado 
                     WHERE tipo = :categoria AND idEntSal = :idMov";
     $stmtFotosEnc = $Conexion->prepare($sqlFotosEnc);
@@ -38,8 +36,7 @@ try {
     $fotografias = [];
     
     if ($encabezadoFotos) {
-        // Consulta detalle de fotografías
-        $sqlFotosDet = "SELECT NombreFoto, RutaFot 
+        $sqlFotosDet = "SELECT NombreFoto, RutaFoto 
                         FROM t_fotografias_detalle 
                         WHERE idfotografiaref = :idFotografiaRef";
         $stmtFotosDet = $Conexion->prepare($sqlFotosDet);
@@ -53,7 +50,6 @@ try {
 }
 ?>
 
-<!-- Modal Único con toda la información -->
 <div class="modal fade" id="modalDetalleUnico" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
@@ -68,7 +64,6 @@ try {
                 </button>
             </div>
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                <!-- Tabla de Información del Movimiento -->
                 <div class="mb-4">
                     <h6 class="text-primary mb-3">
                         <i class="fas fa-clipboard-list mr-2"></i>Información General
@@ -100,7 +95,6 @@ try {
                     <?php endif; ?>
                 </div>
                 
-                <!-- Tabla de Fotografías (si existen) -->
                 <?php if (!empty($fotografias)): ?>
                 <div class="mt-4 pt-3 border-top">
                     <h6 class="text-primary mb-3">
@@ -108,7 +102,6 @@ try {
                         <span class="badge badge-primary badge-pill ml-2"><?php echo count($fotografias); ?></span>
                     </h6>
                     
-                    <!-- Tabla de 5 imágenes por fila -->
                     <div class="table-responsive">
                         <table class="table table-bordered table-sm text-center mb-0">
                             <thead class="thead-light">
@@ -122,14 +115,12 @@ try {
                             </thead>
                             <tbody>
                                 <?php
-                                // Dividir fotografías en filas de 5
                                 $filas_fotos = array_chunk($fotografias, 5);
                                 
                                 foreach ($filas_fotos as $fila): 
                                 ?>
                                     <tr>
                                         <?php 
-                                        // Mostrar 5 imágenes en la fila
                                         for ($i = 0; $i < 5; $i++): 
                                             if (isset($fila[$i])) {
                                                 $foto = $fila[$i];
@@ -140,15 +131,13 @@ try {
                                             <td class="align-middle p-2" style="height: 180px;">
                                                 <?php if ($foto): ?>
                                                     <?php
-                                                    // Determinar ruta completa de la imagen
-                                                    $rutaCompleta = $foto->RutaFot;
-                                                    // Asegurarse de que la ruta sea relativa al sitio
+                                                    $rutaCompleta = $foto->RutaFoto;
                                                     if (strpos($rutaCompleta, 'http') !== 0) {
                                                         $rutaCompleta = ($rutaCompleta[0] != '/') ? '/' . $rutaCompleta : $rutaCompleta;
                                                     }
                                                     ?>
                                                     <div class="foto-item h-100 d-flex flex-column justify-content-between">
-                                                        <!-- Vista previa de imagen -->
+                                                      
                                                         <div class="foto-preview flex-grow-1 d-flex align-items-center justify-content-center mb-1"
                                                              style="background-color: #f8f9fa; border-radius: 4px; border: 1px solid #ddd; cursor: pointer;"
                                                              onclick="ampliarImagen('<?php echo htmlspecialchars($rutaCompleta); ?>', '<?php echo htmlspecialchars($foto->NombreFoto); ?>')"
@@ -159,9 +148,7 @@ try {
                                                                  style="max-height: 100px; max-width: 100%; object-fit: contain;">
                                                         </div>
                                                         
-                                                        <!-- Información y acciones -->
                                                         <div class="foto-details">
-                                                            <!-- Nombre de archivo -->
                                                             <small class="text-muted d-block text-truncate mb-1" 
                                                                    title="<?php echo htmlspecialchars($foto->NombreFoto); ?>">
                                                                 <i class="fas fa-file-image fa-xs mr-1"></i>
@@ -380,11 +367,9 @@ function ampliarImagen(ruta, titulo) {
     };
     document.addEventListener('keydown', keyHandler);
     
-    // Agregar al documento
     document.body.appendChild(overlay);
 }
 
-// Función para descargar imágenes
 function descargarImagen(ruta, nombre) {
     var enlace = document.createElement('a');
     enlace.href = ruta;
@@ -394,7 +379,6 @@ function descargarImagen(ruta, nombre) {
     document.body.removeChild(enlace);
 }
 
-// Efecto hover en las imágenes
 $(document).on('mouseenter', '.foto-preview', function() {
     $(this).css({
         'border-color': '#007bff',

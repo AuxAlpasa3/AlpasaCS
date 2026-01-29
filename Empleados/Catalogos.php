@@ -1,28 +1,29 @@
 <?php
-include '../templates/head.php';
+include_once "../templates/head.php";
 ?>
+
 <div class="content-wrapper">
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0 fw-bold" style="color: #d94f00">Catálogo de Personal</h1>
+                   <h1 class="m-0 fw-bold" style="color: #d94f00">Catálogo de Personal</h1>
                 </div>
             </div>
         </div>
     </div>
+
     <section class="content">
         <div class="container-fluid">
-            <div class="card card-primary">
+            <!-- CARD DE FILTROS -->
+            <div class="card card-primary mb-4">
                 <div class="card-header text-white" style="background-color: #d94f00; padding: 1rem;">
                     <h3 class="card-title mb-0">
                         <i class="fas fa-filter mr-2"></i>Filtros de Búsqueda
                     </h3>
                 </div>
                 <div class="card-body">
-                    <!-- Filtros -->
                     <div class="row mb-3">
-                        <!-- No. Empleado -->
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label>No. Empleado:</label>
@@ -30,15 +31,13 @@ include '../templates/head.php';
                             </div>
                         </div>
                         
-                        <!-- Nombre Completo -->
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Nombre Completo:</label>
-                                <input type="text" id="filtro-nombre" class="form-control" style="border-color: #d94f00;" placeholder="Nombre y/o apellidos">
+                                <label>Nombre:</label>
+                                <input type="text" id="filtro-nombre" class="form-control" style="border-color: #d94f00;" placeholder="Nombre o apellidos">
                             </div>
                         </div>
                         
-                        <!-- Cargo con Select2 -->
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label>Cargo:</label>
@@ -48,7 +47,6 @@ include '../templates/head.php';
                             </div>
                         </div>
                         
-                        <!-- Departamento con Select2 -->
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label>Departamento:</label>
@@ -58,7 +56,6 @@ include '../templates/head.php';
                             </div>
                         </div>
                         
-                        <!-- Ubicación con Select2 -->
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label>Ubicación:</label>
@@ -68,21 +65,17 @@ include '../templates/head.php';
                             </div>
                         </div>
                         
-                        <!-- Vehículo Asignado -->
                         <div class="col-md-1">
                             <div class="form-group">
-                                <label>Vehículo:</label>
-                                <select id="filtro-vehiculo" class="form-control" style="border-color: #d94f00;">
-                                    <option value="">Todos</option>
-                                    <option value="1">Con Vehículo</option>
-                                    <option value="0">Sin Vehículo</option>
+                                <label>Empresa:</label>
+                                <select id="filtro-empresa" class="form-control select2-empresa" style="border-color: #d94f00; width: 100%;">
+                                    <option value="">Todas</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="row mb-4">
-                        <!-- Estatus -->
+                    <div class="row mb-3">
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label>Estatus:</label>
@@ -96,53 +89,71 @@ include '../templates/head.php';
                             </div>
                         </div>
                         
-                        <!-- Empresa -->
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>Empresa:</label>
-                                <select id="filtro-empresa" class="form-control select2-empresa" style="border-color: #d94f00; width: 100%;">
-                                    <option value="">Todas</option>
+                                <label>Vehículo:</label>
+                                <select id="filtro-vehiculo" class="form-control" style="border-color: #d94f00;">
+                                    <option value="">Todos</option>
+                                    <option value="1">Con Vehículo</option>
+                                    <option value="0">Sin Vehículo</option>
                                 </select>
                             </div>
                         </div>
                         
-                        <!-- Botones de acción -->
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label>&nbsp;</label>
-                                <button type="button" id="btn-aplicar-filtros" class="btn btn-primary btn-block" style="background-color: #d94f00; border-color: #d94f00;">
-                                    <i class="fas fa-search"></i> Buscar
+                        <div class="col-md-8">
+                            <div class="form-group text-right mt-4">
+                                <button type="button" id="btn-aplicar-filtros" class="btn btn-primary" style="background-color: #d94f00; border-color: #d94f00;">
+                                    <i class="fas fa-search mr-1"></i> Buscar
                                 </button>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label>&nbsp;</label>
-                                <button type="button" id="btn-limpiar-filtros" class="btn btn-outline-primary btn-block">
-                                    <i class="fas fa-broom"></i> Limpiar
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-4 text-right">
-                            <div class="btn-group mt-4" role="group">
-                                <button type="button" class="btn btn-outline-primary" id="btn-export-excel">
-                                    <i class="fas fa-file-excel"></i> Excel
-                                </button>
-                                <button type="button" class="btn btn-outline-primary" id="btn-export-pdf">
-                                    <i class="fas fa-file-pdf"></i> PDF
-                                </button>
-                                <button type="button" class="btn btn-outline-primary" id="btn-print">
-                                    <i class="fas fa-print"></i> Imprimir
-                                </button>
-                                <button type="button" class="btn btn-outline-primary" id="btn-refresh">
-                                    <i class="fas fa-sync-alt"></i> Recargar
+                                <button type="button" id="btn-limpiar-filtros" class="btn btn-outline-primary">
+                                    <i class="fas fa-broom mr-1"></i> Limpiar
                                 </button>
                             </div>
                         </div>
                     </div>
                     
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary" id="btn-export-excel">
+                                    <i class="fas fa-file-excel mr-1"></i> Excel
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" id="btn-export-pdf">
+                                    <i class="fas fa-file-pdf mr-1"></i> PDF
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" id="btn-print">
+                                    <i class="fas fa-print mr-1"></i> Imprimir
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" id="btn-refresh">
+                                    <i class="fas fa-sync-alt mr-1"></i> Recargar
+                                </button>
+                                <button type="button" class="btn btn-primary" id="btn-nuevo-personal" style="background-color: #d94f00; border-color: #d94f00;">
+                                    <i class="fas fa-plus mr-1"></i> Nuevo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CARD DE TABLA -->
+            <div class="card">
+                <div class="card-header text-white" style="background-color: #2c3e50; padding: 1rem;">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-users mr-2"></i>Lista de Personal
+                    </h3>
+                    <div class="card-tools">
+                        <div class="input-group input-group-sm" style="width: 250px;">
+                            <input type="text" id="table-search" class="form-control" placeholder="Buscar en tabla...">
+                            <div class="input-group-append">
+                                <button class="btn btn-secondary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
                     <div id="loading" class="text-center" style="display: none;">
                         <div class="spinner-border text-primary" role="status">
                             <span class="sr-only">Cargando...</span>
@@ -150,18 +161,7 @@ include '../templates/head.php';
                         <p class="mt-2 text-primary">Cargando personal...</p>
                     </div>
                     
-                    <!-- Botón añadir nuevo -->
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <button type="button" class="btn-nuevo btn btn-primary btn-g" style="background-color: #d94f00; border-color: #d94f00;">
-                                <i class="fa fa-plus"></i> Añadir Nuevo Personal
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div id="notification-area" class="mt-3"></div>
-                    
-                    <div class="table-responsive pt-2">
+                    <div class="table-responsive">
                         <table class="table table-bordered table-striped" id="dataTablePersonal">
                             <thead>
                                 <tr>
@@ -177,43 +177,82 @@ include '../templates/head.php';
                                     <th>Ubicación</th>
                                     <th>Vehículo</th>
                                     <th>Acceso</th>
-                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Los datos se cargarán automáticamente por DataTables -->
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
-            
-            <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="photoModalLabel">Foto</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="dataTables_info" id="dataTablePersonal_info" role="status" aria-live="polite">
+                                Mostrando 0 a 0 de 0 registros
+                            </div>
                         </div>
-                        <div class="modal-body text-center">
-                            <img id="modalPhoto" src="" alt="Foto" class="img-fluid" style="max-height: 70vh;">
-                            <p id="modalEmployeeName" class="mt-3 font-weight-bold"></p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        <div class="col-md-6">
+                            <div class="dataTables_paginate paging_simple_numbers" id="dataTablePersonal_paginate">
+                                <!-- Paginación se generará automáticamente -->
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div id="modal-container"></div>
         </div>
     </section>
 </div>
 
-<!-- DataTables JS -->
+<div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="photoModalLabel">Foto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalPhoto" src="" alt="Foto" class="img-fluid" style="max-height: 70vh;">
+                <p id="modalEmployeeName" class="mt-3 font-weight-bold"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="vehiculoModal" tabindex="-1" aria-labelledby="vehiculoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #d94f00; color: white;">
+                <h5 class="modal-title" id="vehiculoModalLabel">
+                    <i class="fas fa-car mr-2"></i>Información del Vehículo
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="vehiculoModalBody">
+                <!-- Contenido se cargará dinámicamente -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-gestionar-vehiculo" style="background-color: #d94f00; border-color: #d94f00;">
+                    <i class="fas fa-edit mr-1"></i> Gestionar Vehículo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-container"></div>
+
+<?php
+include_once '../templates/footer.php';
+?>
+
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
@@ -221,23 +260,16 @@ include '../templates/head.php';
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
-
-<!-- JSZip para Excel -->
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
-
-<!-- PDFMake para PDF -->
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/pdfmake.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/vfs_fonts.js"></script>
-
-<!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script type="text/javascript">
 $(document).ready(function() {
-    // Variables globales
     var dataTable = null;
+    var selectedRowData = null;
     
-    // Función para mostrar notificación
     function showNotification(message, type = 'success') {
         const alertClass = type === 'success' ? 'alert-success' : 
                          type === 'error' ? 'alert-danger' : 
@@ -255,13 +287,11 @@ $(document).ready(function() {
         
         $('body').append(alertHtml);
         
-        // Auto-remover después de 5 segundos
         setTimeout(() => {
             $('.alert').alert('close');
         }, 5000);
     }
     
-    // Función para cargar datos iniciales de filtros
     function cargarDatosFiltros() {
         // Cargar cargos
         $.ajax({
@@ -281,7 +311,7 @@ $(document).ready(function() {
                     });
                     
                     select.select2({
-                        theme: 'bootstrap-5',
+                        theme: 'bootstrap4',
                         language: 'es',
                         placeholder: 'Seleccionar cargo...',
                         allowClear: true,
@@ -289,15 +319,8 @@ $(document).ready(function() {
                     });
                 }
             },
-            error: function() {
-                $('#filtro-cargo').html('<option value="">Error al cargar</option>');
-                $('#filtro-cargo').select2({
-                    theme: 'bootstrap-5',
-                    language: 'es',
-                    placeholder: 'Error al cargar datos',
-                    allowClear: true,
-                    width: '100%'
-                });
+            error: function(xhr, status, error) {
+                console.error('Error cargando cargos:', error);
             }
         });
         
@@ -319,7 +342,7 @@ $(document).ready(function() {
                     });
                     
                     select.select2({
-                        theme: 'bootstrap-5',
+                        theme: 'bootstrap4',
                         language: 'es',
                         placeholder: 'Seleccionar departamento...',
                         allowClear: true,
@@ -327,15 +350,8 @@ $(document).ready(function() {
                     });
                 }
             },
-            error: function() {
-                $('#filtro-departamento').html('<option value="">Error al cargar</option>');
-                $('#filtro-departamento').select2({
-                    theme: 'bootstrap-5',
-                    language: 'es',
-                    placeholder: 'Error al cargar datos',
-                    allowClear: true,
-                    width: '100%'
-                });
+            error: function(xhr, status, error) {
+                console.error('Error cargando departamentos:', error);
             }
         });
         
@@ -357,7 +373,7 @@ $(document).ready(function() {
                     });
                     
                     select.select2({
-                        theme: 'bootstrap-5',
+                        theme: 'bootstrap4',
                         language: 'es',
                         placeholder: 'Seleccionar ubicación...',
                         allowClear: true,
@@ -365,15 +381,8 @@ $(document).ready(function() {
                     });
                 }
             },
-            error: function() {
-                $('#filtro-ubicacion').html('<option value="">Error al cargar</option>');
-                $('#filtro-ubicacion').select2({
-                    theme: 'bootstrap-5',
-                    language: 'es',
-                    placeholder: 'Error al cargar datos',
-                    allowClear: true,
-                    width: '100%'
-                });
+            error: function(xhr, status, error) {
+                console.error('Error cargando ubicaciones:', error);
             }
         });
         
@@ -395,7 +404,7 @@ $(document).ready(function() {
                     });
                     
                     select.select2({
-                        theme: 'bootstrap-5',
+                        theme: 'bootstrap4',
                         language: 'es',
                         placeholder: 'Seleccionar empresa...',
                         allowClear: true,
@@ -403,40 +412,27 @@ $(document).ready(function() {
                     });
                 }
             },
-            error: function() {
-                $('#filtro-empresa').html('<option value="">Error al cargar</option>');
-                $('#filtro-empresa').select2({
-                    theme: 'bootstrap-5',
-                    language: 'es',
-                    placeholder: 'Error al cargar datos',
-                    allowClear: true,
-                    width: '100%'
-                });
+            error: function(xhr, status, error) {
+                console.error('Error cargando empresas:', error);
             }
         });
     }
     
-    // Inicializar DataTable - VERSIÓN SIMPLIFICADA
     function inicializarDataTable() {
-        // Destruir DataTable si ya existe
         if ($.fn.DataTable.isDataTable('#dataTablePersonal')) {
             if (dataTable) {
                 dataTable.destroy();
             }
-            $('#dataTablePersonal').removeClass('dataTable no-footer');
+            $('#dataTablePersonal tbody').empty();
         }
         
-        // Mostrar loading
-        $('#loading').show();
-        
         dataTable = $('#dataTablePersonal').DataTable({
-            "processing": true,
-            "serverSide": true,
-            "ajax": {
-                "url": "Controlador/Obtener_Personal.php",
-                "type": "POST",
-                "data": function(d) {
-                    // Agregar filtros a la solicitud AJAX
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "Controlador/Obtener_Personal.php",
+                type: "POST",
+                data: function(d) {
                     d.noempleado = $('#filtro-noempleado').val();
                     d.nombre = $('#filtro-nombre').val();
                     d.cargo = $('#filtro-cargo').val();
@@ -446,262 +442,353 @@ $(document).ready(function() {
                     d.empresa = $('#filtro-empresa').val();
                     d.vehiculo = $('#filtro-vehiculo').val();
                 },
-                "dataSrc": function(json) {
-                    // Ocultar loading cuando se reciben los datos
+                beforeSend: function() {
+                    $('#loading').show();
+                },
+                complete: function() {
                     $('#loading').hide();
-                    
+                },
+                dataSrc: function(json) {
                     if (json.error) {
-                        console.error("Error del servidor:", json.error);
                         showNotification('Error al cargar los datos: ' + json.error, 'error');
                         return [];
                     }
                     
-                    console.log("Datos recibidos:", json.data.length, "registros");
-                    return json.data;
+                    if (json.data && Array.isArray(json.data)) {
+                        return json.data;
+                    } else {
+                        return [];
+                    }
                 },
-                "error": function(xhr, error, thrown) {
-                    $('#loading').hide();
-                    console.error("Error en AJAX:", error, thrown);
-                    showNotification('Error al cargar los datos. Por favor, recarga la página.', 'error');
+                error: function(xhr, error, thrown) {
+                    showNotification('Error al cargar los datos.', 'error');
                 }
             },
-            "columns": [
+            columns: [
                 { 
-                    "data": "NoEmpleado",
-                    "className": "text-center",
-                    "orderable": true
+                    data: "NoEmpleado",
+                    className: "text-center",
+                    orderable: true
                 },
                 { 
-                    "data": "Foto",
-                    "orderable": false,
-                    "searchable": false,
-                    "className": "text-center"
+                    data: "Foto",
+                    className: "text-center",
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        // Si no hay foto, mostrar iniciales
+                        if (!data || data === '') {
+                            var nombre = row.Nombre || '';
+                            var apPaterno = row.ApPaterno || '';
+                            var iniciales = (nombre.charAt(0) + apPaterno.charAt(0)).toUpperCase();
+                            var color = getColorForInitials(iniciales);
+                            
+                            return `<div class="employee-initials" style="width: 40px; height: 40px; border-radius: 50%; background-color: ${color}; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto;">${iniciales}</div>`;
+                        }
+                        return data;
+                    }
                 },
                 { 
-                    "data": "Nombre",
-                    "orderable": true
+                    data: "Nombre",
+                    orderable: true
                 },
                 { 
-                    "data": "ApPaterno",
-                    "orderable": true
+                    data: "ApPaterno",
+                    orderable: true
                 },
                 { 
-                    "data": "ApMaterno",
-                    "orderable": true
+                    data: "ApMaterno",
+                    orderable: true
                 },
                 { 
-                    "data": "Cargo",
-                    "orderable": true
+                    data: "Cargo",
+                    orderable: true
                 },
                 { 
-                    "data": "Departamento",
-                    "orderable": true
+                    data: "Departamento",
+                    orderable: true
                 },
                 { 
-                    "data": "Empresa",
-                    "orderable": true
+                    data: "Empresa",
+                    orderable: true
                 },
                 { 
-                    "data": "Estatus",
-                    "className": "text-center",
-                    "orderable": true
+                    data: "Estatus",
+                    className: "text-center",
+                    orderable: true,
+                    render: function(data, type, row) {
+                        var badgeClass = 'badge-secondary';
+                        if (data === 'Activo') badgeClass = 'badge-success';
+                        else if (data === 'Inactivo') badgeClass = 'badge-danger';
+                        else if (data === 'Vacaciones') badgeClass = 'badge-warning';
+                        else if (data === 'Baja') badgeClass = 'badge-dark';
+                        
+                        return `<span class="badge ${badgeClass}">${data}</span>`;
+                    }
                 },
                 { 
-                    "data": "Ubicacion",
-                    "orderable": true
+                    data: "Ubicacion",
+                    orderable: true,
+                    render: function(data, type, row) {
+                        return data || 'N/A';
+                    }
                 },
                 { 
-                    "data": "Vehiculo",
-                    "className": "text-center",
-                    "orderable": false,
-                    "searchable": false
+                    data: "Vehiculo",
+                    className: "text-center",
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        var tieneVehiculo = row.TieneVehiculo || false;
+                        var badgeClass = tieneVehiculo ? 'badge-primary vehicle-badge' : 'badge-secondary';
+                        var badgeText = tieneVehiculo ? 'Con Vehículo' : 'Sin Vehículo';
+                        var clickable = tieneVehiculo ? 'cursor-pointer' : '';
+                        var noEmpleado = row.NoEmpleado || '';
+                        var nombreCompleto = (row.Nombre || '') + ' ' + (row.ApPaterno || '') + ' ' + (row.ApMaterno || '');
+                        
+                        if (tieneVehiculo) {
+                            return `<span class="badge ${badgeClass} ${clickable} btn-ver-vehiculo" 
+                                    data-noempleado="${noEmpleado}" 
+                                    data-nombre="${nombreCompleto.trim()}">
+                                    ${badgeText}
+                                </span>`;
+                        } else {
+                            return `<span class="badge ${badgeClass}">
+                                    ${badgeText}
+                                </span>`;
+                        }
+                    }
                 },
                 { 
-                    "data": "Acceso",
-                    "className": "text-center",
-                    "orderable": false,
-                    "searchable": false
-                },
-                { 
-                    "data": "Acciones",
-                    "className": "text-center",
-                    "orderable": false,
-                    "searchable": false
+                    data: "Acceso",
+                    className: "text-center",
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        return data || 'N/A';
+                    }
                 }
             ],
-            "language": {
-                "processing": "<div class='spinner-border text-primary' role='status'><span class='sr-only'>Cargando...</span></div>",
-                "lengthMenu": "Mostrar _MENU_ registros por página",
-                "zeroRecords": "No se encontraron registros",
-                "info": "Mostrando página _PAGE_ de _PAGES_",
-                "infoEmpty": "No hay registros disponibles",
-                "infoFiltered": "(filtrado de _MAX_ registros totales)",
-                "search": "Buscar:",
-                "paginate": {
-                    "first": "Primera",
-                    "last": "Última",
-                    "next": "Siguiente",
-                    "previous": "Anterior"
-                },
-                "loadingRecords": "Cargando...",
-                "emptyTable": "No hay datos disponibles en la tabla"
+            language: {
+                processing: "Procesando...",
+                lengthMenu: "Mostrar _MENU_ registros",
+                zeroRecords: "No se encontraron resultados",
+                emptyTable: "Ningún dato disponible en esta tabla",
+                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                infoEmpty: "Mostrando 0 a 0 de 0 registros",
+                infoFiltered: "(filtrado de _MAX_ registros totales)",
+                search: "Buscar:",
+                paginate: {
+                    first: "Primero",
+                    last: "Último",
+                    next: "Siguiente",
+                    previous: "Anterior"
+                }
             },
-            "responsive": true,
-            "autoWidth": false,
-            "pageLength": 10,
-            "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
-            "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-                   "<'row'<'col-sm-12'tr>>" +
-                   "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-            "initComplete": function(settings, json) {
+            responsive: true,
+            autoWidth: false,
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+            dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                 "<'row'<'col-sm-12'tr>>" +
+                 "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            initComplete: function(settings, json) {
                 $('#loading').hide();
                 initEvents();
+                configurarBotonesExportacion();
                 showNotification('Catálogo cargado correctamente', 'success');
             },
-            "drawCallback": function(settings) {
+            drawCallback: function(settings) {
                 initEvents();
+            }
+        });
+        
+        // Configurar búsqueda personalizada en la tabla
+        $('#table-search').on('keyup', function() {
+            dataTable.search(this.value).draw();
+        });
+    }
+    
+    function getColorForInitials(initials) {
+        // Colores para las iniciales
+        var colors = [
+            '#d94f00', '#2c3e50', '#3498db', '#e74c3c', '#2ecc71',
+            '#9b59b6', '#1abc9c', '#f39c12', '#d35400', '#c0392b'
+        ];
+        
+        var sum = 0;
+        for (var i = 0; i < initials.length; i++) {
+            sum += initials.charCodeAt(i);
+        }
+        
+        return colors[sum % colors.length];
+    }
+    
+    function configurarBotonesExportacion() {
+        if (dataTable) {
+            // Agregar botones de exportación a DataTable
+            dataTable.buttons().container().appendTo('#dataTablePersonal_wrapper .col-md-6:eq(0)');
+        }
+    }
+    
+    function mostrarInformacionVehiculo(noEmpleado, nombre) {
+        $('#loading').show();
+        
+        $.ajax({
+            url: 'Controlador/ajax_get_vehiculo_personal.php',
+            type: 'GET',
+            data: {
+                NoEmpleado: noEmpleado
+            },
+            dataType: 'json',
+            success: function(response) {
+                $('#loading').hide();
+                
+                if (response.success && response.vehiculo) {
+                    var vehiculo = response.vehiculo;
+                    var html = `
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    <strong>Empleado:</strong> ${nombre} (No. ${noEmpleado})
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-car mr-2"></i>Información del Vehículo</h6>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <th>Marca:</th>
+                                        <td>${vehiculo.Marca || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Modelo:</th>
+                                        <td>${vehiculo.Modelo || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Año:</th>
+                                        <td>${vehiculo.Anio || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Color:</th>
+                                        <td>${vehiculo.Color || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Placas:</th>
+                                        <td>${vehiculo.Placas || 'N/A'}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-id-card mr-2"></i>Información Adicional</h6>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <th>Número de Serie:</th>
+                                        <td>${vehiculo.NumSerie || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>ID Vehículo:</th>
+                                        <td>${vehiculo.IdVehiculo || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Estado:</th>
+                                        <td><span class="badge badge-success">Asignado</span></td>
+                                    </tr>
+                                </table>
+                                
+                                ${vehiculo.RutaFoto ? `
+                                <div class="text-center mt-3">
+                                    <img src="${vehiculo.RutaFoto}" alt="Foto del vehículo" 
+                                         class="img-fluid rounded" style="max-height: 150px; cursor: pointer; border: 1px solid #ddd;"
+                                         onclick="$('#modalPhoto').attr('src', '${vehiculo.RutaFoto}'); 
+                                                  $('#modalEmployeeName').text('${vehiculo.Marca || ''} ${vehiculo.Modelo || ''} - ${vehiculo.Placas || ''}'); 
+                                                  $('#photoModal').modal('show');">
+                                    <small class="text-muted d-block mt-1">Click para ampliar imagen</small>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                    
+                    $('#vehiculoModalBody').html(html);
+                    
+                    $('#btn-gestionar-vehiculo').off('click').on('click', function() {
+                        cargarModalVehiculos(noEmpleado, nombre);
+                    });
+                    
+                    $('#vehiculoModal').modal('show');
+                    
+                } else if (response.success && !response.vehiculo) {
+                    var html = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-car fa-4x text-muted mb-3"></i>
+                            <h5>No hay vehículo asignado</h5>
+                            <p class="text-muted">${nombre} no tiene un vehículo asignado actualmente.</p>
+                            
+                            <div class="alert alert-warning mt-3">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Para asignar un vehículo, use la opción de gestión.
+                            </div>
+                        </div>
+                    `;
+                    
+                    $('#vehiculoModalBody').html(html);
+                    
+                    $('#btn-gestionar-vehiculo').off('click').on('click', function() {
+                        cargarModalVehiculos(noEmpleado, nombre);
+                    });
+                    
+                    $('#vehiculoModal').modal('show');
+                    
+                } else {
+                    showNotification(response.message || 'Error al obtener información del vehículo', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#loading').hide();
+                showNotification('Error al conectar con el servidor', 'error');
             }
         });
     }
     
-    // Configurar botones de exportación
-    function configurarBotonesExportacion() {
-        // Configurar botones de DataTables
-        new $.fn.dataTable.Buttons(dataTable, {
-            dom: {
-                button: {
-                    className: 'btn btn-sm'
-                }
+    function cargarModalVehiculos(noEmpleado, nombre) {
+        $('#vehiculoModal').modal('hide');
+        
+        $.ajax({
+            url: 'Modales/Gestionar_Vehiculos.php',
+            type: 'GET',
+            data: {
+                NoEmpleado: noEmpleado,
+                Nombre: nombre
             },
-            buttons: [
-                {
-                    extend: 'excel',
-                    text: '<i class="fas fa-file-excel"></i> Excel',
-                    className: 'btn-outline-primary',
-                    title: 'Catálogo de Personal',
-                    exportOptions: {
-                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-                    }
-                },
-                {
-                    extend: 'pdf',
-                    text: '<i class="fas fa-file-pdf"></i> PDF',
-                    className: 'btn-outline-primary',
-                    title: 'Catálogo de Personal',
-                    exportOptions: {
-                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-                    }
-                },
-                {
-                    extend: 'print',
-                    text: '<i class="fas fa-print"></i> Imprimir',
-                    className: 'btn-outline-primary',
-                    title: 'Catálogo de Personal',
-                    exportOptions: {
-                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-                    },
-                    customize: function (win) {
-                        $(win.document.body).find('table').addClass('display').css('font-size', '10px');
-                        $(win.document.body).find('tr:nth-child(odd) td').each(function(index){
-                            $(this).css('background-color','#D0D0D0');
-                        });
-                        $(win.document.body).find('h1').css('text-align','center');
-                    }
-                }
-            ]
+            beforeSend: function() {
+                $('#loading').show();
+            },
+            success: function(response) {
+                $('#loading').hide();
+                $('#modal-container').html(response);
+                $('#GestionarVehiculos').modal('show');
+            },
+            error: function(xhr, status, error) {
+                $('#loading').hide();
+                showNotification('Error al cargar el formulario de vehículos', 'danger');
+            }
         });
     }
     
-    // Función para exportar a Excel
-    function exportarExcel() {
-        if (!dataTable || dataTable.rows().count() === 0) {
-            showNotification('No hay datos para exportar', 'warning');
-            return;
-        }
-        
-        showNotification('Generando archivo Excel...', 'info');
-        dataTable.button(0).trigger();
-    }
-    
-    // Función para exportar a PDF
-    function exportarPDF() {
-        if (!dataTable || dataTable.rows().count() === 0) {
-            showNotification('No hay datos para exportar', 'warning');
-            return;
-        }
-        
-        showNotification('Generando archivo PDF...', 'info');
-        dataTable.button(1).trigger();
-    }
-    
-    // Función para imprimir
-    function imprimirTabla() {
-        if (!dataTable || dataTable.rows().count() === 0) {
-            showNotification('No hay datos para imprimir', 'warning');
-            return;
-        }
-        
-        showNotification('Preparando impresión...', 'info');
-        dataTable.button(2).trigger();
-    }
-    
-    // Event Listeners para botones de exportación
-    $('#btn-export-excel').click(function(e) {
-        e.preventDefault();
-        exportarExcel();
-    });
-    
-    $('#btn-export-pdf').click(function(e) {
-        e.preventDefault();
-        exportarPDF();
-    });
-    
-    $('#btn-print').click(function(e) {
-        e.preventDefault();
-        imprimirTabla();
-    });
-    
-    $('#btn-refresh').click(function(e) {
-        e.preventDefault();
-        dataTable.ajax.reload(null, false);
-        showNotification('Tabla recargada correctamente', 'success');
-    });
-    
-    // Event Listeners para filtros
-    $('#btn-aplicar-filtros').click(function() {
-        dataTable.ajax.reload();
-    });
-    
-    $('#btn-limpiar-filtros').click(function() {
-        $('#filtro-noempleado').val('');
-        $('#filtro-nombre').val('');
-        $('#filtro-cargo').val('').trigger('change');
-        $('#filtro-departamento').val('').trigger('change');
-        $('#filtro-ubicacion').val('').trigger('change');
-        $('#filtro-estatus').val('');
-        $('#filtro-empresa').val('').trigger('change');
-        $('#filtro-vehiculo').val('');
-        
-        dataTable.ajax.reload();
-        showNotification('Filtros limpiados', 'info');
-    });
-    
-    // Event Listeners para búsqueda al presionar Enter
-    $('#filtro-noempleado, #filtro-nombre').keypress(function(e) {
-        if (e.which == 13) {
-            dataTable.ajax.reload();
-        }
-    });
-    
-    // Funciones para eventos de la tabla
     function initEvents() {
-        // Evento para ver foto de empleado
-        $(document).off('click', '.thumbnail-image, .view-photo-link').on('click', '.thumbnail-image, .view-photo-link', function(e) {
+        // Evento para ver foto
+        $(document).off('click', '.employee-initials, .thumbnail-image, .view-photo-link').on('click', '.employee-initials, .thumbnail-image, .view-photo-link', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
             var fullImage = $(this).data('full-image') || $(this).attr('src');
-            var employeeName = $(this).data('employee-name') || 'Foto del empleado';
+            var employeeName = $(this).data('employee-name') || $(this).closest('tr').find('td:eq(2)').text() + ' ' + 
+                              $(this).closest('tr').find('td:eq(3)').text() + ' ' + 
+                              $(this).closest('tr').find('td:eq(4)').text();
             
             if (fullImage) {
                 $('#modalPhoto').attr('src', fullImage);
@@ -710,112 +797,144 @@ $(document).ready(function() {
             }
         });
         
-        // Evento para ver foto de vehículo
-        $(document).off('click', '.view-vehicle-photo').on('click', '.view-vehicle-photo', function(e) {
+        // Evento para ver vehículo (solo si tiene vehículo)
+        $(document).off('click', '.btn-ver-vehiculo').on('click', '.btn-ver-vehiculo', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
-            var imageUrl = $(this).data('image');
-            var vehicleInfo = $(this).data('info');
-            
-            if (imageUrl) {
-                $('#modalPhoto').attr('src', imageUrl);
-                $('#modalEmployeeName').text(vehicleInfo);
-                $('#photoModal').modal('show');
-            }
-        });
-        
-        // Evento para gestionar vehículos
-        $(document).off('click', '.btn-gestionar-vehiculos').on('click', '.btn-gestionar-vehiculos', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            var idPersonal = $(this).data('id');
             var noEmpleado = $(this).data('noempleado');
             var nombre = $(this).data('nombre');
             
-            cargarModalVehiculos(idPersonal, noEmpleado, nombre);
+            if (noEmpleado) {
+                mostrarInformacionVehiculo(noEmpleado, nombre);
+            }
         });
         
-        // Evento para editar personal
-        $(document).off('click', '.btn-editar').on('click', '.btn-editar', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            var id = $(this).data('id');
-            loadModal('Modales/Modificar.php?IdPersonal=' + id, '#ModificarPersonal', 'editar');
-        });
-        
-        // Evento para cambiar estatus
-        $(document).off('click', '.btn-cambiar-estatus').on('click', '.btn-cambiar-estatus', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            var id = $(this).data('id');
-            loadModal('Modales/CambiarEstatus.php?IdPersonal=' + id, '#CambiarEstatusPersonal', 'cambiar_estatus');
+        // Seleccionar fila
+        $(document).off('click', '#dataTablePersonal tbody tr').on('click', '#dataTablePersonal tbody tr', function(e) {
+            if (!$(e.target).hasClass('btn-ver-vehiculo') && 
+                !$(e.target).hasClass('employee-initials') && 
+                !$(e.target).hasClass('thumbnail-image') &&
+                !$(e.target).closest('.btn-ver-vehiculo').length) {
+                
+                $('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+                selectedRowData = dataTable.row(this).data();
+            }
         });
     }
     
-    // Función para cargar modal de gestión de vehículos
-    function cargarModalVehiculos(idPersonal, noEmpleado, nombre) {
+    // Eventos de botones
+    $('#btn-aplicar-filtros').click(function() {
+        if (dataTable) {
+            selectedRowData = null;
+            $('tr.selected').removeClass('selected');
+            dataTable.ajax.reload();
+        }
+    });
+    
+    $('#btn-limpiar-filtros').click(function() {
+        $('#filtro-noempleado').val('');
+        $('#filtro-nombre').val('');
+        $('#filtro-cargo').val('').trigger('change');
+        $('#filtro-departamento').val('').trigger('change');
+        $('#filtro-ubicacion').val('').trigger('change');
+        $('#filtro-empresa').val('').trigger('change');
+        $('#filtro-estatus').val('');
+        $('#filtro-vehiculo').val('');
+        
+        selectedRowData = null;
+        $('tr.selected').removeClass('selected');
+        
+        if (dataTable) {
+            dataTable.ajax.reload();
+        }
+        showNotification('Filtros limpiados', 'info');
+    });
+    
+    $('#btn-export-excel').click(function(e) {
+        e.preventDefault();
+        
+        if (!dataTable || dataTable.rows().count() === 0) {
+            showNotification('No hay datos para exportar', 'warning');
+            return;
+        }
+        
+        showNotification('Generando archivo Excel...', 'info');
+        dataTable.button('.buttons-excel').trigger();
+    });
+    
+    $('#btn-export-pdf').click(function(e) {
+        e.preventDefault();
+        
+        if (!dataTable || dataTable.rows().count() === 0) {
+            showNotification('No hay datos para exportar', 'warning');
+            return;
+        }
+        
+        showNotification('Generando archivo PDF...', 'info');
+        dataTable.button('.buttons-pdf').trigger();
+    });
+    
+    $('#btn-print').click(function(e) {
+        e.preventDefault();
+        
+        if (!dataTable || dataTable.rows().count() === 0) {
+            showNotification('No hay datos para imprimir', 'warning');
+            return;
+        }
+        
+        showNotification('Preparando impresión...', 'info');
+        dataTable.button('.buttons-print').trigger();
+    });
+    
+    $('#btn-refresh').click(function(e) {
+        e.preventDefault();
+        if (dataTable) {
+            dataTable.ajax.reload(null, false);
+            selectedRowData = null;
+            $('tr.selected').removeClass('selected');
+            showNotification('Tabla recargada correctamente', 'success');
+        }
+    });
+    
+    $('#btn-nuevo-personal').click(function(e) {
+        e.preventDefault();
+        
         $.ajax({
-            url: 'Modales/GestionarVehiculos.php',
+            url: 'Modales/Nuevo.php',
             type: 'GET',
-            data: {
-                IdPersonal: idPersonal,
-                NoEmpleado: noEmpleado,
-                Nombre: nombre
-            },
             beforeSend: function() {
                 $('#loading').show();
             },
             success: function(response) {
-                $('#modal-container').html(response);
-                $('#GestionarVehiculos').modal('show');
-            },
-            error: function() {
-                showNotification('Error al cargar el formulario de vehículos', 'danger');
-            },
-            complete: function() {
                 $('#loading').hide();
+                $('#modal-container').html(response);
+                $('#NuevoPersonal').modal('show');
+            },
+            error: function(xhr, status, error) {
+                $('#loading').hide();
+                showNotification('Error al cargar el formulario de nuevo personal', 'danger');
             }
         });
-    }
-    
-    // Funciones existentes para otros modales
-    $(document).on('click', '.btn-nuevo', function() {
-        loadModal('Modales/Nuevo.php', '#NuevoPersonal', 'nuevo');
     });
     
-    function loadModal(url, modalId, actionType) {
-        $('#loading').show();
-        
-        $('#modal-container').load(url, function(response, status, xhr) {
-            $('#loading').hide();
-            
-            if (status === "error") {
-                showNotification('Error al cargar el formulario', 'danger');
-                return;
+    // Búsqueda con Enter
+    $('#filtro-noempleado, #filtro-nombre').keypress(function(e) {
+        if (e.which == 13) {
+            if (dataTable) {
+                selectedRowData = null;
+                $('tr.selected').removeClass('selected');
+                dataTable.ajax.reload();
             }
-            
-            $(modalId).modal('show');
-            
-            // Inicializar Select2 si está disponible
-            if ($.fn.select2) {
-                $(modalId).find('select').each(function() {
-                    if (!$(this).hasClass('select2-hidden-accessible')) {
-                        $(this).select2({
-                            theme: 'bootstrap4',
-                            placeholder: 'Seleccione una opción',
-                            allowClear: true
-                        });
-                    }
-                });
-            }
-        });
-    }
+        }
+    });
     
-    // Manejo de formularios de modales
+    // Inicializar
+    cargarDatosFiltros();
+    inicializarDataTable();
+    
+    // Eventos para formularios en modales
     $(document).on('submit', '#formNuevoPersonal, #formModificarPersonal, #formCambiarEstatusPersonal, #formNuevoVehiculo', function(e) {
         e.preventDefault();
         var form = $(this);
@@ -838,7 +957,9 @@ $(document).ready(function() {
                 if (response.success) {
                     showNotification(response.message, 'success');
                     $('.modal').modal('hide');
-                    dataTable.ajax.reload(null, false);
+                    if (dataTable) {
+                        dataTable.ajax.reload(null, false);
+                    }
                     
                     if (form.attr('id') === 'formNuevoPersonal') {
                         form[0].reset();
@@ -852,7 +973,6 @@ $(document).ready(function() {
             },
             error: function(xhr, status, error) {
                 showNotification('Error: ' + error, 'danger');
-                console.error('Error AJAX:', xhr.responseText);
             },
             complete: function() {
                 submitBtn.prop('disabled', false).html(originalText);
@@ -865,28 +985,15 @@ $(document).ready(function() {
         $('.modal').modal('hide');
     });
     
-    // Limpiar contenedor de modales al cerrar
     $(document).on('hidden.bs.modal', '.modal', function() {
-        if ($(this).attr('id') !== 'photoModal') {
+        if ($(this).attr('id') !== 'photoModal' && $(this).attr('id') !== 'vehiculoModal') {
             $('#modal-container').empty();
         }
     });
-    
-    // Inicializar el sistema
-    cargarDatosFiltros();
-    inicializarDataTable();
-    
-    // Configurar botones de exportación después de inicializar la tabla
-    setTimeout(function() {
-        if (dataTable) {
-            configurarBotonesExportacion();
-        }
-    }, 1000);
 });
 </script>
 
 <style>
-/* Estilos específicos para esta página */
 .badge { 
     padding: 4px 8px; 
     border-radius: 12px; 
@@ -899,38 +1006,50 @@ $(document).ready(function() {
 .badge-info { background-color: #17a2b8; color: white; }
 .badge-secondary { background-color: #6c757d; color: white; }
 .badge-primary { background-color: #d94f00; color: white; }
+.badge-dark { background-color: #343a40; color: white; }
 
-#loading {
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.8);
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 1000;
-    top: 0;
-    left: 0;
+.vehicle-badge {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.vehicle-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-.select2-container--bootstrap-5 {
+#loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    z-index: 99999;
+    text-align: center;
+}
+
+.select2-container--bootstrap4 {
     width: 100% !important;
 }
 
-.select2-container--bootstrap-5 .select2-selection {
+.select2-container--bootstrap4 .select2-selection {
     min-height: 38px;
     border: 1px solid #ced4da !important;
     border-radius: 0.25rem !important;
 }
 
-.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+.select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
     line-height: 36px;
     padding-left: 12px;
 }
 
-.select2-container--bootstrap-5 .select2-selection--single {
+.select2-container--bootstrap4 .select2-selection--single {
     height: 38px;
 }
 
-.select2-container--bootstrap-5 .select2-dropdown {
+.select2-container--bootstrap4 .select2-dropdown {
     border-color: #ced4da;
     border-radius: 0.25rem;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
@@ -945,7 +1064,6 @@ $(document).ready(function() {
     z-index: 1050 !important;
 }
 
-/* Estilos para botones de exportación */
 .btn-outline-primary {
     border-color: #d94f00;
     color: #d94f00;
@@ -957,25 +1075,24 @@ $(document).ready(function() {
     color: white;
 }
 
-/* Estilos para los botones de exportación en filtros */
-.btn-group.mt-4 {
+.btn-group {
     display: flex;
-    justify-content: flex-end;
     gap: 5px;
+    flex-wrap: wrap;
 }
 
-.btn-group.mt-4 .btn {
+.btn-group .btn {
     padding: 8px 12px;
     font-size: 14px;
 }
 
-/* Estilos para la tabla */
 .table th {
-    background-color: #d94f00;
+    background-color: #2c3e50;
     color: white;
-    border-color: #b53d00;
+    border-color: #1a252f;
     text-align: center;
     vertical-align: middle;
+    font-weight: 600;
 }
 
 .table td {
@@ -983,14 +1100,35 @@ $(document).ready(function() {
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(217, 79, 0, 0.05);
+    background-color: rgba(44, 62, 80, 0.05);
 }
 
-.table-hover tbody tr:hover {
-    background-color: rgba(217, 79, 0, 0.1);
+#dataTablePersonal tbody tr {
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-/* Estilos para DataTables */
+#dataTablePersonal tbody tr:hover {
+    background-color: rgba(217, 79, 0, 0.05) !important;
+}
+
+#dataTablePersonal tbody tr.selected {
+    background-color: rgba(217, 79, 0, 0.15) !important;
+}
+
+.thumbnail-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.thumbnail-image:hover {
+    transform: scale(1.05);
+}
+
 .dataTables_wrapper {
     margin-top: 10px;
 }
@@ -1004,128 +1142,118 @@ $(document).ready(function() {
     padding-top: 10px;
 }
 
-/* Estilos para botones dentro de la tabla */
-.table .btn-sm {
-    padding: 4px 8px;
-    font-size: 12px;
-    margin: 2px;
+.card-tools .input-group {
+    margin-top: -5px;
 }
 
-.table .btn-info {
-    background-color: #17a2b8;
-    border-color: #17a2b8;
+.employee-initials {
+    cursor: pointer;
+    transition: transform 0.2s;
 }
 
-.table .btn-info:hover {
-    background-color: #138496;
-    border-color: #117a8b;
+.employee-initials:hover {
+    transform: scale(1.1);
 }
 
-.table .btn-warning {
-    background-color: #ffc107;
-    border-color: #ffc107;
-}
-
-.table .btn-warning:hover {
-    background-color: #e0a800;
-    border-color: #d39e00;
-}
-
-.table .btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
-}
-
-.table .btn-secondary:hover {
-    background-color: #5a6268;
-    border-color: #545b62;
-}
-
-.table .btn-success {
-    background-color: #28a745;
-    border-color: #28a745;
-}
-
-.table .btn-success:hover {
-    background-color: #218838;
-    border-color: #1e7e34;
-}
-
-.table .btn-primary {
-    background-color: #d94f00;
-    border-color: #d94f00;
-}
-
-.table .btn-primary:hover {
-    background-color: #b53d00;
-    border-color: #a83600;
-}
-
-/* Estilos para dropdown de vehículos */
-.dropdown-menu {
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.dropdown-item small {
-    font-size: 12px;
-    line-height: 1.4;
-}
-
-.view-vehicle-photo {
-    font-size: 11px;
-    text-decoration: underline;
-}
-
-.view-vehicle-photo:hover {
-    text-decoration: none;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .badge { font-size: 0.75em !important; }
+@media (max-width: 1200px) {
+    .btn-group .btn {
+        padding: 6px 8px !important;
+        font-size: 12px !important;
+        margin: 2px !important;
+    }
     
-    .select2-container--bootstrap-5 .select2-selection {
+    .btn-group .btn i {
+        margin-right: 3px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .badge { 
+        font-size: 10px !important; 
+        padding: 3px 6px !important;
+    }
+    
+    .select2-container--bootstrap4 .select2-selection {
         min-height: 42px;
     }
     
-    .select2-container--bootstrap-5 .select2-selection--single {
+    .select2-container--bootstrap4 .select2-selection--single {
         height: 42px;
     }
     
-    .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
         line-height: 40px;
     }
     
     .col-md-2, .col-md-3 {
-        margin-bottom: 10px;
+        margin-bottom: 15px !important;
     }
     
-    .btn-group.mt-4 {
+    .form-group label {
+        font-size: 14px !important;
+        margin-bottom: 5px !important;
+    }
+    
+    .btn-group {
         width: 100%;
         justify-content: center;
-        margin-top: 10px;
+        margin-top: 15px !important;
     }
     
-    .btn-group.mt-4 .btn {
+    .btn-group .btn {
         flex: 1;
         margin-bottom: 5px;
+        padding: 6px 8px !important;
+        font-size: 12px !important;
     }
     
     .dataTables_length,
     .dataTables_filter {
-        text-align: center;
+        text-align: center !important;
+        margin-bottom: 15px !important;
     }
     
-    .table .btn-sm {
-        padding: 2px 4px;
-        font-size: 10px;
-        margin: 1px;
+    .dataTables_filter input {
+        width: 100% !important;
     }
     
     .table td, .table th {
-        font-size: 12px;
-        padding: 4px;
+        font-size: 12px !important;
+        padding: 6px 4px !important;
+    }
+    
+    .thumbnail-image {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .card-tools {
+        width: 100%;
+        margin-top: 10px;
+    }
+    
+    .card-tools .input-group {
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .btn-group {
+        flex-wrap: wrap;
+    }
+    
+    .btn-group .btn {
+        flex-basis: calc(50% - 5px);
+        margin-bottom: 10px;
+        font-size: 11px !important;
+    }
+    
+    .btn-group .btn i {
+        font-size: 10px !important;
+    }
+    
+    .table-responsive {
+        border: none;
     }
 }
 
@@ -1138,14 +1266,11 @@ $(document).ready(function() {
     .dataTables_filter,
     .dataTables_info,
     .dataTables_paginate,
-    .btn-nuevo,
+    .btn-ver-vehiculo,
+    .employee-initials,
     .thumbnail-image,
-    .view-photo-link,
-    .btn-editar,
-    .btn-cambiar-estatus,
-    .btn-gestionar-vehiculos,
-    .dropdown,
-    .btn-info {
+    .select2-container,
+    .card-tools {
         display: none !important;
     }
     
@@ -1158,6 +1283,10 @@ $(document).ready(function() {
         padding: 0 !important;
     }
     
+    .card-footer {
+        display: none !important;
+    }
+    
     .table th {
         background-color: #f8f9fa !important;
         color: #000 !important;
@@ -1166,19 +1295,27 @@ $(document).ready(function() {
     
     body {
         margin: 0.5cm !important;
+        font-size: 10pt !important;
     }
     
-    .table .btn {
-        display: none !important;
+    .table {
+        font-size: 10pt !important;
+        border: 1px solid #000 !important;
     }
     
-    a[href*="GenerarDoc"] {
-        text-decoration: none !important;
+    .badge {
+        background-color: transparent !important;
         color: #000 !important;
+        border: 1px solid #000 !important;
+        padding: 1px 4px !important;
+    }
+    
+    a[href]:after {
+        content: none !important;
+    }
+    
+    #dataTablePersonal tbody tr.selected {
+        background-color: #f8f9fa !important;
     }
 }
 </style>
-
-<?php
-include '../templates/footer.php';
-?>

@@ -48,54 +48,6 @@ $isNotClient = in_array($currentRole, [6]);
               </p>
             </a>
             <ul class="nav nav-treeview">
-              <!-- REMISIÓN -->
-              <?php if ($isNotLimited) { ?>
-                <li class="nav-item">
-                  <a href="" class="nav-link">
-                    <b>ACCESOS</b>
-                    <i class="fas fa-angle-left right" style="color: #dc5504;"></i>
-                  </a>
-                  <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                      <a href="../Empleados/Accesos" class="nav-link">
-                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                        <p style="color: #dc5504;">Empleados</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="../Vehiculos/Accesos" class="nav-link">
-                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                        <p style="color: #dc5504;">Vehiculos</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="../Maniobras/Accesos" class="nav-link">
-                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                        <p style="color: #dc5504;">Maniobras</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="../Visitas/Accesos" class="nav-link">
-                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                        <p style="color: #dc5504;">Visitas</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="../Proveedores/Accesos" class="nav-link">
-                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                        <p style="color: #dc5504;">Proveedores</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="../Externos/Accesos" class="nav-link">
-                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                        <p style="color: #dc5504;">Externos</p>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-              <?php } ?>
-
               <!-- CATALOGOS -->
               <?php if ($isNotLimited) { ?>
                 <li class="nav-item">
@@ -111,9 +63,9 @@ $isNotClient = in_array($currentRole, [6]);
                         </a>
                       </li>
                       <li class="nav-item">
-                        <a href="../Vehiculos/Catalogos" class="nav-link">
+                        <a href="../Externos/Catalogos" class="nav-link">
                           <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                          <p style="color: #dc5504;">Vehiculos</p>
+                          <p style="color: #dc5504;">Personal Externo</p>
                         </a>
                       </li>
                       <li class="nav-item">
@@ -125,23 +77,77 @@ $isNotClient = in_array($currentRole, [6]);
                       <li class="nav-item">
                         <a href="../Visitas/Catalogos" class="nav-link">
                           <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                          <p style="color: #dc5504;">Registrar Visitas</p>
+                          <p style="color: #dc5504;">Visitas</p>
                         </a>
                       </li>
                       <li class="nav-item">
-                        <a href="../Externos/Catalogos" class="nav-link">
+                        <a href="../Maniobras/Catalogos" class="nav-link">
                           <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                          <p style="color: #dc5504;">Registrar Externos</p>
+                          <p style="color: #dc5504;">Maniobras</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="../Bascula/Catalogos" class="nav-link">
+                          <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
+                          <p style="color: #dc5504;">Bascula</p>
                         </a>
                       </li>
                   </ul>
                 </li>
               <?php } ?>
+              <!-- ACCESOS -->
+              <?php if ($isNotLimited) { ?>
+                <li class="nav-item">
+                  <a href="" class="nav-link">
+                    <b>ACCESOS</b>
+                    <i class="fas fa-angle-left right" style="color: #dc5504;"></i>
+                  </a>
+                  <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                      <a href="../Empleados/Accesos" class="nav-link">
+                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
+                        <p style="color: #dc5504;">Empleados</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="../Externos/Accesos" class="nav-link">
+                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
+                        <p style="color: #dc5504;">Personal Externo</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="../Proveedores/Accesos" class="nav-link">
+                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
+                        <p style="color: #dc5504;">Proveedores</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="../Visitas/Accesos" class="nav-link">
+                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
+                        <p style="color: #dc5504;">Visitas</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="../Maniobras/Accesos" class="nav-link">
+                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
+                        <p style="color: #dc5504;">Maniobras</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="../Bascula/Accesos" class="nav-link">
+                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
+                        <p style="color: #dc5504;">Bascula</p>
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+              <?php } ?>
+
+              
             </ul>
           </li>
         <?php } ?>
 
-        <!-- MÓDULO CONFIGURACIÓN -->
         <?php if ($isConfigUser) { ?>
           <li class="nav-item">
             <a href="#" class="nav-link">
@@ -151,7 +157,6 @@ $isNotClient = in_array($currentRole, [6]);
               </p>
             </a>
             <ul class="nav nav-treeview">
-              <!-- USUARIOS -->
               <?php if ($isConfigUser) { ?>
                 <li class="nav-item">
                   <a href="" class="nav-link">
@@ -179,7 +184,6 @@ $isNotClient = in_array($currentRole, [6]);
                 </li>
               <?php } ?>
 
-              <!-- ALMACEN -->
               <?php if ($isConfigUser) { ?>
                 <li class="nav-item">
                   <a href="" class="nav-link">
@@ -208,7 +212,6 @@ $isNotClient = in_array($currentRole, [6]);
           </li>
         <?php } ?>
 
-        <!-- MÓDULO CATÁLOGOS INTERNOS -->
         <?php if ($isNotLimited) { ?>
           <li class="nav-item">
             <a href="#" class="nav-link">

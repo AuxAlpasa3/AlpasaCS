@@ -50,7 +50,6 @@ include_once "../templates/head.php";
                             </div>
                         </div>
                         
-                        <!-- Personal con Select2 -->
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label>Personal:</label>
@@ -131,7 +130,6 @@ include_once "../templates/head.php";
                     </div>
                     
                     <div id="movimientos-container">
-                        <!-- Aquí se cargarán los movimientos -->
                     </div>
                 </div>
             </div>
@@ -207,11 +205,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 5000);
         }
         
-        // Función para cargar datos iniciales
         function cargarDatosIniciales() {
             console.log('Cargando datos iniciales...');
             
-            // Cargar personal
             $.ajax({
                 url: 'Controlador/ajax_get_personal.php',
                 type: 'GET',
@@ -505,7 +501,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 1000);
         }
         
-        // Función para exportar a PDF usando DataTables pero de forma manual
         function exportarPDFDataTable() {
             if (!dataTable || !$.fn.DataTable.isDataTable('#dataTableMovimientos')) {
                 showNotification('La tabla no está inicializada', 'warning');
@@ -519,7 +514,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             showNotification('Generando archivo PDF...', 'info');
             
-            // Crear un DataTable temporal solo para exportar
             $.fn.dataTable.ext.buttons.pdfHtml5.action.call(
                 { 
                     node: $('#btn-export-pdf')[0],
