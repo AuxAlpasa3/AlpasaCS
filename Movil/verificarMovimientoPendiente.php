@@ -35,7 +35,8 @@ try {
         }
     }
 
-    $IdPersonal = $input['IdPersonal'];
+    $IdPersonal = '260';
+    //$input['IdPersonal'];
 
     $sqlMovimientoPendiente = "SELECT
                             t1.IdMovEnTSal,
@@ -48,7 +49,7 @@ try {
                             regentsalper as t1
                             LEFT JOIN t_ubicacion_interna as t2
                             on t1.IdUbicacion=t2.IdUbicacion
-                            where t1.IdPer = 260
+                            where t1.IdPer =:IdPersonal 
                             and t1.FolMovSal IS NULL
                             and t1.StatusRegistro= 1 ";
     
