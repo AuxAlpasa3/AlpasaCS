@@ -2,7 +2,7 @@
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, Accept');
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     http_response_code(200);
@@ -19,22 +19,29 @@ $response = [
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Método no permitido');
+        throw new Exception('Método no permitido. Se requiere POST');
+    }
+    $input = null;
+    
+    if (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
+        $input = json_decode(file_get_contents('php://input'), true);
+    } else {
+        $input = $_POST;
     }
     
+    error_log("Datos recibidos: " . print_r($input, true));
+    error_log("Content-Type: " . ($_SERVER['CONTENT_TYPE'] ?? 'No definido'));
+    error_log("php://input: " . file_get_contents('php://input'));
+
     if (!$input || !is_array($input)) {
-        throw new Exception('Datos JSON no válidos');
+        throw new Exception('Datos no válidos o vacíos');
     }
 
-    if (!isset($input['IdPersonal']) || trim($input['IdPersonal']) === '') {
-        throw new Exception('El campo IdPersonal es requerido');
+    if (!isset($input['IdPersonal']) || empty(trim($input['IdPersonal']))) {
+        throw new Exception('El campo IdPersonal es requerido y no puede estar vacío');
     }
 
-    $IdPersonal = $_POST['IdPersonal'];
-
-    if (!$Conexion) {
-        throw new Exception('Error de conexión a la base de datos');
-    }
+    $IdPersonal = trim($input['IdPersonal']);
 
     $sqlMovimientoPendiente = "SELECT
                             t1.IdMovEnTSal,
@@ -42,28 +49,21 @@ try {
                             t1.FechaEntrada,
                             t1.IdUbicacion as UbicacionAnterior,
                             t2.NomLargo as NombreUbicacionAnterior,
-                            CONVERT(VARCHAR(8), t1.FechaEntrada, 108) as HoraEntrada
+                            FORMAT(t1.FechaEntrada, 'HH:mm:ss') as HoraEntrada
                             FROM
                             regentsalper as t1
                             LEFT JOIN t_ubicacion_interna as t2
-                            ON t1.IdUbicacion = t2.IdUbicacion
-                            WHERE t1.IdPer = :IdPersonal 
-                            AND t1.FolMovSal IS NULL
-                            AND t1.StatusRegistro = 1";
+                            on t1.IdUbicacion=t2.IdUbicacion
+                            where t1.IdPer = :IdPersonal 
+                            and t1.FolMovSal IS NULL
+                            and t1.StatusRegistro = 1";
     
     $stmtMovimiento = $Conexion->prepare($sqlMovimientoPendiente);
     $stmtMovimiento->bindParam(':IdPersonal', $IdPersonal, PDO::PARAM_STR);
-    
-    if (!$stmtMovimiento->execute()) {
-        throw new Exception('Error al ejecutar consulta de movimiento pendiente');
-    }
+    $stmtMovimiento->execute();
     
     if ($stmtMovimiento->rowCount() > 0) {
         $movimiento = $stmtMovimiento->fetch(PDO::FETCH_ASSOC);
-        
-        if (!isset($movimiento['FolMovEnt']) || empty($movimiento['FolMovEnt'])) {
-            throw new Exception('FolMovEnt no encontrado en el registro');
-        }
         
         $sqlEntradaInfo = "SELECT 
                                 Observaciones,
@@ -75,10 +75,7 @@ try {
         
         $stmtEntrada = $Conexion->prepare($sqlEntradaInfo);
         $stmtEntrada->bindParam(':FolMovEnt', $movimiento['FolMovEnt'], PDO::PARAM_INT);
-        
-        if (!$stmtEntrada->execute()) {
-            throw new Exception('Error al obtener detalle de entrada');
-        }
+        $stmtEntrada->execute();
         
         $entradaInfo = $stmtEntrada->fetch(PDO::FETCH_ASSOC);
         
@@ -86,8 +83,8 @@ try {
         $response['message'] = 'Existe un movimiento de entrada sin salida registrada';
         $response['data'] = [
             'movimiento_pendiente' => true,
-            'IdMovEnTSal' => (int)$movimiento['IdMovEnTSal'],
-            'FolMovEnt' => (int)$movimiento['FolMovEnt'],
+            'IdMovEnTSal' => $movimiento['IdMovEnTSal'],
+            'FolMovEnt' => $movimiento['FolMovEnt'],
             'FechaEntrada' => $movimiento['FechaEntrada'],
             'HoraEntrada' => $movimiento['HoraEntrada'],
             'UbicacionAnterior' => $movimiento['UbicacionAnterior'],
@@ -102,21 +99,14 @@ try {
         ];
     }
 
-} catch (PDOException $e) {
-    $response['success'] = false;
-    $response['message'] = 'Error de base de datos: ' . $e->getMessage();
-    error_log('Error PDO en verificarMovimientoPendiente: ' . $e->getMessage());
-    http_response_code(500);
 } catch (Exception $e) {
     $response['success'] = false;
     $response['message'] = $e->getMessage();
     error_log('Error en verificarMovimientoPendiente: ' . $e->getMessage());
     http_response_code(400);
 } finally {
-    if (isset($Conexion)) {
-        $Conexion = null;
-    }
+    $Conexion = null;
 }
 
-echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+echo json_encode($response);
 ?>
