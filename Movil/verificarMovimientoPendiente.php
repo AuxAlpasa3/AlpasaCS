@@ -35,8 +35,7 @@ try {
         }
     }
 
-    $IdPersonal = '260';
-    //$input['IdPersonal'];
+    $IdPersonal =$input['IdPersonal'];
 
     $sqlMovimientoPendiente = "SELECT
                             t1.IdMovEnTSal,
@@ -54,11 +53,12 @@ try {
                             and t1.StatusRegistro= 1 ";
     
     $stmtMovimiento = $Conexion->prepare($sqlMovimientoPendiente);
-    $stmtMovimiento->bindParam(':IdPersonal', $IdPersonal, PDO::PARAM_STR);
+    $stmtMovimiento->bindParam(':IdPersonal', $IdPersonal);
     $stmtMovimiento->execute();
-    if ($stmtMovimiento->rowCount() > 0) {
-        $movimiento = $stmtMovimiento->fetch(PDO::FETCH_ASSOC);
-        
+
+    $movimiento = $stmtMovimiento->fetch(PDO::FETCH_ASSOC);
+
+    if (count($movimiento) > 0) {
         $sqlEntradaInfo = "SELECT 
                                 Observaciones,
                                 Ubicacion,
