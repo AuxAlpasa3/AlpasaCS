@@ -18,9 +18,9 @@ $response = [
 ];
 
 try {
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Método no permitido');
-    }
+    // if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    //     throw new Exception('Método no permitido');
+    // }
     
     if (!$input || !is_array($input)) {
         throw new Exception('Datos JSON no válidos');
