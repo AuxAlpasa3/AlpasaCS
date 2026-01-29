@@ -48,14 +48,13 @@ try {
                             regentsalper as t1
                             LEFT JOIN t_ubicacion_interna as t2
                             on t1.IdUbicacion=t2.IdUbicacion
-                            where t1.IdPer=:IdPersonal 
+                            where t1.IdPer = 260
                             and t1.FolMovSal IS NULL
                             and t1.StatusRegistro= 1 ";
     
     $stmtMovimiento = $Conexion->prepare($sqlMovimientoPendiente);
     $stmtMovimiento->bindParam(':IdPersonal', $IdPersonal, PDO::PARAM_STR);
     $stmtMovimiento->execute();
-    
     if ($stmtMovimiento->rowCount() > 0) {
         $movimiento = $stmtMovimiento->fetch(PDO::FETCH_ASSOC);
         
