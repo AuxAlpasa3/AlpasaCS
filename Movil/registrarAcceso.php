@@ -42,7 +42,7 @@ try {
     $TipoTransporte = $input['TipoTransporte'];
     $usuario = $input['IdUsuario'];
 
-    // Ya no necesitamos IdVehiculoTransporte
+    $TipoMov = 1;
     $Observaciones = isset($input['Observaciones']) && $input['Observaciones'] !== 'NULL' ? $input['Observaciones'] : '';
     $NotificarSupervisor = isset($input['NotificarSupervisor']) ? (bool)$input['NotificarSupervisor'] : false;
 
@@ -218,7 +218,7 @@ try {
         $stmtRegentPer = $Conexion->prepare($sqlRegentPer);
         $stmtRegentPer->bindParam(':IdPer', $IdPersonal, PDO::PARAM_STR);
         $stmtRegentPer->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
-        $stmtRegentPer->bindParam(':TipoMov', $TipoTransporte, PDO::PARAM_INT); // TipoMov = TipoTransporte para entrada
+        $stmtRegentPer->bindParam(':TipoMov', $TipoMov, PDO::PARAM_INT); // TipoMov = TipoTransporte para entrada
         $stmtRegentPer->bindParam(':DispN', $DispN, PDO::PARAM_STR);
         $stmtRegentPer->bindParam(':TipoVehiculo', $TipoTransporte, PDO::PARAM_INT);
         $stmtRegentPer->bindParam(':Observaciones', $Observaciones, PDO::PARAM_STR);

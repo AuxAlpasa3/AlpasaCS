@@ -15,14 +15,19 @@ include_once "../templates/head.php";
 
     <section class="content">
         <div class="container-fluid">
-            <!-- CARD DE FILTROS -->
+            <!-- CARD DE FILTROS - Con botón de expandir/contraer -->
             <div class="card card-primary mb-4">
-                <div class="card-header text-white" style="background-color: #d94f00; padding: 1rem;">
-                    <h3 class="card-title mb-0">
-                        <i class="fas fa-filter mr-2"></i>Filtros de Búsqueda
+                <div class="card-header text-white" style="background-color: #d94f00; padding: 1rem; cursor: pointer;" id="filtrosHeader">
+                    <h3 class="card-title mb-0 d-flex justify-content-between align-items-center">
+                        <span>
+                            <i class="fas fa-filter mr-2"></i>Filtros de Búsqueda
+                        </span>
+                        <span class="toggle-icon">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
                     </h3>
                 </div>
-                <div class="card-body">
+                <div class="card-body" id="filtrosBody">
                     <div class="row mb-3">
                         <div class="col-md-2">
                             <div class="form-group">
@@ -136,22 +141,12 @@ include_once "../templates/head.php";
                 </div>
             </div>
             
-            <!-- CARD DE TABLA -->
+            <!-- CARD DE TABLA - Mismos colores que filtros -->
             <div class="card">
-                <div class="card-header text-white" style="background-color: #2c3e50; padding: 1rem;">
+                <div class="card-header text-white" style="background-color: #d94f00; padding: 1rem;">
                     <h3 class="card-title mb-0">
                         <i class="fas fa-users mr-2"></i>Lista de Personal
                     </h3>
-                    <div class="card-tools">
-                        <div class="input-group input-group-sm" style="width: 250px;">
-                            <input type="text" id="table-search" class="form-control" placeholder="Buscar en tabla...">
-                            <div class="input-group-append">
-                                <button class="btn btn-secondary" type="button">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
                 <div class="card-body">
                     <div id="loading" class="text-center" style="display: none;">
@@ -269,6 +264,37 @@ include_once '../templates/footer.php';
 $(document).ready(function() {
     var dataTable = null;
     var selectedRowData = null;
+    var filtrosExpandidos = true; // Estado inicial: expandido
+    
+    // Función para expandir/contraer los filtros
+    function toggleFiltros() {
+        filtrosExpandidos = !filtrosExpandidos;
+        
+        if (filtrosExpandidos) {
+            $('#filtrosBody').slideDown(300);
+            $('#filtrosHeader .toggle-icon').html('<i class="fas fa-chevron-up"></i>');
+            // Guardar estado en localStorage
+            localStorage.setItem('filtrosExpandidos', 'true');
+        } else {
+            $('#filtrosBody').slideUp(300);
+            $('#filtrosHeader .toggle-icon').html('<i class="fas fa-chevron-down"></i>');
+            // Guardar estado en localStorage
+            localStorage.setItem('filtrosExpandidos', 'false');
+        }
+    }
+    
+    // Inicializar estado de filtros desde localStorage
+    var filtrosGuardados = localStorage.getItem('filtrosExpandidos');
+    if (filtrosGuardados === 'false') {
+        filtrosExpandidos = false;
+        $('#filtrosBody').hide();
+        $('#filtrosHeader .toggle-icon').html('<i class="fas fa-chevron-down"></i>');
+    }
+    
+    // Evento para expandir/contraer filtros
+    $('#filtrosHeader').click(function() {
+        toggleFiltros();
+    });
     
     function showNotification(message, type = 'success') {
         const alertClass = type === 'success' ? 'alert-success' : 
@@ -483,9 +509,10 @@ $(document).ready(function() {
                             var iniciales = (nombre.charAt(0) + apPaterno.charAt(0)).toUpperCase();
                             var color = getColorForInitials(iniciales);
                             
-                            return `<div class="employee-initials" style="width: 40px; height: 40px; border-radius: 50%; background-color: ${color}; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto;">${iniciales}</div>`;
+                            return `<div class="employee-initials" style="width: 40px; height: 40px; border-radius: 50%; background-color: ${color}; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto;" data-employee-name="${nombre} ${apPaterno}">${iniciales}</div>`;
                         }
-                        return data;
+                        // Si hay foto, mostrar miniatura
+                        return `<img src="${data}" class="thumbnail-image" alt="Foto" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer;" data-full-image="${data}" data-employee-name="${row.Nombre || ''} ${row.ApPaterno || ''}">`;
                     }
                 },
                 { 
@@ -601,11 +628,6 @@ $(document).ready(function() {
             drawCallback: function(settings) {
                 initEvents();
             }
-        });
-        
-        // Configurar búsqueda personalizada en la tabla
-        $('#table-search').on('keyup', function() {
-            dataTable.search(this.value).draw();
         });
     }
     
@@ -780,15 +802,21 @@ $(document).ready(function() {
     }
     
     function initEvents() {
-        // Evento para ver foto
-        $(document).off('click', '.employee-initials, .thumbnail-image, .view-photo-link').on('click', '.employee-initials, .thumbnail-image, .view-photo-link', function(e) {
+        // Evento para ver foto (iniciales o imagen)
+        $(document).off('click', '.employee-initials, .thumbnail-image').on('click', '.employee-initials, .thumbnail-image', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
-            var fullImage = $(this).data('full-image') || $(this).attr('src');
+            var fullImage = $(this).data('full-image') || null;
             var employeeName = $(this).data('employee-name') || $(this).closest('tr').find('td:eq(2)').text() + ' ' + 
                               $(this).closest('tr').find('td:eq(3)').text() + ' ' + 
                               $(this).closest('tr').find('td:eq(4)').text();
+            
+            // Si es solo iniciales, no mostrar modal de foto
+            if ($(this).hasClass('employee-initials')) {
+                // Podrías mostrar un modal diferente o no hacer nada
+                return;
+            }
             
             if (fullImage) {
                 $('#modalPhoto').attr('src', fullImage);
@@ -810,16 +838,28 @@ $(document).ready(function() {
             }
         });
         
-        // Seleccionar fila
+        // Seleccionar fila - Cambiar color de fondo
         $(document).off('click', '#dataTablePersonal tbody tr').on('click', '#dataTablePersonal tbody tr', function(e) {
+            // No seleccionar si se hizo clic en elementos específicos
             if (!$(e.target).hasClass('btn-ver-vehiculo') && 
-                !$(e.target).hasClass('employee-initials') && 
+                !$(e.target).hasClass('employee-iniciales') && 
                 !$(e.target).hasClass('thumbnail-image') &&
-                !$(e.target).closest('.btn-ver-vehiculo').length) {
+                !$(e.target).closest('.btn-ver-vehiculo').length &&
+                !$(e.target).closest('.employee-iniciales').length) {
                 
-                $('tr.selected').removeClass('selected');
+                // Remover selección anterior
+                $('#dataTablePersonal tbody tr.selected').removeClass('selected');
+                
+                // Agregar selección a la fila actual
                 $(this).addClass('selected');
+                
+                // Guardar datos de la fila seleccionada
                 selectedRowData = dataTable.row(this).data();
+                
+                // Opcional: mostrar información de la fila seleccionada
+                if (selectedRowData) {
+                    console.log('Fila seleccionada:', selectedRowData);
+                }
             }
         });
     }
@@ -828,7 +868,7 @@ $(document).ready(function() {
     $('#btn-aplicar-filtros').click(function() {
         if (dataTable) {
             selectedRowData = null;
-            $('tr.selected').removeClass('selected');
+            $('#dataTablePersonal tbody tr.selected').removeClass('selected');
             dataTable.ajax.reload();
         }
     });
@@ -844,7 +884,7 @@ $(document).ready(function() {
         $('#filtro-vehiculo').val('');
         
         selectedRowData = null;
-        $('tr.selected').removeClass('selected');
+        $('#dataTablePersonal tbody tr.selected').removeClass('selected');
         
         if (dataTable) {
             dataTable.ajax.reload();
@@ -893,7 +933,7 @@ $(document).ready(function() {
         if (dataTable) {
             dataTable.ajax.reload(null, false);
             selectedRowData = null;
-            $('tr.selected').removeClass('selected');
+            $('#dataTablePersonal tbody tr.selected').removeClass('selected');
             showNotification('Tabla recargada correctamente', 'success');
         }
     });
@@ -924,7 +964,7 @@ $(document).ready(function() {
         if (e.which == 13) {
             if (dataTable) {
                 selectedRowData = null;
-                $('tr.selected').removeClass('selected');
+                $('#dataTablePersonal tbody tr.selected').removeClass('selected');
                 dataTable.ajax.reload();
             }
         }
@@ -994,6 +1034,7 @@ $(document).ready(function() {
 </script>
 
 <style>
+/* Estilos generales */
 .badge { 
     padding: 4px 8px; 
     border-radius: 12px; 
@@ -1008,6 +1049,7 @@ $(document).ready(function() {
 .badge-primary { background-color: #d94f00; color: white; }
 .badge-dark { background-color: #343a40; color: white; }
 
+/* Badge de vehículo */
 .vehicle-badge {
     cursor: pointer;
     transition: all 0.2s;
@@ -1017,6 +1059,7 @@ $(document).ready(function() {
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
+/* Indicador de carga */
 #loading {
     position: fixed;
     top: 50%;
@@ -1030,6 +1073,7 @@ $(document).ready(function() {
     text-align: center;
 }
 
+/* Select2 personalizado */
 .select2-container--bootstrap4 {
     width: 100% !important;
 }
@@ -1056,6 +1100,7 @@ $(document).ready(function() {
     z-index: 1060 !important;
 }
 
+/* Modales */
 .modal {
     z-index: 1060 !important;
 }
@@ -1064,6 +1109,7 @@ $(document).ready(function() {
     z-index: 1050 !important;
 }
 
+/* Botones */
 .btn-outline-primary {
     border-color: #d94f00;
     color: #d94f00;
@@ -1086,10 +1132,24 @@ $(document).ready(function() {
     font-size: 14px;
 }
 
+/* Cabecera de la card de filtros */
+#filtrosHeader {
+    transition: all 0.3s;
+}
+
+#filtrosHeader:hover {
+    background-color: #b53d00 !important;
+}
+
+#filtrosHeader .toggle-icon {
+    transition: transform 0.3s;
+}
+
+/* Tabla */
 .table th {
-    background-color: #2c3e50;
+    background-color: #d94f00;
     color: white;
-    border-color: #1a252f;
+    border-color: #b53d00;
     text-align: center;
     vertical-align: middle;
     font-weight: 600;
@@ -1100,27 +1160,27 @@ $(document).ready(function() {
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(44, 62, 80, 0.05);
+    background-color: rgba(217, 79, 0, 0.05);
 }
 
+/* Filas de la tabla */
 #dataTablePersonal tbody tr {
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
 #dataTablePersonal tbody tr:hover {
-    background-color: rgba(217, 79, 0, 0.05) !important;
+    background-color: rgba(217, 79, 0, 0.1) !important;
 }
 
+/* Fila seleccionada - Cambio de color */
 #dataTablePersonal tbody tr.selected {
-    background-color: rgba(217, 79, 0, 0.15) !important;
+    background-color: #ffd9c2 !important;
+    box-shadow: inset 0 0 0 2px #d94f00;
 }
 
+/* Imágenes e iniciales */
 .thumbnail-image {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 4px;
     cursor: pointer;
     transition: transform 0.2s;
 }
@@ -1129,6 +1189,11 @@ $(document).ready(function() {
     transform: scale(1.05);
 }
 
+.employee-initials {
+    cursor: default;
+}
+
+/* DataTables */
 .dataTables_wrapper {
     margin-top: 10px;
 }
@@ -1142,19 +1207,7 @@ $(document).ready(function() {
     padding-top: 10px;
 }
 
-.card-tools .input-group {
-    margin-top: -5px;
-}
-
-.employee-initials {
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.employee-initials:hover {
-    transform: scale(1.1);
-}
-
+/* Responsive */
 @media (max-width: 1200px) {
     .btn-group .btn {
         padding: 6px 8px !important;
@@ -1222,18 +1275,9 @@ $(document).ready(function() {
         padding: 6px 4px !important;
     }
     
-    .thumbnail-image {
-        width: 40px !important;
-        height: 40px !important;
-    }
-    
-    .card-tools {
-        width: 100%;
-        margin-top: 10px;
-    }
-    
-    .card-tools .input-group {
-        width: 100% !important;
+    .thumbnail-image, .employee-initials {
+        width: 35px !important;
+        height: 35px !important;
     }
 }
 
@@ -1270,7 +1314,7 @@ $(document).ready(function() {
     .employee-initials,
     .thumbnail-image,
     .select2-container,
-    .card-tools {
+    .toggle-icon {
         display: none !important;
     }
     
