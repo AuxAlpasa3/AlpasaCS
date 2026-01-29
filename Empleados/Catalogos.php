@@ -68,12 +68,15 @@ include '../templates/head.php';
                             </div>
                         </div>
                         
+                        <!-- Vehículo Asignado -->
                         <div class="col-md-1">
                             <div class="form-group">
-                                <label>&nbsp;</label>
-                                <button type="button" id="btn-aplicar-filtros" class="btn btn-primary btn-block" style="background-color: #d94f00; border-color: #d94f00;">
-                                    <i class="fas fa-search"></i>
-                                </button>
+                                <label>Vehículo:</label>
+                                <select id="filtro-vehiculo" class="form-control" style="border-color: #d94f00;">
+                                    <option value="">Todos</option>
+                                    <option value="1">Con Vehículo</option>
+                                    <option value="0">Sin Vehículo</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -103,6 +106,16 @@ include '../templates/head.php';
                             </div>
                         </div>
                         
+                        <!-- Botones de acción -->
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button type="button" id="btn-aplicar-filtros" class="btn btn-primary btn-block" style="background-color: #d94f00; border-color: #d94f00;">
+                                    <i class="fas fa-search"></i> Buscar
+                                </button>
+                            </div>
+                        </div>
+                        
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label>&nbsp;</label>
@@ -112,8 +125,8 @@ include '../templates/head.php';
                             </div>
                         </div>
                         
-                        <div class="col-md-6 text-right">
-                            <div class="btn-group mt-6" role="group">
+                        <div class="col-md-4 text-right">
+                            <div class="btn-group mt-4" role="group">
                                 <button type="button" class="btn btn-outline-primary" id="btn-export-excel">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </button>
@@ -162,11 +175,13 @@ include '../templates/head.php';
                                     <th>Empresa</th>
                                     <th>Estatus</th>
                                     <th>Ubicación</th>
+                                    <th>Vehículo</th>
                                     <th>Acceso</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                <!-- Los datos se cargarán automáticamente por DataTables -->
                             </tbody>
                         </table>
                     </div>
@@ -177,13 +192,13 @@ include '../templates/head.php';
                 <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="photoModalLabel">Foto del Empleado</h5>
+                            <h5 class="modal-title" id="photoModalLabel">Foto</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div class="modal-body text-center">
-                            <img id="modalPhoto" src="" alt="Foto del empleado" class="img-fluid" style="max-height: 70vh;">
+                            <img id="modalPhoto" src="" alt="Foto" class="img-fluid" style="max-height: 70vh;">
                             <p id="modalEmployeeName" class="mt-3 font-weight-bold"></p>
                         </div>
                         <div class="modal-footer">
@@ -221,7 +236,6 @@ include '../templates/head.php';
 $(document).ready(function() {
     // Variables globales
     var dataTable = null;
-    var currentData = [];
     
     // Función para mostrar notificación
     function showNotification(message, type = 'success') {
@@ -402,7 +416,7 @@ $(document).ready(function() {
         });
     }
     
-    // Inicializar DataTable
+    // Inicializar DataTable - VERSIÓN SIMPLIFICADA
     function inicializarDataTable() {
         // Destruir DataTable si ya existe
         if ($.fn.DataTable.isDataTable('#dataTablePersonal')) {
@@ -411,6 +425,9 @@ $(document).ready(function() {
             }
             $('#dataTablePersonal').removeClass('dataTable no-footer');
         }
+        
+        // Mostrar loading
+        $('#loading').show();
         
         dataTable = $('#dataTablePersonal').DataTable({
             "processing": true,
@@ -427,18 +444,32 @@ $(document).ready(function() {
                     d.ubicacion = $('#filtro-ubicacion').val();
                     d.estatus = $('#filtro-estatus').val();
                     d.empresa = $('#filtro-empresa').val();
+                    d.vehiculo = $('#filtro-vehiculo').val();
                 },
-                "dataType": "json",
-                "error": function(xhr, error, thrown) {
-                    console.error("Error al cargar datos:", error);
-                    showNotification('Error al cargar los datos. Por favor, recarga la página.', 'error');
+                "dataSrc": function(json) {
+                    // Ocultar loading cuando se reciben los datos
                     $('#loading').hide();
+                    
+                    if (json.error) {
+                        console.error("Error del servidor:", json.error);
+                        showNotification('Error al cargar los datos: ' + json.error, 'error');
+                        return [];
+                    }
+                    
+                    console.log("Datos recibidos:", json.data.length, "registros");
+                    return json.data;
+                },
+                "error": function(xhr, error, thrown) {
+                    $('#loading').hide();
+                    console.error("Error en AJAX:", error, thrown);
+                    showNotification('Error al cargar los datos. Por favor, recarga la página.', 'error');
                 }
             },
             "columns": [
                 { 
                     "data": "NoEmpleado",
-                    "className": "text-center"
+                    "className": "text-center",
+                    "orderable": true
                 },
                 { 
                     "data": "Foto",
@@ -446,39 +477,56 @@ $(document).ready(function() {
                     "searchable": false,
                     "className": "text-center"
                 },
-                { "data": "Nombre" },
-                { "data": "ApPaterno" },
-                { "data": "ApMaterno" },
-                { "data": "Cargo" },
-                { "data": "Departamento" },
-                { "data": "Empresa" },
+                { 
+                    "data": "Nombre",
+                    "orderable": true
+                },
+                { 
+                    "data": "ApPaterno",
+                    "orderable": true
+                },
+                { 
+                    "data": "ApMaterno",
+                    "orderable": true
+                },
+                { 
+                    "data": "Cargo",
+                    "orderable": true
+                },
+                { 
+                    "data": "Departamento",
+                    "orderable": true
+                },
+                { 
+                    "data": "Empresa",
+                    "orderable": true
+                },
                 { 
                     "data": "Estatus",
                     "className": "text-center",
-                    // MOSTRAR EL HTML QUE VIENE DEL SERVIDOR (ya incluye el badge)
-                    "render": function(data, type, row) {
-                        return data;
-                    }
+                    "orderable": true
                 },
-                { "data": "Ubicacion" },
+                { 
+                    "data": "Ubicacion",
+                    "orderable": true
+                },
+                { 
+                    "data": "Vehiculo",
+                    "className": "text-center",
+                    "orderable": false,
+                    "searchable": false
+                },
                 { 
                     "data": "Acceso",
-                    "orderable": false,
-                    "searchable": false,
                     "className": "text-center",
-                    // MOSTRAR EL HTML QUE VIENE DEL SERVIDOR (el botón de descarga)
-                    "render": function(data, type, row) {
-                        return data;
-                    }
+                    "orderable": false,
+                    "searchable": false
                 },
                 { 
                     "data": "Acciones",
-                    "orderable": false,
-                    "searchable": false,
                     "className": "text-center",
-                    "render": function(data, type, row) {
-                        return data;
-                    }
+                    "orderable": false,
+                    "searchable": false
                 }
             ],
             "language": {
@@ -506,21 +554,61 @@ $(document).ready(function() {
                    "<'row'<'col-sm-12'tr>>" +
                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
             "initComplete": function(settings, json) {
-                initEvents();
-                console.log('DataTable inicializado correctamente');
                 $('#loading').hide();
+                initEvents();
                 showNotification('Catálogo cargado correctamente', 'success');
             },
             "drawCallback": function(settings) {
                 initEvents();
-                $('#loading').hide();
-                
-                // Guardar datos actuales
-                currentData = dataTable.data().toArray();
-            },
-            "preDrawCallback": function(settings) {
-                $('#loading').show();
             }
+        });
+    }
+    
+    // Configurar botones de exportación
+    function configurarBotonesExportacion() {
+        // Configurar botones de DataTables
+        new $.fn.dataTable.Buttons(dataTable, {
+            dom: {
+                button: {
+                    className: 'btn btn-sm'
+                }
+            },
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: '<i class="fas fa-file-excel"></i> Excel',
+                    className: 'btn-outline-primary',
+                    title: 'Catálogo de Personal',
+                    exportOptions: {
+                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                    className: 'btn-outline-primary',
+                    title: 'Catálogo de Personal',
+                    exportOptions: {
+                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                    }
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print"></i> Imprimir',
+                    className: 'btn-outline-primary',
+                    title: 'Catálogo de Personal',
+                    exportOptions: {
+                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                    },
+                    customize: function (win) {
+                        $(win.document.body).find('table').addClass('display').css('font-size', '10px');
+                        $(win.document.body).find('tr:nth-child(odd) td').each(function(index){
+                            $(this).css('background-color','#D0D0D0');
+                        });
+                        $(win.document.body).find('h1').css('text-align','center');
+                    }
+                }
+            ]
         });
     }
     
@@ -532,42 +620,7 @@ $(document).ready(function() {
         }
         
         showNotification('Generando archivo Excel...', 'info');
-        
-        // Crear DataTable temporal para exportar
-        $.fn.dataTable.ext.buttons.excelHtml5.action.call(
-            { 
-                node: $('#btn-export-excel')[0],
-                conf: {
-                    extend: 'excelHtml5',
-                    text: 'Excel',
-                    title: 'Catalogo_Personal_' + new Date().toISOString().split('T')[0],
-                    exportOptions: {
-                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                        modifier: {
-                            page: 'all'
-                        }
-                    },
-                    filename: 'catalogo_personal_' + new Date().toISOString().split('T')[0],
-                    customize: function(xlsx) {
-                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
-                        
-                        // Agregar fecha al archivo
-                        $('row:first c', sheet).attr('s', '2');
-                        $('row:eq(1) c', sheet).each(function() {
-                            if ($(this).is(':first-child')) {
-                                $(this).attr('s', '2');
-                                $(this).text('Fecha: ' + new Date().toLocaleDateString());
-                            }
-                        });
-                    }
-                },
-                dt: dataTable
-            }
-        );
-        
-        setTimeout(() => {
-            showNotification('Archivo Excel generado correctamente', 'success');
-        }, 1000);
+        dataTable.button(0).trigger();
     }
     
     // Función para exportar a PDF
@@ -578,75 +631,7 @@ $(document).ready(function() {
         }
         
         showNotification('Generando archivo PDF...', 'info');
-        
-        // Crear DataTable temporal para exportar
-        $.fn.dataTable.ext.buttons.pdfHtml5.action.call(
-            { 
-                node: $('#btn-export-pdf')[0],
-                conf: {
-                    extend: 'pdfHtml5',
-                    text: 'PDF',
-                    title: 'Catálogo de Personal',
-                    message: 'Fecha: ' + new Date().toLocaleDateString(),
-                    exportOptions: {
-                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                        modifier: {
-                            page: 'all'
-                        }
-                    },
-                    orientation: 'landscape',
-                    pageSize: 'A4',
-                    customize: function(doc) {
-                        doc.defaultStyle.fontSize = 8;
-                        doc.styles.tableHeader.fontSize = 9;
-                        doc.styles.tableHeader.alignment = 'center';
-                        doc.styles.tableHeader.fillColor = '#d94f00';
-                        doc.styles.tableHeader.color = '#ffffff';
-                        doc.content[1].table.widths = 
-                            Array(doc.content[1].table.body[0].length).fill('*');
-                        
-                        // Agregar encabezado
-                        doc.content.splice(0, 0, {
-                            text: 'Catálogo de Personal',
-                            fontSize: 16,
-                            alignment: 'center',
-                            color: '#d94f00',
-                            margin: [0, 0, 0, 10]
-                        });
-                        
-                        // Agregar información de filtros
-                        var filtros = 'Filtros aplicados: ';
-                        var filtrosArray = [];
-                        
-                        if ($('#filtro-noempleado').val()) filtrosArray.push('No. Empleado: ' + $('#filtro-noempleado').val());
-                        if ($('#filtro-nombre').val()) filtrosArray.push('Nombre: ' + $('#filtro-nombre').val());
-                        if ($('#filtro-cargo').val()) filtrosArray.push('Cargo: ' + $('#filtro-cargo option:selected').text());
-                        if ($('#filtro-departamento').val()) filtrosArray.push('Depto: ' + $('#filtro-departamento option:selected').text());
-                        if ($('#filtro-ubicacion').val()) filtrosArray.push('Ubicación: ' + $('#filtro-ubicacion option:selected').text());
-                        if ($('#filtro-estatus').val()) filtrosArray.push('Estatus: ' + $('#filtro-estatus').val());
-                        if ($('#filtro-empresa').val()) filtrosArray.push('Empresa: ' + $('#filtro-empresa option:selected').text());
-                        
-                        if (filtrosArray.length > 0) {
-                            filtros += filtrosArray.join(' | ');
-                        } else {
-                            filtros += 'Ninguno (Todos los registros)';
-                        }
-                        
-                        doc.content.splice(1, 0, {
-                            text: filtros,
-                            fontSize: 9,
-                            alignment: 'left',
-                            margin: [0, 0, 0, 10]
-                        });
-                    }
-                },
-                dt: dataTable
-            }
-        );
-        
-        setTimeout(() => {
-            showNotification('Archivo PDF generado correctamente', 'success');
-        }, 1000);
+        dataTable.button(1).trigger();
     }
     
     // Función para imprimir
@@ -657,83 +642,7 @@ $(document).ready(function() {
         }
         
         showNotification('Preparando impresión...', 'info');
-        
-        // Crear DataTable temporal para imprimir
-        $.fn.dataTable.ext.buttons.print.action.call(
-            { 
-                node: $('#btn-print')[0],
-                conf: {
-                    extend: 'print',
-                    text: 'Imprimir',
-                    title: 'Catálogo de Personal',
-                    exportOptions: {
-                        columns: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                        modifier: {
-                            page: 'all'
-                        }
-                    },
-                    customize: function(win) {
-                        $(win.document.body).find('h1').css({
-                            'color': '#d94f00',
-                            'text-align': 'center',
-                            'margin-bottom': '20px'
-                        });
-                        
-                        // Agregar encabezado con información
-                        $(win.document.body).prepend(
-                            '<div style="text-align: center; margin-bottom: 20px;">' +
-                            '<h1 style="color: #d94f00;">Catálogo de Personal</h1>' +
-                            '<p><strong>Fecha:</strong> ' + new Date().toLocaleDateString() + '</p>' +
-                            '<p><strong>Hora:</strong> ' + new Date().toLocaleTimeString() + '</p>' +
-                            '</div>'
-                        );
-                        
-                        // Agregar información de filtros
-                        var filtros = '<div style="margin-bottom: 15px; padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;">' +
-                            '<strong>Filtros aplicados:</strong> ';
-                        var filtrosArray = [];
-                        
-                        if ($('#filtro-noempleado').val()) filtrosArray.push('No. Empleado: ' + $('#filtro-noempleado').val());
-                        if ($('#filtro-nombre').val()) filtrosArray.push('Nombre: ' + $('#filtro-nombre').val());
-                        if ($('#filtro-cargo').val()) filtrosArray.push('Cargo: ' + $('#filtro-cargo option:selected').text());
-                        if ($('#filtro-departamento').val()) filtrosArray.push('Depto: ' + $('#filtro-departamento option:selected').text());
-                        if ($('#filtro-ubicacion').val()) filtrosArray.push('Ubicación: ' + $('#filtro-ubicacion option:selected').text());
-                        if ($('#filtro-estatus').val()) filtrosArray.push('Estatus: ' + $('#filtro-estatus').val());
-                        if ($('#filtro-empresa').val()) filtrosArray.push('Empresa: ' + $('#filtro-empresa option:selected').text());
-                        
-                        if (filtrosArray.length > 0) {
-                            filtros += filtrosArray.join(' | ');
-                        } else {
-                            filtros += 'Ninguno (Todos los registros)';
-                        }
-                        
-                        filtros += '</div>';
-                        
-                        $(win.document.body).find('div').first().after(filtros);
-                        
-                        $(win.document.body).find('table').addClass('table table-bordered table-striped');
-                        $(win.document.body).find('thead th').css({
-                            'background-color': '#d94f00',
-                            'color': 'white',
-                            'padding': '8px',
-                            'text-align': 'center'
-                        });
-                        $(win.document.body).find('td').css({
-                            'padding': '6px',
-                            'text-align': 'center'
-                        });
-                        
-                        // Agregar pie de página
-                        $(win.document.body).append(
-                            '<div style="margin-top: 20px; text-align: center; font-size: 10px; color: #666;">' +
-                            'Generado el: ' + new Date().toLocaleString() + ' | Total de registros: ' + dataTable.rows().count() +
-                            '</div>'
-                        );
-                    }
-                },
-                dt: dataTable
-            }
-        );
+        dataTable.button(2).trigger();
     }
     
     // Event Listeners para botones de exportación
@@ -754,7 +663,7 @@ $(document).ready(function() {
     
     $('#btn-refresh').click(function(e) {
         e.preventDefault();
-        dataTable.ajax.reload();
+        dataTable.ajax.reload(null, false);
         showNotification('Tabla recargada correctamente', 'success');
     });
     
@@ -771,6 +680,7 @@ $(document).ready(function() {
         $('#filtro-ubicacion').val('').trigger('change');
         $('#filtro-estatus').val('');
         $('#filtro-empresa').val('').trigger('change');
+        $('#filtro-vehiculo').val('');
         
         dataTable.ajax.reload();
         showNotification('Filtros limpiados', 'info');
@@ -783,13 +693,15 @@ $(document).ready(function() {
         }
     });
     
-    // Funciones existentes para modal de fotos y otros eventos
+    // Funciones para eventos de la tabla
     function initEvents() {
-        $('.thumbnail-image, .view-photo-link').off('click').on('click', function(e) {
+        // Evento para ver foto de empleado
+        $(document).off('click', '.thumbnail-image, .view-photo-link').on('click', '.thumbnail-image, .view-photo-link', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             
-            var fullImage = $(this).data('full-image');
-            var employeeName = $(this).data('employee-name');
+            var fullImage = $(this).data('full-image') || $(this).attr('src');
+            var employeeName = $(this).data('employee-name') || 'Foto del empleado';
             
             if (fullImage) {
                 $('#modalPhoto').attr('src', fullImage);
@@ -797,28 +709,95 @@ $(document).ready(function() {
                 $('#photoModal').modal('show');
             }
         });
+        
+        // Evento para ver foto de vehículo
+        $(document).off('click', '.view-vehicle-photo').on('click', '.view-vehicle-photo', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            var imageUrl = $(this).data('image');
+            var vehicleInfo = $(this).data('info');
+            
+            if (imageUrl) {
+                $('#modalPhoto').attr('src', imageUrl);
+                $('#modalEmployeeName').text(vehicleInfo);
+                $('#photoModal').modal('show');
+            }
+        });
+        
+        // Evento para gestionar vehículos
+        $(document).off('click', '.btn-gestionar-vehiculos').on('click', '.btn-gestionar-vehiculos', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            var idPersonal = $(this).data('id');
+            var noEmpleado = $(this).data('noempleado');
+            var nombre = $(this).data('nombre');
+            
+            cargarModalVehiculos(idPersonal, noEmpleado, nombre);
+        });
+        
+        // Evento para editar personal
+        $(document).off('click', '.btn-editar').on('click', '.btn-editar', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            var id = $(this).data('id');
+            loadModal('Modales/Modificar.php?IdPersonal=' + id, '#ModificarPersonal', 'editar');
+        });
+        
+        // Evento para cambiar estatus
+        $(document).off('click', '.btn-cambiar-estatus').on('click', '.btn-cambiar-estatus', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            var id = $(this).data('id');
+            loadModal('Modales/CambiarEstatus.php?IdPersonal=' + id, '#CambiarEstatusPersonal', 'cambiar_estatus');
+        });
     }
     
+    // Función para cargar modal de gestión de vehículos
+    function cargarModalVehiculos(idPersonal, noEmpleado, nombre) {
+        $.ajax({
+            url: 'Modales/GestionarVehiculos.php',
+            type: 'GET',
+            data: {
+                IdPersonal: idPersonal,
+                NoEmpleado: noEmpleado,
+                Nombre: nombre
+            },
+            beforeSend: function() {
+                $('#loading').show();
+            },
+            success: function(response) {
+                $('#modal-container').html(response);
+                $('#GestionarVehiculos').modal('show');
+            },
+            error: function() {
+                showNotification('Error al cargar el formulario de vehículos', 'danger');
+            },
+            complete: function() {
+                $('#loading').hide();
+            }
+        });
+    }
+    
+    // Funciones existentes para otros modales
     $(document).on('click', '.btn-nuevo', function() {
         loadModal('Modales/Nuevo.php', '#NuevoPersonal', 'nuevo');
     });
     
-    $(document).on('click', '.btn-editar', function() {
-        var id = $(this).data('id');
-        loadModal('Modales/Modificar.php?IdPersonal=' + id, '#ModificarPersonal', 'editar');
-    });
-    
-    $(document).on('click', '.btn-cambiar-estatus', function() {
-        var id = $(this).data('id');
-        loadModal('Modales/CambiarEstatus.php?IdPersonal=' + id, '#CambiarEstatusPersonal', 'cambiar_estatus');
-    });
-    
     function loadModal(url, modalId, actionType) {
+        $('#loading').show();
+        
         $('#modal-container').load(url, function(response, status, xhr) {
+            $('#loading').hide();
+            
             if (status === "error") {
                 showNotification('Error al cargar el formulario', 'danger');
                 return;
             }
+            
             $(modalId).modal('show');
             
             // Inicializar Select2 si está disponible
@@ -836,7 +815,8 @@ $(document).ready(function() {
         });
     }
     
-    $(document).on('submit', '#formNuevoPersonal, #formModificarPersonal, #formCambiarEstatusPersonal', function(e) {
+    // Manejo de formularios de modales
+    $(document).on('submit', '#formNuevoPersonal, #formModificarPersonal, #formCambiarEstatusPersonal, #formNuevoVehiculo', function(e) {
         e.preventDefault();
         var form = $(this);
         var formData = new FormData(this);
@@ -880,10 +860,12 @@ $(document).ready(function() {
         });
     });
     
+    // Cerrar modales
     $(document).on('click', '[data-dismiss="modal"], .btn-close, .modal-close', function() {
         $('.modal').modal('hide');
     });
     
+    // Limpiar contenedor de modales al cerrar
     $(document).on('hidden.bs.modal', '.modal', function() {
         if ($(this).attr('id') !== 'photoModal') {
             $('#modal-container').empty();
@@ -893,6 +875,13 @@ $(document).ready(function() {
     // Inicializar el sistema
     cargarDatosFiltros();
     inicializarDataTable();
+    
+    // Configurar botones de exportación después de inicializar la tabla
+    setTimeout(function() {
+        if (dataTable) {
+            configurarBotonesExportacion();
+        }
+    }, 1000);
 });
 </script>
 
@@ -1062,6 +1051,36 @@ $(document).ready(function() {
     border-color: #1e7e34;
 }
 
+.table .btn-primary {
+    background-color: #d94f00;
+    border-color: #d94f00;
+}
+
+.table .btn-primary:hover {
+    background-color: #b53d00;
+    border-color: #a83600;
+}
+
+/* Estilos para dropdown de vehículos */
+.dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.dropdown-item small {
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.view-vehicle-photo {
+    font-size: 11px;
+    text-decoration: underline;
+}
+
+.view-vehicle-photo:hover {
+    text-decoration: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .badge { font-size: 0.75em !important; }
@@ -1103,6 +1122,11 @@ $(document).ready(function() {
         font-size: 10px;
         margin: 1px;
     }
+    
+    .table td, .table th {
+        font-size: 12px;
+        padding: 4px;
+    }
 }
 
 @media print {
@@ -1118,7 +1142,10 @@ $(document).ready(function() {
     .thumbnail-image,
     .view-photo-link,
     .btn-editar,
-    .btn-cambiar-estatus {
+    .btn-cambiar-estatus,
+    .btn-gestionar-vehiculos,
+    .dropdown,
+    .btn-info {
         display: none !important;
     }
     
