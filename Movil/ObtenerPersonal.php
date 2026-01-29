@@ -1,82 +1,93 @@
 <?php
-header('Content-Type: application/json; charset=UTF-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
-
+session_start();
 require_once '../api/db/conexion.php';
+header('Content-Type: application/json');
 
-$noEmpleado = $_POST['NoEmpleado'] ?? '';
-$idUsuario = $_POST['IdUsuario'] ?? '';
-
-if (empty($noEmpleado)) {
-    echo json_encode(array(
-        'success' => false,
-        'message' => 'No se proporcionó el número de empleado'
-    ), JSON_UNESCAPED_UNICODE);
-    exit;
-}
+$response = array('success' => false, 'message' => '');
 
 try {
+    $noEmpleado = $_GET['NoEmpleado'] ?? '';
+
+    if (empty($noEmpleado)) {
+        throw new Exception('No se proporcionó el número de empleado');
+    }
+
     $sentencia = $Conexion->prepare("
         SELECT 
             t1.IdPersonal,
-            t1.NoEmpleado, 
-            CONCAT(t1.Nombre,' ',t1.ApPaterno,' ',t1.ApMaterno) as NombreCompleto,
-            t2.NomCargo, 
-            t3.NomDepto, 
-            t4.NomEmpresa, 
-            t5.NomLargo, 
-            t1.RutaFoto
+            t1.NoEmpleado,
+            t1.Nombre,
+            t1.ApPaterno,
+            t1.ApMaterno,
+            t2.NomCargo,
+            t3.NomDepto,
+            t4.NomEmpresa,
+            t5.NomLargo,
+            t1.RutaFoto,
+            CASE 
+                WHEN t1.Status = 1 THEN 'Activo'
+                WHEN t1.Status = 0 THEN 'Inactivo'
+                ELSE 'Desconocido'
+            END as Estatus,
+            t1.Acceso
         FROM t_personal as t1 
-        INNER JOIN t_cargo as t2 ON t1.Cargo = t2.IdCargo
-        INNER JOIN t_departamento as t3 ON t1.Departamento = t3.IdDepartamento
-        INNER JOIN t_empresa as t4 ON t1.Empresa = t4.IdEmpresa
-        INNER JOIN t_ubicacion as t5 ON t1.IdUbicacion = t5.IdUbicacion
-        WHERE t1.NoEmpleado = ? AND t1.Status = 1
+        LEFT JOIN t_cargo as t2 ON t1.Cargo = t2.IdCargo
+        LEFT JOIN t_departamento as t3 ON t1.Departamento = t3.IdDepartamento
+        LEFT JOIN t_empresa as t4 ON t1.Empresa = t4.IdEmpresa
+        LEFT JOIN t_ubicacion as t5 ON t1.IdUbicacion = t5.IdUbicacion
+        WHERE t1.NoEmpleado = ?
     ");
     
     $sentencia->execute([$noEmpleado]);
-    $resultados = $sentencia->fetchAll(PDO::FETCH_OBJ);
-    
-    if (count($resultados) > 0) {
-        $personal = $resultados[0];
-        
+    $personal = $sentencia->fetch(PDO::FETCH_ASSOC);
+
+    if ($personal) {
         $sentenciaVehiculo = $Conexion->prepare("
-            SELECT IdVehiculo, Marca, Modelo, Num_Serie, Placas, Anio, Color, RutaFoto 
+            SELECT 
+                IdVehiculo,
+                Marca,
+                Modelo,
+                Num_Serie,
+                Placas,
+                Anio,
+                Color,
+                RutaFoto 
             FROM t_vehiculos 
-            WHERE NoEmpleado = ? and Activo = 1
+            WHERE NoEmpleado = ? AND Activo = 1
+            LIMIT 1
         ");
         
         $sentenciaVehiculo->execute([$noEmpleado]);
-        $vehiculos = $sentenciaVehiculo->fetchAll(PDO::FETCH_OBJ);
-        
-        echo json_encode(array(
-            'success' => true,
-            'data' => array(
-                'IdPersonal' => $personal->IdPersonal,
-                'NoEmpleado' => $personal->NoEmpleado,
-                'NombreCompleto' => $personal->NombreCompleto,
-                'NomCargo' => $personal->NomCargo,
-                'NomDepto' => $personal->NomDepto,
-                'NomEmpresa' => $personal->NomEmpresa,
-                'NomLargo' => $personal->NomLargo,
-                'RutaFoto' => $personal->RutaFoto,
-                'Vehiculos' => $vehiculos
-            )
-        ), JSON_UNESCAPED_UNICODE);
+        $vehiculo = $sentenciaVehiculo->fetch(PDO::FETCH_ASSOC);
+
+        $nombreCompleto = $personal['Nombre'] . ' ' . $personal['ApPaterno'] . ' ' . $personal['ApMaterno'];
+
+        $response['success'] = true;
+        $response['vehiculo'] = $vehiculo ? $vehiculo : null;
+        $response['personal'] = array(
+            'IdPersonal' => $personal['IdPersonal'],
+            'NoEmpleado' => $personal['NoEmpleado'],
+            'NombreCompleto' => trim($nombreCompleto),
+            'Nombre' => $personal['Nombre'],
+            'ApPaterno' => $personal['ApPaterno'],
+            'ApMaterno' => $personal['ApMaterno'],
+            'NomCargo' => $personal['NomCargo'],
+            'NomDepto' => $personal['NomDepto'],
+            'NomEmpresa' => $personal['NomEmpresa'],
+            'NomLargo' => $personal['NomLargo'],
+            'RutaFoto' => $personal['RutaFoto'],
+            'Estatus' => $personal['Estatus'],
+            'Acceso' => $personal['Acceso']
+        );
         
     } else {
-        echo json_encode(array(
-            'success' => false,
-            'message' => 'No se encontró el empleado con número: ' . $noEmpleado
-        ), JSON_UNESCAPED_UNICODE);
+        $response['message'] = 'No se encontró el empleado con número: ' . $noEmpleado;
     }
-    
+
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(array(
-        'success' => false,
-        'message' => 'Error en el servidor: ' . $e->getMessage()
-    ), JSON_UNESCAPED_UNICODE);
+    $response['message'] = 'Error en el servidor: ' . $e->getMessage();
 }
+
+echo json_encode($response, JSON_UNESCAPED_UNICODE);
 ?>

@@ -55,7 +55,6 @@ try {
     $stmtMovimiento = $Conexion->prepare($sqlMovimientoPendiente);
     $stmtMovimiento->bindParam(':IdPersonal', $IdPersonal, PDO::PARAM_STR);
     $stmtMovimiento->execute();
-    
     if ($stmtMovimiento->rowCount() > 0) {
         $movimiento = $stmtMovimiento->fetch(PDO::FETCH_ASSOC);
         
@@ -65,7 +64,7 @@ try {
                                 DispN,
                                 TipoVehiculo
                            FROM regentper 
-                           WHERE FolMov = :FolMovEnt";
+                           WHERE FolMov = 2";
         
         $stmtEntrada = $Conexion->prepare($sqlEntradaInfo);
         $stmtEntrada->bindParam(':FolMovEnt', $movimiento['FolMovEnt'], PDO::PARAM_INT);
