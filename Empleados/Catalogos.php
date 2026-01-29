@@ -15,7 +15,6 @@ include_once "../templates/head.php";
 
     <section class="content">
         <div class="container-fluid">
-            <!-- CARD DE FILTROS - Con botón de expandir/contraer -->
             <div class="card card-primary mb-4">
                 <div class="card-header text-white" style="background-color: #d94f00; padding: 1rem; cursor: pointer;" id="filtrosHeader">
                     <h3 class="card-title mb-0 d-flex justify-content-between align-items-center">
@@ -141,7 +140,6 @@ include_once "../templates/head.php";
                 </div>
             </div>
             
-            <!-- CARD DE TABLA - Mismos colores que filtros -->
             <div class="card">
                 <div class="card-header text-white" style="background-color: #d94f00; padding: 1rem;">
                     <h3 class="card-title mb-0">
@@ -188,7 +186,6 @@ include_once "../templates/head.php";
                         </div>
                         <div class="col-md-6">
                             <div class="dataTables_paginate paging_simple_numbers" id="dataTablePersonal_paginate">
-                                <!-- Paginación se generará automáticamente -->
                             </div>
                         </div>
                     </div>
@@ -230,7 +227,6 @@ include_once "../templates/head.php";
                 </button>
             </div>
             <div class="modal-body" id="vehiculoModalBody">
-                <!-- Contenido se cargará dinámicamente -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
@@ -263,27 +259,22 @@ include_once '../templates/footer.php';
 <script type="text/javascript">
 $(document).ready(function() {
     var dataTable = null;
-    var selectedRowData = null;
-    var filtrosExpandidos = true; // Estado inicial: expandido
+    var filtrosExpandidos = true;
     
-    // Función para expandir/contraer los filtros
     function toggleFiltros() {
         filtrosExpandidos = !filtrosExpandidos;
         
         if (filtrosExpandidos) {
             $('#filtrosBody').slideDown(300);
             $('#filtrosHeader .toggle-icon').html('<i class="fas fa-chevron-up"></i>');
-            // Guardar estado en localStorage
             localStorage.setItem('filtrosExpandidos', 'true');
         } else {
             $('#filtrosBody').slideUp(300);
             $('#filtrosHeader .toggle-icon').html('<i class="fas fa-chevron-down"></i>');
-            // Guardar estado en localStorage
             localStorage.setItem('filtrosExpandidos', 'false');
         }
     }
     
-    // Inicializar estado de filtros desde localStorage
     var filtrosGuardados = localStorage.getItem('filtrosExpandidos');
     if (filtrosGuardados === 'false') {
         filtrosExpandidos = false;
@@ -291,7 +282,6 @@ $(document).ready(function() {
         $('#filtrosHeader .toggle-icon').html('<i class="fas fa-chevron-down"></i>');
     }
     
-    // Evento para expandir/contraer filtros
     $('#filtrosHeader').click(function() {
         toggleFiltros();
     });
@@ -319,7 +309,6 @@ $(document).ready(function() {
     }
     
     function cargarDatosFiltros() {
-        // Cargar cargos
         $.ajax({
             url: 'Controlador/ajax_get_cargos.php',
             type: 'GET',
@@ -350,7 +339,6 @@ $(document).ready(function() {
             }
         });
         
-        // Cargar departamentos
         $.ajax({
             url: 'Controlador/ajax_get_departamentos.php',
             type: 'GET',
@@ -381,7 +369,6 @@ $(document).ready(function() {
             }
         });
         
-        // Cargar ubicaciones
         $.ajax({
             url: 'Controlador/ajax_get_ubicaciones.php',
             type: 'GET',
@@ -412,7 +399,6 @@ $(document).ready(function() {
             }
         });
         
-        // Cargar empresas
         $.ajax({
             url: 'Controlador/ajax_get_empresas.php',
             type: 'GET',
@@ -502,7 +488,6 @@ $(document).ready(function() {
                     orderable: false,
                     searchable: false,
                     render: function(data, type, row) {
-                        // Si no hay foto, mostrar iniciales
                         if (!data || data === '') {
                             var nombre = row.Nombre || '';
                             var apPaterno = row.ApPaterno || '';
@@ -511,7 +496,6 @@ $(document).ready(function() {
                             
                             return `<div class="employee-initials" style="width: 40px; height: 40px; border-radius: 50%; background-color: ${color}; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto;" data-employee-name="${nombre} ${apPaterno}">${iniciales}</div>`;
                         }
-                        // Si hay foto, mostrar miniatura
                         return `<img src="${data}" class="thumbnail-image" alt="Foto" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer;" data-full-image="${data}" data-employee-name="${row.Nombre || ''} ${row.ApPaterno || ''}">`;
                     }
                 },
@@ -622,7 +606,6 @@ $(document).ready(function() {
             initComplete: function(settings, json) {
                 $('#loading').hide();
                 initEvents();
-                configurarBotonesExportacion();
                 showNotification('Catálogo cargado correctamente', 'success');
             },
             drawCallback: function(settings) {
@@ -632,7 +615,6 @@ $(document).ready(function() {
     }
     
     function getColorForInitials(initials) {
-        // Colores para las iniciales
         var colors = [
             '#d94f00', '#2c3e50', '#3498db', '#e74c3c', '#2ecc71',
             '#9b59b6', '#1abc9c', '#f39c12', '#d35400', '#c0392b'
@@ -644,13 +626,6 @@ $(document).ready(function() {
         }
         
         return colors[sum % colors.length];
-    }
-    
-    function configurarBotonesExportacion() {
-        if (dataTable) {
-            // Agregar botones de exportación a DataTable
-            dataTable.buttons().container().appendTo('#dataTablePersonal_wrapper .col-md-6:eq(0)');
-        }
     }
     
     function mostrarInformacionVehiculo(noEmpleado, nombre) {
@@ -802,7 +777,6 @@ $(document).ready(function() {
     }
     
     function initEvents() {
-        // Evento para ver foto (iniciales o imagen)
         $(document).off('click', '.employee-initials, .thumbnail-image').on('click', '.employee-initials, .thumbnail-image', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -812,9 +786,7 @@ $(document).ready(function() {
                               $(this).closest('tr').find('td:eq(3)').text() + ' ' + 
                               $(this).closest('tr').find('td:eq(4)').text();
             
-            // Si es solo iniciales, no mostrar modal de foto
             if ($(this).hasClass('employee-initials')) {
-                // Podrías mostrar un modal diferente o no hacer nada
                 return;
             }
             
@@ -825,7 +797,6 @@ $(document).ready(function() {
             }
         });
         
-        // Evento para ver vehículo (solo si tiene vehículo)
         $(document).off('click', '.btn-ver-vehiculo').on('click', '.btn-ver-vehiculo', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -837,38 +808,10 @@ $(document).ready(function() {
                 mostrarInformacionVehiculo(noEmpleado, nombre);
             }
         });
-        
-        // Seleccionar fila - Cambiar color de fondo
-        $(document).off('click', '#dataTablePersonal tbody tr').on('click', '#dataTablePersonal tbody tr', function(e) {
-            // No seleccionar si se hizo clic en elementos específicos
-            if (!$(e.target).hasClass('btn-ver-vehiculo') && 
-                !$(e.target).hasClass('employee-iniciales') && 
-                !$(e.target).hasClass('thumbnail-image') &&
-                !$(e.target).closest('.btn-ver-vehiculo').length &&
-                !$(e.target).closest('.employee-iniciales').length) {
-                
-                // Remover selección anterior
-                $('#dataTablePersonal tbody tr.selected').removeClass('selected');
-                
-                // Agregar selección a la fila actual
-                $(this).addClass('selected');
-                
-                // Guardar datos de la fila seleccionada
-                selectedRowData = dataTable.row(this).data();
-                
-                // Opcional: mostrar información de la fila seleccionada
-                if (selectedRowData) {
-                    console.log('Fila seleccionada:', selectedRowData);
-                }
-            }
-        });
     }
     
-    // Eventos de botones
     $('#btn-aplicar-filtros').click(function() {
         if (dataTable) {
-            selectedRowData = null;
-            $('#dataTablePersonal tbody tr.selected').removeClass('selected');
             dataTable.ajax.reload();
         }
     });
@@ -882,9 +825,6 @@ $(document).ready(function() {
         $('#filtro-empresa').val('').trigger('change');
         $('#filtro-estatus').val('');
         $('#filtro-vehiculo').val('');
-        
-        selectedRowData = null;
-        $('#dataTablePersonal tbody tr.selected').removeClass('selected');
         
         if (dataTable) {
             dataTable.ajax.reload();
@@ -900,8 +840,21 @@ $(document).ready(function() {
             return;
         }
         
+        var params = {
+            noempleado: $('#filtro-noempleado').val(),
+            nombre: $('#filtro-nombre').val(),
+            cargo: $('#filtro-cargo').val(),
+            departamento: $('#filtro-departamento').val(),
+            ubicacion: $('#filtro-ubicacion').val(),
+            estatus: $('#filtro-estatus').val(),
+            empresa: $('#filtro-empresa').val(),
+            vehiculo: $('#filtro-vehiculo').val()
+        };
+        
+        var url = 'Controlador/Exportar_Excel.php?' + $.param(params);
+        window.open(url, '_blank');
+        
         showNotification('Generando archivo Excel...', 'info');
-        dataTable.button('.buttons-excel').trigger();
     });
     
     $('#btn-export-pdf').click(function(e) {
@@ -912,8 +865,21 @@ $(document).ready(function() {
             return;
         }
         
+        var params = {
+            noempleado: $('#filtro-noempleado').val(),
+            nombre: $('#filtro-nombre').val(),
+            cargo: $('#filtro-cargo').val(),
+            departamento: $('#filtro-departamento').val(),
+            ubicacion: $('#filtro-ubicacion').val(),
+            estatus: $('#filtro-estatus').val(),
+            empresa: $('#filtro-empresa').val(),
+            vehiculo: $('#filtro-vehiculo').val()
+        };
+        
+        var url = 'Controlador/Exportar_PDF.php?' + $.param(params);
+        window.open(url, '_blank');
+        
         showNotification('Generando archivo PDF...', 'info');
-        dataTable.button('.buttons-pdf').trigger();
     });
     
     $('#btn-print').click(function(e) {
@@ -924,16 +890,27 @@ $(document).ready(function() {
             return;
         }
         
-        showNotification('Preparando impresión...', 'info');
-        dataTable.button('.buttons-print').trigger();
+        var params = {
+            noempleado: $('#filtro-noempleado').val(),
+            nombre: $('#filtro-nombre').val(),
+            cargo: $('#filtro-cargo').val(),
+            departamento: $('#filtro-departamento').val(),
+            ubicacion: $('#filtro-ubicacion').val(),
+            estatus: $('#filtro-estatus').val(),
+            empresa: $('#filtro-empresa').val(),
+            vehiculo: $('#filtro-vehiculo').val()
+        };
+        
+        var url = 'Controlador/Imprimir.php?' + $.param(params);
+        window.open(url, '_blank', 'width=1024,height=768');
+        
+        showNotification('Abriendo vista de impresión...', 'info');
     });
     
     $('#btn-refresh').click(function(e) {
         e.preventDefault();
         if (dataTable) {
             dataTable.ajax.reload(null, false);
-            selectedRowData = null;
-            $('#dataTablePersonal tbody tr.selected').removeClass('selected');
             showNotification('Tabla recargada correctamente', 'success');
         }
     });
@@ -959,22 +936,17 @@ $(document).ready(function() {
         });
     });
     
-    // Búsqueda con Enter
     $('#filtro-noempleado, #filtro-nombre').keypress(function(e) {
         if (e.which == 13) {
             if (dataTable) {
-                selectedRowData = null;
-                $('#dataTablePersonal tbody tr.selected').removeClass('selected');
                 dataTable.ajax.reload();
             }
         }
     });
     
-    // Inicializar
     cargarDatosFiltros();
     inicializarDataTable();
     
-    // Eventos para formularios en modales
     $(document).on('submit', '#formNuevoPersonal, #formModificarPersonal, #formCambiarEstatusPersonal, #formNuevoVehiculo', function(e) {
         e.preventDefault();
         var form = $(this);
@@ -1020,7 +992,6 @@ $(document).ready(function() {
         });
     });
     
-    // Cerrar modales
     $(document).on('click', '[data-dismiss="modal"], .btn-close, .modal-close', function() {
         $('.modal').modal('hide');
     });
@@ -1034,7 +1005,6 @@ $(document).ready(function() {
 </script>
 
 <style>
-/* Estilos generales */
 .badge { 
     padding: 4px 8px; 
     border-radius: 12px; 
@@ -1049,7 +1019,6 @@ $(document).ready(function() {
 .badge-primary { background-color: #d94f00; color: white; }
 .badge-dark { background-color: #343a40; color: white; }
 
-/* Badge de vehículo */
 .vehicle-badge {
     cursor: pointer;
     transition: all 0.2s;
@@ -1059,7 +1028,6 @@ $(document).ready(function() {
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-/* Indicador de carga */
 #loading {
     position: fixed;
     top: 50%;
@@ -1073,7 +1041,6 @@ $(document).ready(function() {
     text-align: center;
 }
 
-/* Select2 personalizado */
 .select2-container--bootstrap4 {
     width: 100% !important;
 }
@@ -1100,7 +1067,6 @@ $(document).ready(function() {
     z-index: 1060 !important;
 }
 
-/* Modales */
 .modal {
     z-index: 1060 !important;
 }
@@ -1109,7 +1075,6 @@ $(document).ready(function() {
     z-index: 1050 !important;
 }
 
-/* Botones */
 .btn-outline-primary {
     border-color: #d94f00;
     color: #d94f00;
@@ -1132,7 +1097,6 @@ $(document).ready(function() {
     font-size: 14px;
 }
 
-/* Cabecera de la card de filtros */
 #filtrosHeader {
     transition: all 0.3s;
 }
@@ -1145,7 +1109,6 @@ $(document).ready(function() {
     transition: transform 0.3s;
 }
 
-/* Tabla */
 .table th {
     background-color: #d94f00;
     color: white;
@@ -1163,23 +1126,10 @@ $(document).ready(function() {
     background-color: rgba(217, 79, 0, 0.05);
 }
 
-/* Filas de la tabla */
 #dataTablePersonal tbody tr {
-    cursor: pointer;
-    transition: background-color 0.2s;
+    cursor: default;
 }
 
-#dataTablePersonal tbody tr:hover {
-    background-color: rgba(217, 79, 0, 0.1) !important;
-}
-
-/* Fila seleccionada - Cambio de color */
-#dataTablePersonal tbody tr.selected {
-    background-color: #ffd9c2 !important;
-    box-shadow: inset 0 0 0 2px #d94f00;
-}
-
-/* Imágenes e iniciales */
 .thumbnail-image {
     cursor: pointer;
     transition: transform 0.2s;
@@ -1193,7 +1143,6 @@ $(document).ready(function() {
     cursor: default;
 }
 
-/* DataTables */
 .dataTables_wrapper {
     margin-top: 10px;
 }
@@ -1207,7 +1156,6 @@ $(document).ready(function() {
     padding-top: 10px;
 }
 
-/* Responsive */
 @media (max-width: 1200px) {
     .btn-group .btn {
         padding: 6px 8px !important;
@@ -1356,10 +1304,6 @@ $(document).ready(function() {
     
     a[href]:after {
         content: none !important;
-    }
-    
-    #dataTablePersonal tbody tr.selected {
-        background-color: #f8f9fa !important;
     }
 }
 </style>
