@@ -295,7 +295,7 @@ try {
             'FolMovEnt' => $IdMov,
             'fecha' => $fechaActual,
             'hora' => $horaActual,
-            'Personal Externo' => [
+            'personal' => [
                 'nombre' => $personalExterno['NombreCompleto'],
                 'NumeroIdentificacion' => $personalExterno['NumeroIdentificacion']
             ],
