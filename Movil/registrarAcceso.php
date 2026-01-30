@@ -119,7 +119,7 @@ try {
                 }
                 
                 $fechaHoraEntrada = date('Y-m-d H:i:s', strtotime($fechaEntrada . ' ' . $horaEntrada));
-                $fechaHoraSalida = date('Y-m-d H:i:s', strtotime($fechaActual . ' ' . $HoraSalidaManual));
+                $fechaHoraSalida = date('Y-m-d H:i:s', strtotime($FechaSalida . ' ' . $HoraSalidaManual));
                 
                 $sqlDiferencia = "SELECT DATEDIFF(MINUTE, 
                                   CAST(:FechaHoraEntrada AS DATETIME), 
@@ -199,7 +199,7 @@ try {
                 
                 $stmtActualizar = $Conexion->prepare($sqlActualizar);
                 $stmtActualizar->bindParam(':FolMovSal', $IdMovSalida, PDO::PARAM_INT);
-                $stmtActualizar->bindParam(':FechaSalida', $FechaSalida, PDO::PARAM_STR);
+                $stmtActualizar->bindParam(':FechaSalida', $fechaHoraSalida, PDO::PARAM_STR);
                 $stmtActualizar->bindParam(':Tiempo', $tiempoFormateado, PDO::PARAM_STR);
                 $stmtActualizar->bindParam(':IdMovEnTSal', $IdMovEnTSal, PDO::PARAM_INT);
                 
