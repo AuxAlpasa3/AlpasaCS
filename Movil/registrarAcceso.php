@@ -119,7 +119,7 @@ try {
                 }
                 
                 $fechaHoraEntrada = date('Y-m-d H:i:s', strtotime($fechaEntrada . ' ' . $horaEntrada));
-                $fechaHoraSalida = date('Y-m-d H:i:s', strtotime($fechaActual . ' ' . $horaSalida));
+                $fechaHoraSalida = date('Y-m-d H:i:s', strtotime($fechaActual . ' ' . $HoraSalidaManual));
                 
                 $sqlDiferencia = "SELECT DATEDIFF(MINUTE, 
                                   CAST(:FechaHoraEntrada AS DATETIME), 
@@ -172,7 +172,7 @@ try {
                 $stmtSalida->bindParam(':IdFolEnt', $FolMovEnt, PDO::PARAM_STR);
                 $stmtSalida->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
                 $stmtSalida->bindParam(':DispN', $DispN, PDO::PARAM_STR);
-                $stmtSalida->bindParam(':FechaSalida', $FechaSalida, PDO::PARAM_STR);
+                $stmtSalida->bindParam(':FechaSalida', $fechaHoraSalida, PDO::PARAM_STR);
                 $stmtSalida->bindParam(':TiempoMarcaje', $HoraSalidaManual, PDO::PARAM_STR);
                 $stmtSalida->bindParam(':TipoVehiculo', $TipoTransporte, PDO::PARAM_INT);
                 $stmtSalida->bindParam(':Observaciones', $ObservacionesSalida, PDO::PARAM_STR);
@@ -183,12 +183,12 @@ try {
                     $errorInfo = $stmtSalida->errorInfo();
                     throw new Exception('Error al registrar salida: ' . ($errorInfo[2] ?? 'Error desconocido'));
                 }
-                
-                //prueba
-                $sqlLastId = "SELECT SCOPE_IDENTITY() as LastID";
-                $stmtLastId = $Conexion->query($sqlLastId);
-                $lastIdResult = $stmtLastId->fetchAll(PDO::FETCH_ASSOC);
-                $IdMovSalida = (int)$lastIdResult[0]['LastID'];
+
+                $IdMovSalida = (int)$Conexion->lastInsertId();
+
+                if ($IdMovSalida <= 0) {
+                    throw new Exception("No se pudo obtener el ID de la inserción");
+                }
             
                 $sqlActualizar = "UPDATE regentsalper SET 
                                   FolMovSal = :FolMovSal,
