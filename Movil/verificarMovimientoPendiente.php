@@ -43,7 +43,8 @@ try {
                             t1.FechaEntrada,
                             t1.IdUbicacion as UbicacionAnterior,
                             t2.NomLargo as NombreUbicacionAnterior,
-                            FORMAT(t1.FechaEntrada, 'HH:mm:ss') as HoraEntrada
+                            FORMAT(t1.FechaEntrada, 'HH:mm:ss') as HoraEntrada,
+                            t1.tieneVehiculo
                             FROM
                             regentsalper as t1
                             LEFT JOIN t_ubicacion_interna as t2
@@ -72,6 +73,22 @@ try {
         $stmtEntrada->execute();
         
         $entradaInfo = $stmtEntrada->fetch(PDO::FETCH_ASSOC);
+
+         $sqlEntradaInfoVeh = "SELECT 
+                                Observaciones,
+                                Ubicacion,
+                                DispN,
+                                TipoVehiculo
+                            FROM regentveh 
+                            WHERE FolMov = :FolMovEnt";
+        
+        $stmtEntradaVeh = $Conexion->prepare($sqlEntradaInfoVeh);
+        $stmtEntradaVeh->bindParam(':FolMovEnt', $movimiento['tieneVehiculo'], PDO::PARAM_INT);
+        $stmtEntradaVeh->execute();
+        
+        $entradaInfoVeh = $stmtEntradaVeh->fetch(PDO::FETCH_ASSOC);
+
+        
         
         $response['success'] = true;
         $response['message'] = 'Existe un movimiento de entrada sin salida registrada';
@@ -83,7 +100,8 @@ try {
             'HoraEntrada' => $movimiento['HoraEntrada'],
             'UbicacionAnterior' => $movimiento['UbicacionAnterior'],
             'NombreUbicacionAnterior' => $movimiento['NombreUbicacionAnterior'] ?? 'Ubicación desconocida',
-            'DetalleEntrada' => $entradaInfo ?: []
+            'DetalleEntrada' => $entradaInfo ?: [],
+            'DetalleVehiculo' => $entradaInfoVeh?: []
         ];
     } else {
         $response['success'] = true;
