@@ -184,6 +184,7 @@ try {
                     throw new Exception('Error al registrar salida: ' . ($errorInfo[2] ?? 'Error desconocido'));
                 }
                 
+                //prueba
                 $sqlLastId = "SELECT SCOPE_IDENTITY() as LastID";
                 $stmtLastId = $Conexion->query($sqlLastId);
                 $lastIdResult = $stmtLastId->fetchAll(PDO::FETCH_ASSOC);
