@@ -283,10 +283,11 @@ try {
             throw new Exception('Error al registrar en regentsalper: ' . ($errorInfo[2] ?? 'Error desconocido'));
         }
         
-        $sqlLastIdEntSal = "SELECT SCOPE_IDENTITY() as LastID";
-        $stmtLastIdEntSal = $Conexion->query($sqlLastIdEntSal);
-        $lastIdEntSalResult = $stmtLastIdEntSal->fetchAll(PDO::FETCH_ASSOC);
-        $IdEntSal = (int)$lastIdEntSalResult[0]['LastID'];
+         $IdEntSal = (int)$Conexion->lastInsertId();
+
+        if ($IdEntSal <= 0) {
+            throw new Exception("No se pudo obtener el ID de la inserción");
+        }
         
         $Conexion->commit();
         
