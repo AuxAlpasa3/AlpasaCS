@@ -256,6 +256,7 @@ try {
         }
         
         $rowData = [
+             'IdPersonal' => htmlspecialchars($Personal->IdPersonal),
             'NoEmpleado' => htmlspecialchars($Personal->NoEmpleado),
             'Foto' => $fotoHTML,
             'Nombre' => htmlspecialchars($Personal->Nombre),

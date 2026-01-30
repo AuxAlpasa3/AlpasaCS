@@ -170,6 +170,7 @@ include_once "../templates/head.php";
                                     <th>Ubicación</th>
                                     <th>Vehículo</th>
                                     <th>Acceso</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -578,6 +579,45 @@ $(document).ready(function() {
                     render: function(data, type, row) {
                         return data || 'N/A';
                     }
+                },
+                { 
+                    data: null,
+                    className: "text-center",
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        var noEmpleado = row.NoEmpleado || '';
+                        var nombre = row.Nombre || '';
+                        var apPaterno = row.ApPaterno || '';
+                        var estatus = row.Estatus || '';
+                        var tieneVehiculo = row.TieneVehiculo || false;
+                        var idPersonal = row.IdPersonal  || '';
+                        
+                        return `
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-primary btn-editar" 
+                                        data-noempleado="${idPersonal}"
+                                        title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger btn-cambiar-estatus" 
+                                        data-noempleado="${idPersonal}"
+                                        data-nombre="${nombre} ${apPaterno}"
+                                        data-estatus="${estatus}"
+                                        title="${estatus === 'Activo' ? 'Dar de Baja' : 'Reactivar'}">
+                                    <i class="fas ${estatus === 'Activo' ? 'fa-user-times' : 'fa-user-check'}"></i>
+                                </button>
+                                ${!tieneVehiculo ? `
+                                <button type="button" class="btn btn-sm btn-info btn-gestion-vehiculo" 
+                                        data-noempleado="${noEmpleado}"
+                                        data-nombre="${nombre} ${apPaterno}"
+                                        title="Gestionar Vehículo">
+                                    <i class="fas fa-car"></i>
+                                </button>
+                                ` : ''}
+                            </div>
+                        `;
+                    }
                 }
             ],
             language: {
@@ -700,9 +740,7 @@ $(document).ready(function() {
                                 <div class="text-center mt-3">
                                     <img src="${vehiculo.RutaFoto}" alt="Foto del vehículo" 
                                          class="img-fluid rounded" style="max-height: 150px; cursor: pointer; border: 1px solid #ddd;"
-                                         onclick="$('#modalPhoto').attr('src', '${vehiculo.RutaFoto}'); 
-                                                  $('#modalEmployeeName').text('${vehiculo.Marca || ''} ${vehiculo.Modelo || ''} - ${vehiculo.Placas || ''}'); 
-                                                  $('#photoModal').modal('show');">
+                                         onclick="mostrarFotoVehiculo('${vehiculo.RutaFoto}', '${vehiculo.Marca || ''} ${vehiculo.Modelo || ''} - ${vehiculo.Placas || ''}')">
                                     <small class="text-muted d-block mt-1">Click para ampliar imagen</small>
                                 </div>
                                 ` : ''}
@@ -751,6 +789,16 @@ $(document).ready(function() {
         });
     }
     
+    function mostrarFotoVehiculo(rutaFoto, titulo) {
+        $('#modalPhoto').attr('src', rutaFoto);
+        $('#modalEmployeeName').text(titulo);
+        
+        setTimeout(function() {
+            $('#photoModal').modal('show');
+            $('#photoModal').css('z-index', '99999');
+        }, 100);
+    }
+    
     function cargarModalVehiculos(noEmpleado, nombre) {
         $('#vehiculoModal').modal('hide');
         
@@ -772,6 +820,52 @@ $(document).ready(function() {
             error: function(xhr, status, error) {
                 $('#loading').hide();
                 showNotification('Error al cargar el formulario de vehículos', 'danger');
+            }
+        });
+    }
+    
+    function cargarModalEditar(noEmpleado) {
+        $.ajax({
+            url: 'Modales/Modificar.php',
+            type: 'GET',
+            data: {
+                NoEmpleado: noEmpleado
+            },
+            beforeSend: function() {
+                $('#loading').show();
+            },
+            success: function(response) {
+                $('#loading').hide();
+                $('#modal-container').html(response);
+                $('#ModificarPersonal').modal('show');
+            },
+            error: function(xhr, status, error) {
+                $('#loading').hide();
+                showNotification('Error al cargar el formulario de edición', 'danger');
+            }
+        });
+    }
+    
+    function cargarModalCambiarEstatus(noEmpleado, nombre, estatusActual) {
+        $.ajax({
+            url: 'Modales/CambiarEstatus.php',
+            type: 'GET',
+            data: {
+                NoEmpleado: noEmpleado,
+                Nombre: nombre,
+                EstatusActual: estatusActual
+            },
+            beforeSend: function() {
+                $('#loading').show();
+            },
+            success: function(response) {
+                $('#loading').hide();
+                $('#modal-container').html(response);
+                $('#CambiarEstatusPersonal').modal('show');
+            },
+            error: function(xhr, status, error) {
+                $('#loading').hide();
+                showNotification('Error al cargar el formulario de cambio de estatus', 'danger');
             }
         });
     }
@@ -806,6 +900,41 @@ $(document).ready(function() {
             
             if (noEmpleado) {
                 mostrarInformacionVehiculo(noEmpleado, nombre);
+            }
+        });
+        
+        $(document).off('click', '.btn-editar').on('click', '.btn-editar', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            var noEmpleado = $(this).data('noempleado');
+            if (noEmpleado) {
+                cargarModalEditar(noEmpleado);
+            }
+        });
+        
+        $(document).off('click', '.btn-cambiar-estatus').on('click', '.btn-cambiar-estatus', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            var noEmpleado = $(this).data('noempleado');
+            var nombre = $(this).data('nombre');
+            var estatus = $(this).data('estatus');
+            
+            if (noEmpleado) {
+                cargarModalCambiarEstatus(noEmpleado, nombre, estatus);
+            }
+        });
+        
+        $(document).off('click', '.btn-gestion-vehiculo').on('click', '.btn-gestion-vehiculo', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            var noEmpleado = $(this).data('noempleado');
+            var nombre = $(this).data('nombre');
+            
+            if (noEmpleado) {
+                cargarModalVehiculos(noEmpleado, nombre);
             }
         });
     }
@@ -947,7 +1076,7 @@ $(document).ready(function() {
     cargarDatosFiltros();
     inicializarDataTable();
     
-    $(document).on('submit', '#formNuevoPersonal, #formModificarPersonal, #formCambiarEstatusPersonal, #formNuevoVehiculo', function(e) {
+    $(document).on('submit', '#formNuevoPersonal, #formModificarPersonal, #formCambiarEstatusPersonal, #formGestionarVehiculos', function(e) {
         e.preventDefault();
         var form = $(this);
         var formData = new FormData(this);
@@ -1305,5 +1434,39 @@ $(document).ready(function() {
     a[href]:after {
         content: none !important;
     }
+}
+
+#photoModal {
+    z-index: 99999 !important;
+}
+
+#photoModal .modal-dialog {
+    z-index: 99999 !important;
+}
+
+.modal.fade.show {
+    z-index: 99999 !important;
+}
+
+.modal-backdrop.show {
+    z-index: 99998 !important;
+}
+
+.modal.fade.show ~ .modal-backdrop {
+    z-index: 99998 !important;
+}
+
+.btn-group .btn {
+    padding: 4px 8px !important;
+    margin: 0 2px !important;
+    font-size: 12px !important;
+}
+
+.btn-group .btn i {
+    font-size: 12px !important;
+}
+
+.btn-sm {
+    min-width: 32px;
 }
 </style>

@@ -1,7 +1,7 @@
 <?php
   Include_once "../../templates/Sesion.php";
 
-$IdPersonal = $_GET['IdPersonal'] ?? 0;
+$IdPersonal = $_GET['NoEmpleado'] ?? 0;
 
 $sentPersonal = $Conexion->prepare("SELECT IdPersonal, Nombre, ApPaterno, ApMaterno, Status FROM t_personal WHERE IdPersonal = ?");
 $sentPersonal->execute([$IdPersonal]);
