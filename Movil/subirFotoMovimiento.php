@@ -42,10 +42,7 @@ try {
     $base64Image = $input['FotoBase64'];
     $nextId = isset($input['nextId']) ? $input['nextId'] : 1;
     
-
-    if (!file_exists($directorio)) {
-        mkdir($directorio, 0777, true);
-    }
+    $RutaLocal = getenv('VERSION');
 
     $Conexion->beginTransaction();
     
