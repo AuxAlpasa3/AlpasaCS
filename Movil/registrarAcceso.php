@@ -28,23 +28,25 @@ try {
         throw new Exception('Datos no válidos');
     }
 
-    $requiredFields = ['IdPersonal', 'IdUsuario', 'TipoTransporte', 'Ubicacion', 'DispN'];
+    $requiredFields = ['IdPersonal', 'IdUsuario', 'TipoTransporte', 'Ubicacion'];
     foreach ($requiredFields as $field) {
         if (!isset($input[$field]) || (is_string($input[$field]) && trim($input[$field]) === '')) {
             throw new Exception("Campo requerido faltante: $field");
         }
     }
 
-    $DispN = $input['DispN'];
     $IdPersonal = $input['IdPersonal'];
     $IdUsuario = $input['IdUsuario'];
     $Ubicacion = $input['Ubicacion'];
     $TipoTransporte = $input['TipoTransporte'];
-    $usuario = $input['IdUsuario'];
-
+    $DispN = isset($input['DispN']) ? $input['DispN'] : 'APP_MOVIL';
     $Observaciones = isset($input['Observaciones']) && $input['Observaciones'] !== 'NULL' ? $input['Observaciones'] : '';
     $NotificarSupervisor = isset($input['NotificarSupervisor']) ? (bool)$input['NotificarSupervisor'] : false;
+    
+    $MovimientoPendiente = isset($input['MovimientoPendiente']) ? $input['MovimientoPendiente'] : null;
+    $HoraSalidaManual = isset($input['MovimientoPendiente']['HoraSalidaManual']) ? $input['MovimientoPendiente']['HoraSalidaManual'] : null;
 
+    // Validar que el personal existe
     $sqlPersonal = "SELECT 
                         t1.IdPersonal,
                         t1.NoEmpleado,
@@ -68,331 +70,235 @@ try {
     }
     
     $personal = $stmtPersonal->fetch(PDO::FETCH_ASSOC);
+    $NombreUsuario = obtenerNombreUsuario($Conexion, $IdUsuario);
     
-    // Buscar si hay movimiento pendiente (sin salida)
-    $sqlValidacionMovimiento = "SELECT * FROM regentsalper WHERE IdPer = :IdPersonal AND FolMovSal IS NULL AND StatusRegistro = 1";
-    $stmtValidacion = $Conexion->prepare($sqlValidacionMovimiento);
-    $stmtValidacion->bindParam(':IdPersonal', $IdPersonal, PDO::PARAM_STR);
-    $stmtValidacion->execute();
-    
-    $movimientoPendiente = null;
     $salidaRegistrada = false;
-    
-    if ($stmtValidacion->rowCount() > 0) {
-        $movimientoPendiente = $stmtValidacion->fetch(PDO::FETCH_ASSOC);
-        
-        $Conexion->beginTransaction();
-        try {
-            $fechaActual = date('Y-m-d H:i:s');
-            $horaActual = date('H:i:s');
-            
-            // Insertar en regsalper (SALIDA)
-            $sqlSalidaRegentPer = "INSERT INTO regsalper (
-                                    IdPer,
-                                    Ubicacion,
-                                    DispN,
-                                    Fecha,
-                                    TiempoMarcaje,
-                                    TipoVehiculo,
-                                    Observaciones,
-                                    Usuario,
-                                    Notificar
-                                ) VALUES (:IdPer, :Ubicacion, :DispN, GETDATE(), GETDATE(), :TipoVehiculo, :Observaciones, :Usuario, :Notificar)";
-            
-            $stmtSalidaRegentPer = $Conexion->prepare($sqlSalidaRegentPer);
-            $stmtSalidaRegentPer->bindParam(':IdPer', $IdPersonal, PDO::PARAM_STR);
-            $stmtSalidaRegentPer->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
-            $stmtSalidaRegentPer->bindParam(':DispN', $DispN, PDO::PARAM_STR);
-            $stmtSalidaRegentPer->bindParam(':TipoVehiculo', $TipoTransporte, PDO::PARAM_INT);
-            $stmtSalidaRegentPer->bindParam(':Observaciones', 'Salida automática por nueva entrada', PDO::PARAM_STR);
-            $stmtSalidaRegentPer->bindParam(':Usuario', $usuario, PDO::PARAM_STR);
-            $stmtSalidaRegentPer->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
-            
-            if (!$stmtSalidaRegentPer->execute()) {
-                throw new Exception('Error al registrar salida automática: ' . implode(', ', $stmtSalidaRegentPer->errorInfo()));
-            }
-            
-            $IdMovSalida = $Conexion->lastInsertId();
-            
-            // Calcular tiempo transcurrido
-            $fechaEntrada = $movimientoPendiente['FechaEntrada'];
-            
-            $sqlCalcularTiempo = "SELECT 
-                                    DATEDIFF(MINUTE, :FechaEntrada, GETDATE()) as Minutos,
-                                    DATEDIFF(SECOND, :FechaEntrada, GETDATE()) as Segundos";
-            
-            $stmtCalcularTiempo = $Conexion->prepare($sqlCalcularTiempo);
-            $stmtCalcularTiempo->bindParam(':FechaEntrada', $fechaEntrada, PDO::PARAM_STR);
-            $stmtCalcularTiempo->execute();
-            $tiempoCalculado = $stmtCalcularTiempo->fetch(PDO::FETCH_ASSOC);
-            
-            $minutosTotales = $tiempoCalculado['Minutos'];
-            $horasTotales = floor($minutosTotales / 60);
-            $minutosRestantes = $minutosTotales % 60;
-            $segundos = $tiempoCalculado['Segundos'];
-            
-            // Formatear tiempo como HH:MM:SS
-            $tiempoFormateado = sprintf("%02d:%02d:%02d", $horasTotales, $minutosRestantes, $segundos % 60);
-            
-            // Actualizar regentsalper con información de salida
-            $sqlActualizarSalper = "UPDATE regentsalper SET 
-                                    FolMovSal = :FolMovSal,
-                                    FechaSalida = GETDATE(),
-                                    Tiempo = :Tiempo,
-                                    TiempoTotalMinutos = :TiempoTotalMinutos,
-                                    TiempoTotalHoras = :TiempoTotalHoras,
-                                    StatusRegistro = 2
-                                    WHERE IdMovEnTSal = :IdMovEnTSal";
-            
-            $stmtActualizarSalper = $Conexion->prepare($sqlActualizarSalper);
-            $stmtActualizarSalper->bindParam(':FolMovSal', $IdMovSalida, PDO::PARAM_INT);
-            $stmtActualizarSalper->bindParam(':Tiempo', $tiempoFormateado, PDO::PARAM_STR);
-            $stmtActualizarSalper->bindParam(':TiempoTotalMinutos', $minutosTotales, PDO::PARAM_INT);
-            $stmtActualizarSalper->bindParam(':TiempoTotalHoras', $horasTotales, PDO::PARAM_INT);
-            $stmtActualizarSalper->bindParam(':IdMovEnTSal', $movimientoPendiente['IdMovEnTSal'], PDO::PARAM_INT);
-            
-            if (!$stmtActualizarSalper->execute()) {
-                throw new Exception('Error al actualizar registro de salida: ' . implode(', ', $stmtActualizarSalper->errorInfo()));
-            }
-            
-            $Conexion->commit();
-            $salidaRegistrada = true;
-            
-            $response['data']['salida_automatica'] = [
-                'id_movimiento_anterior' => $movimientoPendiente['IdMovEnTSal'],
-                'folio_salida' => $IdMovSalida,
-                'fecha_entrada_anterior' => $fechaEntrada,
-                'fecha_salida' => $fechaActual,
-                'tiempo_transcurrido_minutos' => $minutosTotales,
-                'tiempo_transcurrido_horas' => $horasTotales,
-                'tiempo_formateado' => $tiempoFormateado,
-                'mensaje' => 'Se registró salida automática del movimiento pendiente'
-            ];
-            
-        } catch (Exception $e) {
-            $Conexion->rollBack();
-            throw new Exception('Error al procesar salida automática: ' . $e->getMessage());
-        }
-    }
+    $IdMovSalida = null;
     
     $Conexion->beginTransaction();
     
     try {
+        if ($MovimientoPendiente && isset($MovimientoPendiente['IdMovEnTSal']) && isset($MovimientoPendiente['FolMovEnt'])) {
+            $IdMovEnTSal = $MovimientoPendiente['IdMovEnTSal'];
+            $FolMovEnt = $MovimientoPendiente['FolMovEnt'];
+            $ObservacionesSalida = isset($MovimientoPendiente['ObservacionesSalida']) ? 
+                $MovimientoPendiente['ObservacionesSalida'] : 'Salida manual registrada';
+            
+            $sqlMovPendiente = "SELECT IdPer, IdUbicacion, FechaEntrada, HoraEntrada 
+                                FROM regentsalper 
+                                WHERE IdMovEnTSal = :IdMovEnTSal AND FolMovEnt = :FolMovEnt";
+            
+            $stmtMovPendiente = $Conexion->prepare($sqlMovPendiente);
+            $stmtMovPendiente->bindParam(':IdMovEnTSal', $IdMovEnTSal, PDO::PARAM_INT);
+            $stmtMovPendiente->bindParam(':FolMovEnt', $FolMovEnt, PDO::PARAM_INT);
+            $stmtMovPendiente->execute();
+            
+            if ($stmtMovPendiente->rowCount() > 0) {
+                $movimiento = $stmtMovPendiente->fetch(PDO::FETCH_ASSOC);
+                
+                // Determinar hora de salida
+                $fechaActual = date('Y-m-d');
+                $horaSalida = $HoraSalidaManual ?: date('H:i:s');
+                
+                // Calcular tiempo transcurrido
+                $fechaEntrada = $movimiento['FechaEntrada'];
+                $horaEntrada = isset($movimiento['HoraEntrada']) ? $movimiento['HoraEntrada'] : '00:00:00';
+                
+                // Crear fecha/hora completa de entrada
+                $fechaHoraEntrada = $fechaEntrada . ' ' . $horaEntrada;
+                $fechaHoraSalida = $fechaActual . ' ' . $horaSalida;
+                
+                // Calcular diferencia en minutos
+                $sqlDiferencia = "SELECT DATEDIFF(MINUTE, :FechaHoraEntrada, :FechaHoraSalida) as Minutos";
+                $stmtDiferencia = $Conexion->prepare($sqlDiferencia);
+                $stmtDiferencia->bindParam(':FechaHoraEntrada', $fechaHoraEntrada);
+                $stmtDiferencia->bindParam(':FechaHoraSalida', $fechaHoraSalida);
+                $stmtDiferencia->execute();
+                $diferencia = $stmtDiferencia->fetch(PDO::FETCH_ASSOC);
+                
+                $minutosTotales = $diferencia['Minutos'];
+                $horasTotales = floor($minutosTotales / 60);
+                $minutosRestantes = $minutosTotales % 60;
+                
+                // Formatear tiempo como HH:MM:SS
+                $tiempoFormateado = sprintf("%02d:%02d:%02d", $horasTotales, $minutosRestantes, 0);
+                
+                // Insertar en regsalper (SALIDA)
+                $sqlSalida = "INSERT INTO regsalper (
+                                IdPer,
+                                Ubicacion,
+                                DispN,
+                                Fecha,
+                                TiempoMarcaje,
+                                TipoVehiculo,
+                                Observaciones,
+                                Usuario,
+                                Notificar
+                            ) VALUES (
+                                :IdPer, 
+                                :Ubicacion, 
+                                :DispN, 
+                                GETDATE(), 
+                                :TiempoMarcaje, 
+                                :TipoVehiculo, 
+                                :Observaciones, 
+                                :Usuario, 
+                                :Notificar
+                            )";
+                
+                $stmtSalida = $Conexion->prepare($sqlSalida);
+                $stmtSalida->bindParam(':IdPer', $movimiento['IdPer'], PDO::PARAM_STR);
+                $stmtSalida->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
+                $stmtSalida->bindParam(':DispN', $DispN, PDO::PARAM_STR);
+                $stmtSalida->bindParam(':TiempoMarcaje', $horaSalida, PDO::PARAM_STR);
+                $stmtSalida->bindParam(':TipoVehiculo', $TipoTransporte, PDO::PARAM_INT);
+                $stmtSalida->bindParam(':Observaciones', $ObservacionesSalida, PDO::PARAM_STR);
+                $stmtSalida->bindParam(':Usuario', $NombreUsuario, PDO::PARAM_STR);
+                $stmtSalida->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
+                
+                if (!$stmtSalida->execute()) {
+                    throw new Exception('Error al registrar salida: ' . implode(', ', $stmtSalida->errorInfo()));
+                }
+                
+                $IdMovSalida = $Conexion->lastInsertId();
+                
+                // Actualizar regentsalper
+                $sqlActualizar = "UPDATE regentsalper SET 
+                                  FolMovSal = :FolMovSal,
+                                  FechaSalida = :FechaSalida,
+                                  HoraSalida = :HoraSalida,
+                                  Tiempo = :Tiempo,
+                                  TiempoTotalMinutos = :TiempoTotalMinutos,
+                                  TiempoTotalHoras = :TiempoTotalHoras,
+                                  StatusRegistro = 0
+                                  WHERE IdMovEnTSal = :IdMovEnTSal";
+                
+                $stmtActualizar = $Conexion->prepare($sqlActualizar);
+                $stmtActualizar->bindParam(':FolMovSal', $IdMovSalida, PDO::PARAM_INT);
+                $stmtActualizar->bindParam(':FechaSalida', $fechaActual, PDO::PARAM_STR);
+                $stmtActualizar->bindParam(':HoraSalida', $horaSalida, PDO::PARAM_STR);
+                $stmtActualizar->bindParam(':Tiempo', $tiempoFormateado, PDO::PARAM_STR);
+                $stmtActualizar->bindParam(':TiempoTotalMinutos', $minutosTotales, PDO::PARAM_INT);
+                $stmtActualizar->bindParam(':TiempoTotalHoras', $horasTotales, PDO::PARAM_INT);
+                $stmtActualizar->bindParam(':IdMovEnTSal', $IdMovEnTSal, PDO::PARAM_INT);
+                
+                if (!$stmtActualizar->execute()) {
+                    throw new Exception('Error al actualizar movimiento: ' . implode(', ', $stmtActualizar->errorInfo()));
+                }
+                
+                $salidaRegistrada = true;
+            }
+        }
+        
+        // 2. Registrar la nueva ENTRADA en regentper
         $fechaActual = date('Y-m-d');
         $horaActual = date('H:i:s');
-
-        // Determinar IdFolEnt (si hubo salida automática)
-        $IdFolEnt = null;
-        if ($salidaRegistrada && isset($IdMovSalida)) {
-            $IdFolEnt = $IdMovSalida;
-        }
-
-        // Insertar en regentper (ENTRADA)
-        $sqlRegentPer = "INSERT INTO regentper (
-                            IdPer,
-                            Ubicacion,
-                            DispN,
-                            Fecha,
-                            TiempoMarcaje,
-                            TipoVehiculo,
-                            Observaciones,
-                            Usuario,
-                            Notificar" . 
-                            ($IdFolEnt ? ", IdFolEnt" : "") . "
-                        ) VALUES (
-                            :IdPer, 
-                            :Ubicacion, 
-                            :DispN, 
-                            GETDATE(), 
-                            GETDATE(), 
-                            :TipoVehiculo, 
-                            :Observaciones, 
-                            :Usuario, 
-                            :Notificar" .
-                            ($IdFolEnt ? ", :IdFolEnt" : "") . "
-                        )";
         
-        $stmtRegentPer = $Conexion->prepare($sqlRegentPer);
-        $stmtRegentPer->bindParam(':IdPer', $IdPersonal, PDO::PARAM_STR);
-        $stmtRegentPer->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
-        $stmtRegentPer->bindParam(':DispN', $DispN, PDO::PARAM_STR);
-        $stmtRegentPer->bindParam(':TipoVehiculo', $TipoTransporte, PDO::PARAM_INT);
-        $stmtRegentPer->bindParam(':Observaciones', $Observaciones, PDO::PARAM_STR);
-        $stmtRegentPer->bindParam(':Usuario', $usuario, PDO::PARAM_STR);
-        $stmtRegentPer->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
+        // Determinar IdFolEnt (folio de entrada relacionado)
+        $IdFolEnt = $salidaRegistrada ? $IdMovSalida : null;
+        
+        // Insertar en regentper
+        $sqlEntrada = "INSERT INTO regentper (
+                        IdPer,
+                        Ubicacion,
+                        DispN,
+                        Fecha,
+                        TiempoMarcaje,
+                        TipoVehiculo,
+                        Observaciones,
+                        Usuario,
+                        Notificar" . 
+                        ($IdFolEnt ? ", IdFolEnt" : "") . "
+                    ) VALUES (
+                        :IdPer, 
+                        :Ubicacion, 
+                        :DispN, 
+                        GETDATE(), 
+                        :TiempoMarcaje, 
+                        :TipoVehiculo, 
+                        :Observaciones, 
+                        :Usuario, 
+                        :Notificar" .
+                        ($IdFolEnt ? ", :IdFolEnt" : "") . "
+                    )";
+        
+        $stmtEntrada = $Conexion->prepare($sqlEntrada);
+        $stmtEntrada->bindParam(':IdPer', $IdPersonal, PDO::PARAM_STR);
+        $stmtEntrada->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
+        $stmtEntrada->bindParam(':DispN', $DispN, PDO::PARAM_STR);
+        $stmtEntrada->bindParam(':TiempoMarcaje', $horaActual, PDO::PARAM_STR);
+        $stmtEntrada->bindParam(':TipoVehiculo', $TipoTransporte, PDO::PARAM_INT);
+        $stmtEntrada->bindParam(':Observaciones', $Observaciones, PDO::PARAM_STR);
+        $stmtEntrada->bindParam(':Usuario', $NombreUsuario, PDO::PARAM_STR);
+        $stmtEntrada->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
         
         if ($IdFolEnt) {
-            $stmtRegentPer->bindParam(':IdFolEnt', $IdFolEnt, PDO::PARAM_INT);
+            $stmtEntrada->bindParam(':IdFolEnt', $IdFolEnt, PDO::PARAM_INT);
         }
         
-        if (!$stmtRegentPer->execute()) {
-            throw new Exception('Error al registrar entrada: ' . implode(', ', $stmtRegentPer->errorInfo()));
+        if (!$stmtEntrada->execute()) {
+            throw new Exception('Error al registrar entrada: ' . implode(', ', $stmtEntrada->errorInfo()));
         }
         
         $IdMov = $Conexion->lastInsertId();
         
-        // Insertar en regentsalper
+        // 3. Registrar en regentsalper
         $sqlRegentSalPer = "INSERT INTO regentsalper (
-                                IdPer,
-                                IdUbicacion,
-                                FolMovEnt,
-                                FechaEntrada,
-                                StatusRegistro
-                            ) VALUES (:IdPer, :IdUbicacion, :FolMovEnt, GETDATE(), 1)";
+                            IdPer,
+                            IdUbicacion,
+                            FolMovEnt,
+                            FechaEntrada,
+                            HoraEntrada,
+                            StatusRegistro
+                        ) VALUES (
+                            :IdPer, 
+                            :IdUbicacion, 
+                            :FolMovEnt, 
+                            :FechaEntrada, 
+                            :HoraEntrada, 
+                            1
+                        )";
         
         $stmtRegentSalPer = $Conexion->prepare($sqlRegentSalPer);
         $stmtRegentSalPer->bindParam(':IdPer', $IdPersonal, PDO::PARAM_STR);
         $stmtRegentSalPer->bindParam(':IdUbicacion', $Ubicacion, PDO::PARAM_STR);
         $stmtRegentSalPer->bindParam(':FolMovEnt', $IdMov, PDO::PARAM_INT);
+        $stmtRegentSalPer->bindParam(':FechaEntrada', $fechaActual, PDO::PARAM_STR);
+        $stmtRegentSalPer->bindParam(':HoraEntrada', $horaActual, PDO::PARAM_STR);
         
         if (!$stmtRegentSalPer->execute()) {
-            throw new Exception('Error al registrar entrada en salper: ' . implode(', ', $stmtRegentSalPer->errorInfo()));
+            throw new Exception('Error al registrar en regentsalper: ' . implode(', ', $stmtRegentSalPer->errorInfo()));
         }
         
         $IdEntSal = $Conexion->lastInsertId();
         
-        $fotosProcesadas = [];
-        if (isset($input['fotos']) && is_array($input['fotos']) && count($input['fotos']) > 0) {
-            $sqlFotoEncabezado = "INSERT INTO T_fotografia_Encabezado (
-                                    IdEntSal,
-                                    FechaIngreso,
-                                    Tipo,
-                                    TipoMov,
-                                    IdUsuario,
-                                    Estatus
-                                ) VALUES (:IdEntSal, GETDATE(), 'Personal', 1, :IdUsuario, 1)";
-            
-            $stmtFotoEncabezado = $Conexion->prepare($sqlFotoEncabezado);
-            $stmtFotoEncabezado->bindParam(':IdEntSal', $IdEntSal, PDO::PARAM_INT);
-            $stmtFotoEncabezado->bindParam(':IdUsuario', $IdUsuario, PDO::PARAM_STR);
-            
-            if (!$stmtFotoEncabezado->execute()) {
-                throw new Exception('Error al crear encabezado de fotos: ' . implode(', ', $stmtFotoEncabezado->errorInfo()));
-            }
-            
-            $idFotografias = $Conexion->lastInsertId();
-            
-            $fotos = $input['fotos'];
-            $nextIdFoto = 1; 
-            $directorioFotos = '../fotos_accesos/' . date('Y') . '/' . date('m') . '/' . date('d') . '/';
-            if (!file_exists($directorioFotos)) {
-                mkdir($directorioFotos, 0777, true);
-            }
-            
-            foreach ($fotos as $index => $fotoData) {
-                if (isset($fotoData['base64']) && isset($fotoData['nombre'])) {
-                    $base64Data = $fotoData['base64'];
-                    // Eliminar el encabezado base64 si existe
-                    $base64Data = preg_replace('/^data:image\/\w+;base64,/', '', $base64Data);
-                    $nombreFoto = $fotoData['nombre'] . '.jpg';
-                    
-                    $imagenDecodificada = base64_decode($base64Data);
-                    
-                    if ($imagenDecodificada === false) {
-                        error_log("Error decodificando foto $index para acceso $IdEntSal");
-                        continue;
-                    }
-                    
-                    $rutaCompleta = $directorioFotos . $nombreFoto;
-                    
-                    if (file_put_contents($rutaCompleta, $imagenDecodificada)) {
-                        $rutaRelativa = 'fotos_accesos/' . date('Y') . '/' . date('m') . '/' . date('d') . '/' . $nombreFoto;
-                        
-                        $sqlFotoDetalle = "INSERT INTO T_fotografia_Detalle (
-                                            IdEntSal,
-                                            IdFotografiaRef,
-                                            NombreFoto,
-                                            RutaFoto,
-                                            NextIdFoto
-                                        ) VALUES (:IdEntSal, :IdFotografiaRef, :NombreFoto, :RutaFoto, :NextIdFoto)";
-                        
-                        $stmtFotoDetalle = $Conexion->prepare($sqlFotoDetalle);
-                        $stmtFotoDetalle->bindParam(':IdEntSal', $IdEntSal, PDO::PARAM_INT);
-                        $stmtFotoDetalle->bindParam(':IdFotografiaRef', $idFotografias, PDO::PARAM_INT);
-                        $stmtFotoDetalle->bindParam(':NombreFoto', $nombreFoto, PDO::PARAM_STR);
-                        $stmtFotoDetalle->bindParam(':RutaFoto', $rutaRelativa, PDO::PARAM_STR);
-                        $stmtFotoDetalle->bindParam(':NextIdFoto', $nextIdFoto, PDO::PARAM_INT);
-                        
-                        if ($stmtFotoDetalle->execute()) {
-                            $fotosProcesadas[] = $nombreFoto;
-                            $nextIdFoto++; 
-                        }
-                    }
-                }
-            }
-        }
-
-        if ($NotificarSupervisor) {
-            $sqlSupervisor = "SELECT 
-                                CONCAT(Nombre,' ',ApPaterno,' ',ApMaterno) as NombreCompleto,
-                                Email, Contacto
-                                FROM t_personal 
-                                WHERE IdPersonal = 
-                                (SELECT IdSupervisor FROM t_personal WHERE IdPersonal = :IdPersonal)"; 
-                              
-            $stmtSupervisor = $Conexion->prepare($sqlSupervisor);
-            $stmtSupervisor->bindParam(':IdPersonal', $IdPersonal, PDO::PARAM_STR);
-            $stmtSupervisor->execute();
-            
-            if ($stmtSupervisor->rowCount() > 0) {
-                $supervisor = $stmtSupervisor->fetch(PDO::FETCH_ASSOC);
-                
-                $asunto = "Registro de Entrada - " . $personal['NombreCompleto'];
-                $mensaje = "
-                    <h2>Registro de Entrada de Personal</h2>
-                    <p><strong>Empleado:</strong> " . $personal['NombreCompleto'] . "</p>
-                    <p><strong>Número de Empleado:</strong> " . $personal['NoEmpleado'] . "</p>
-                    <p><strong>Empresa:</strong> " . $personal['NomEmpresa'] . "</p>
-                    <p><strong>Departamento:</strong> " . $personal['NomDepto'] . "</p>
-                    <p><strong>Cargo:</strong> " . $personal['NomCargo'] . "</p>
-                    <p><strong>Ubicación:</strong> " . $Ubicacion . "</p>
-                    <p><strong>Observaciones:</strong> " . $Observaciones . "</p>
-                    <p><strong>Fecha:</strong> " . $fechaActual . "</p>
-                    <p><strong>Hora de Entrada:</strong> " . $horaActual . "</p>
-                    <p><strong>Registrado por:</strong> " . $usuario . "</p>
-                    <p><strong>DispN:</strong> " . $DispN . "</p>
-                ";
-                
-                if ($salidaRegistrada) {
-                    $mensaje .= "<p><strong>Nota:</strong> Se registró automáticamente una salida previa que estaba pendiente.</p>";
-                }
-                
-                if (!empty($fotosProcesadas)) {
-                    $mensaje .= "<p><strong>Fotos tomadas:</strong> " . implode(', ', $fotosProcesadas) . "</p>";
-                }
-                
-                // Envío de correo (implementar según necesidades)
-                // enviarCorreo($supervisor['Email'], $asunto, $mensaje);
-            }
-        }
         
-        // Confirmar transacción
         $Conexion->commit();
         
         $response['success'] = true;
         $response['message'] = $salidaRegistrada ? 
-            'Salida automática registrada y nueva entrada procesada correctamente' : 
+            'Salida registrada y nueva entrada procesada correctamente' : 
             'Acceso registrado correctamente';
+        
         $response['data'] = [
-            'folioMov' => $IdMov,
-            'IdMov' => $IdMov,
+            'idMovimiento' => $IdMov,
             'IdEntSal' => $IdEntSal,
+            'FolMovEnt' => $IdMov,
             'fecha' => $fechaActual,
             'hora' => $horaActual,
             'personal' => [
                 'nombre' => $personal['NombreCompleto'],
-                'noEmpleado' => $personal['NoEmpleado'],
-                'empresa' => $personal['NomEmpresa']
+                'noEmpleado' => $personal['NoEmpleado']
             ],
-            'ubicacion' => $Ubicacion,
-            'fotos_procesadas' => $fotosProcesadas,
-            'notificacion_supervisor' => $NotificarSupervisor,
-            'salida_automatica_registrada' => $salidaRegistrada
+            'salida_registrada' => $salidaRegistrada
         ];
         
-        // Si hubo salida automática, incluir esa información
-        if ($salidaRegistrada && isset($response['data']['salida_automatica'])) {
-            $response['data']['salida_automatica'] = $response['data']['salida_automatica'];
+        if ($salidaRegistrada) {
+            $response['data']['salida_info'] = [
+                'id_movimiento_anterior' => $MovimientoPendiente['IdMovEnTSal'],
+                'folio_salida' => $IdMovSalida,
+                'hora_salida' => $HoraSalidaManual
+            ];
         }
         
     } catch (Exception $e) {
@@ -410,15 +316,17 @@ try {
 
 echo json_encode($response);
 
-function enviarCorreo($destinatario, $asunto, $mensaje) {
-    // Implementación de envío de correo
-    /*
-    $headers = "MIME-Version: 1.0" . "\r\n";
-    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-    $headers .= 'From: sistema@empresa.com' . "\r\n";
+function obtenerNombreUsuario($conn, $IdUsuario) {
+    $sql = "SELECT Usuario FROM usuarios WHERE IdUsuario = :IdUsuario";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':IdUsuario', $IdUsuario);
+    $stmt->execute();
     
-    return mail($destinatario, $asunto, $mensaje, $headers);
-    */
-    return true;
+    if ($stmt->rowCount() > 0) {
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['Usuario'];
+    }
+    
+    return $IdUsuario; 
 }
 ?>
