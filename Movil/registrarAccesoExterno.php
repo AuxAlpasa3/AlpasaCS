@@ -141,7 +141,7 @@ try {
                 
                 $tiempoFormateado = sprintf("%02d:%02d", $horasTotales, $minutosRestantes);
                 
-                $sqlSalida = "INSERT INTO regsalper (
+                $sqlSalida = "INSERT INTO regsalext (
                                 IdExt,
                                 IdFolEnt,
                                 Ubicacion,
