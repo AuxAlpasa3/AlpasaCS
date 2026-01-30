@@ -83,9 +83,9 @@ try {
             $ObservacionesSalida = isset($MovimientoPendiente['ObservacionesSalida']) ? 
                 $MovimientoPendiente['ObservacionesSalida'] : 'Salida manual registrada';
             
-            $sqlMovPendiente = "SELECT IdPer, IdUbicacion, FechaEntrada, HoraEntrada 
-                                FROM regentsalper 
-                                WHERE IdMovEnTSal = :IdMovEnTSal AND FolMovEnt = :FolMovEnt";
+            $sqlMovPendiente = "SELECT IdPer, IdUbicacion, fecha as FechaEntrada, TiempoMarcaje as HoraEntrada
+                                FROM regentper 
+                                WHERE  FolMovEnt = :FolMovEnt";
             
             $stmtMovPendiente = $Conexion->prepare($sqlMovPendiente);
             $stmtMovPendiente->bindParam(':IdMovEnTSal', $IdMovEnTSal, PDO::PARAM_INT);
@@ -193,8 +193,6 @@ try {
         $fechaActual = date('Y-m-d');
         $horaActual = date('H:i:s');
         
-        // Determinar IdFolEnt (folio de entrada relacionado)
-        $IdFolEnt = $salidaRegistrada ? $IdMovSalida : null;
         
         // Insertar en regentper
         $sqlEntrada = "INSERT INTO regentper (
@@ -247,14 +245,12 @@ try {
                             IdUbicacion,
                             FolMovEnt,
                             FechaEntrada,
-                            HoraEntrada,
                             StatusRegistro
                         ) VALUES (
                             :IdPer, 
                             :IdUbicacion, 
                             :FolMovEnt, 
                             :FechaEntrada, 
-                            :HoraEntrada, 
                             1
                         )";
         
