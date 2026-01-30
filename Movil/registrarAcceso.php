@@ -70,7 +70,6 @@ try {
     }
     
     $personal = $stmtPersonal->fetch(PDO::FETCH_ASSOC);
-    $NombreUsuario = obtenerNombreUsuario($Conexion, $IdUsuario);
     
     $salidaRegistrada = false;
     $IdMovSalida = null;
@@ -153,7 +152,7 @@ try {
                 $stmtSalida->bindParam(':TiempoMarcaje', $horaSalida, PDO::PARAM_STR);
                 $stmtSalida->bindParam(':TipoVehiculo', $TipoTransporte, PDO::PARAM_INT);
                 $stmtSalida->bindParam(':Observaciones', $ObservacionesSalida, PDO::PARAM_STR);
-                $stmtSalida->bindParam(':Usuario', $NombreUsuario, PDO::PARAM_STR);
+                $stmtSalida->bindParam(':Usuario', $IdUsuario, PDO::PARAM_STR);
                 $stmtSalida->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
                 
                 if (!$stmtSalida->execute()) {
@@ -229,7 +228,7 @@ try {
         $stmtEntrada->bindParam(':TiempoMarcaje', $horaActual, PDO::PARAM_STR);
         $stmtEntrada->bindParam(':TipoVehiculo', $TipoTransporte, PDO::PARAM_INT);
         $stmtEntrada->bindParam(':Observaciones', $Observaciones, PDO::PARAM_STR);
-        $stmtEntrada->bindParam(':Usuario', $NombreUsuario, PDO::PARAM_STR);
+        $stmtEntrada->bindParam(':Usuario', $IdUsuario, PDO::PARAM_STR);
         $stmtEntrada->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
         
         if ($IdFolEnt) {
@@ -316,17 +315,4 @@ try {
 
 echo json_encode($response);
 
-function obtenerNombreUsuario($conn, $IdUsuario) {
-    $sql = "SELECT Usuario FROM usuarios WHERE IdUsuario = :IdUsuario";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':IdUsuario', $IdUsuario);
-    $stmt->execute();
-    
-    if ($stmt->rowCount() > 0) {
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row['Usuario'];
-    }
-    
-    return $IdUsuario; 
-}
 ?>
