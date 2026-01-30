@@ -1,5 +1,7 @@
 <?php
-include '../../api/db/conexion.php';
+include_once '../../api/db/conexion.php';
+
+header('Content-Type: application/json; charset=utf-8');
 
 $draw = $_POST['draw'] ?? 1;
 $start = $_POST['start'] ?? 0;
@@ -21,7 +23,7 @@ $imagenPorDefecto = 'https://intranet.alpasamx.com/regentsalper/imagenes/emplead
 
 $columns = [
     0 => 't1.NoEmpleado',
-    1 => null,
+    1 => null, 
     2 => 't1.Nombre',
     3 => 't1.ApPaterno',
     4 => 't1.ApMaterno',
@@ -30,11 +32,11 @@ $columns = [
     7 => 't2.NomEmpresa',
     8 => 't1.Status',
     9 => 't5.NomLargo',
-    10 => null,
-    11 => null
+    10 => null, 
+    11 => null  
 ];
 
-$orderColumn = $columns[$orderColumnIndex] ?? 't1.IdPersonal';
+$orderColumn = $columns[$orderColumnIndex] ?? 't1.NoEmpleado';
 $orderDirection = ($orderDirection == 'desc') ? 'DESC' : 'ASC';
 
 try {
@@ -55,17 +57,35 @@ try {
                     t1.Status,
                     t1.IdUbicacion,
                     t1.status as Acceso,
-                    (CASE when t1.Cargo=0 then 'Sin Cargo' else t3.NomCargo END) AS NomCargo, 
-                    (CASE when t1.Departamento=0 THEN 'SinDepto' else t4.NomDepto END) AS NomDepto,
-                    (CASE when t1.Empresa=0 then 'SinEmpresa' else t2.NomEmpresa END) AS NomEmpresa,
-                    (CASE when t1.Status=1 then 'Activo' when t1.Status=0 then 'Inactivo' when t1.Status=2 then 'Baja' when t1.Status=3 then 'Vacaciones' END) as StatusTexto,
-                    (CASE when t1.IdUbicacion=0 then 'SinUbicacion' else t5.NomLargo end) as NomCorto 
+                    (CASE 
+                        WHEN t1.Cargo = 0 THEN 'Sin Cargo' 
+                        ELSE t3.NomCargo 
+                     END) AS CargoNombre, 
+                    (CASE 
+                        WHEN t1.Departamento = 0 THEN 'Sin Departamento' 
+                        ELSE t4.NomDepto 
+                     END) AS DepartamentoNombre,
+                    (CASE 
+                        WHEN t1.Empresa = 0 THEN 'Sin Empresa' 
+                        ELSE t2.NomEmpresa 
+                     END) AS EmpresaNombre,
+                    (CASE 
+                        WHEN t1.Status = 1 THEN 'Activo' 
+                        WHEN t1.Status = 0 THEN 'Inactivo' 
+                        WHEN t1.Status = 2 THEN 'Baja' 
+                        WHEN t1.Status = 3 THEN 'Vacaciones'
+                        ELSE 'Desconocido'
+                     END) as EstatusTexto,
+                    (CASE 
+                        WHEN t1.IdUbicacion = 0 THEN 'Sin Ubicación' 
+                        ELSE t5.NomLargo 
+                     END) as UbicacionNombre 
                   FROM t_Personal as t1 
-                  LEFT JOIN t_empresa as t2 on t1.Empresa=t2.IdEmpresa 
-                  LEFT JOIN t_cargo as t3 on t1.Cargo=t3.IdCargo 
-                  LEFT JOIN t_departamento as t4 on t4.IdDepartamento=t1.Departamento 
-                  LEFT JOIN t_ubicacion as t5 on t5.IdUbicacion =t1.IdUbicacion
-                  WHERE NoEmpleado > 0";
+                  LEFT JOIN t_empresa as t2 ON t1.Empresa = t2.IdEmpresa 
+                  LEFT JOIN t_cargo as t3 ON t1.Cargo = t3.IdCargo 
+                  LEFT JOIN t_departamento as t4 ON t4.IdDepartamento = t1.Departamento 
+                  LEFT JOIN t_ubicacion as t5 ON t5.IdUbicacion = t1.IdUbicacion
+                  WHERE t1.NoEmpleado > 0";
     
     $queryFiltered = $queryBase;
     $searchParams = [];
@@ -146,9 +166,15 @@ try {
     
     if (!empty($vehiculo) && $vehiculo !== '') {
         if ($vehiculo === '1') {
-            $queryFiltered .= " AND EXISTS (SELECT 1 FROM t_vehiculos v WHERE v.NoEmpleado = t1.NoEmpleado AND v.Activo = 1)";
+            $queryFiltered .= " AND EXISTS (
+                SELECT 1 FROM t_vehiculos v 
+                WHERE v.NoEmpleado = t1.NoEmpleado AND v.Activo = 1
+            )";
         } elseif ($vehiculo === '0') {
-            $queryFiltered .= " AND NOT EXISTS (SELECT 1 FROM t_vehiculos v WHERE v.NoEmpleado = t1.NoEmpleado AND v.Activo = 1)";
+            $queryFiltered .= " AND NOT EXISTS (
+                SELECT 1 FROM t_vehiculos v 
+                WHERE v.NoEmpleado = t1.NoEmpleado AND v.Activo = 1
+            )";
         }
     }
     
@@ -180,59 +206,53 @@ try {
     
     $data = [];
     foreach($Personales as $Personal) {
-        $queryVehiculo = "SELECT COUNT(*) as tieneVehiculo FROM t_vehiculos WHERE NoEmpleado = :noempleado AND Activo = 1";
+        $queryVehiculo = "SELECT COUNT(*) as tieneVehiculo 
+                          FROM t_vehiculos 
+                          WHERE NoEmpleado = :noempleado 
+                          AND Activo = 1";
+        
         $stmtVehiculo = $Conexion->prepare($queryVehiculo);
         $stmtVehiculo->bindValue(':noempleado', $Personal->NoEmpleado);
         $stmtVehiculo->execute();
         $tieneVehiculo = $stmtVehiculo->fetch(PDO::FETCH_ASSOC)['tieneVehiculo'] > 0;
         
         $badgeClass = '';
-        $badgeText = $Personal->StatusTexto;
-        
         switch($Personal->Status) {
-            case 1: $badgeClass = 'badge-success'; break;
-            case 0: $badgeClass = 'badge-warning'; break;
-            case 2: $badgeClass = 'badge-danger'; break;
-            case 3: $badgeClass = 'badge-info'; break;
+            case 1: $badgeClass = 'badge-success'; break;  // Activo
+            case 0: $badgeClass = 'badge-danger'; break;   // Inactivo
+            case 2: $badgeClass = 'badge-dark'; break;     // Baja
             default: $badgeClass = 'badge-secondary';
         }
         
         $accesoActivo = ($Personal->Acceso == 1);
         
         $foto = !empty($Personal->RutaFoto) ? $Personal->RutaFoto : $imagenPorDefecto;
-        $nombreCompleto = $Personal->Nombre . ' ' . $Personal->ApPaterno . ' ' . $Personal->ApMaterno;
-        $nombreCompletoHTML = htmlspecialchars($nombreCompleto);
+        $nombreCompleto = trim($Personal->Nombre . ' ' . $Personal->ApPaterno . ' ' . $Personal->ApMaterno);
         
-        $fotoHTML = '<img src="' . htmlspecialchars($foto) . '" 
-                      alt="Foto" 
-                      class="thumbnail-image" 
-                      style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;" 
-                      data-full-image="' . htmlspecialchars($foto) . '" 
-                      data-employee-name="' . $nombreCompletoHTML . '"
-                      onerror="this.onerror=null; this.src=\'' . $imagenPorDefecto . '\';">';
+        $fotoHTML = '';
+        if (!empty($Personal->RutaFoto) && $Personal->RutaFoto !== $imagenPorDefecto) {
+            $fotoHTML = $foto;
+        } else {
+            $fotoHTML = $imagenPorDefecto;
+        }
         
         $vehiculoHTML = '';
         if ($tieneVehiculo) {
-            $vehiculoHTML = '<a href="#" 
-                                class="btn-ver-vehiculo" 
-                                data-noempleado="' . htmlspecialchars($Personal->NoEmpleado) . '" 
-                                data-nombre="' . $nombreCompletoHTML . '">
-                                <span class="badge badge-success">Con Vehículo</span>
-                             </a>';
+            $vehiculoHTML = '<span class="badge badge-primary vehicle-badge btn-ver-vehiculo" 
+                                 style="cursor: pointer;"
+                                 data-noempleado="' . htmlspecialchars($Personal->NoEmpleado) . '" 
+                                 data-nombre="' . htmlspecialchars($nombreCompleto) . '">
+                                 Con Vehículo
+                              </span>';
         } else {
             $vehiculoHTML = '<span class="badge badge-secondary">Sin Vehículo</span>';
         }
         
         $accesoHTML = '';
         if ($accesoActivo) {
-            $accesoHTML = '<a href="GenerarDoc?ID=' . $Personal->IdPersonal . '" 
-                              class="btn btn-primary btn-sm" 
-                              target="_blank"
-                              title="Descargar identificación con QR">
-                              <i class="fas fa-id-card"></i> ID
-                           </a>';
+            $accesoHTML = 'Activo';
         } else {
-            $accesoHTML = '<span class="badge badge-danger" title="Acceso inactivo">Sin Acceso</span>';
+            $accesoHTML = 'Inactivo';
         }
         
         $rowData = [
@@ -241,41 +261,42 @@ try {
             'Nombre' => htmlspecialchars($Personal->Nombre),
             'ApPaterno' => htmlspecialchars($Personal->ApPaterno),
             'ApMaterno' => htmlspecialchars($Personal->ApMaterno),
-            'Cargo' => htmlspecialchars($Personal->NomCargo),
-            'Departamento' => htmlspecialchars($Personal->NomDepto),
-            'Empresa' => htmlspecialchars($Personal->NomEmpresa),
-            'Estatus' => '<span class="badge ' . $badgeClass . ' p-2">' . $badgeText . '</span>',
-            'Ubicacion' => htmlspecialchars($Personal->NomCorto),
+            'Cargo' => htmlspecialchars($Personal->CargoNombre),
+            'Departamento' => htmlspecialchars($Personal->DepartamentoNombre),
+            'Empresa' => htmlspecialchars($Personal->EmpresaNombre),
+            'Estatus' => htmlspecialchars($Personal->EstatusTexto),
+            'Ubicacion' => htmlspecialchars($Personal->UbicacionNombre),
             'Vehiculo' => $vehiculoHTML,
-            'Acceso' => $accesoHTML
+            'Acceso' => $accesoHTML,
+            'TieneVehiculo' => $tieneVehiculo,
+            'EstatusId' => $Personal->Status,
+            'AccesoActivo' => $accesoActivo,
+            'FotoURL' => $foto
         ];
         
-        $data[] = array_merge($rowData, [
-            '_id' => $Personal->IdPersonal,
-            '_noempleado' => $Personal->NoEmpleado,
-            '_nombre_completo' => $nombreCompleto,
-            '_tiene_vehiculo' => $tieneVehiculo,
-            '_estatus_id' => $Personal->Status,
-            '_acceso_activo' => $accesoActivo,
-            '_foto_url' => $foto
-        ]);
+        $data[] = $rowData;
     }
     
-    echo json_encode([
+    $response = [
         "draw" => intval($draw),
         "recordsTotal" => intval($totalRecords),
         "recordsFiltered" => intval($filteredRecords),
-        "data" => $data
-    ]);
+        "data" => $data,
+        "error" => null
+    ];
+    
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
     
 } catch(PDOException $e) {
-    http_response_code(500);
-    echo json_encode([
+    $response = [
         "draw" => intval($draw),
         "recordsTotal" => 0,
         "recordsFiltered" => 0,
         "data" => [],
         "error" => "Error en la consulta: " . $e->getMessage()
-    ]);
+    ];
+    
+    http_response_code(500);
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
 }
 ?>

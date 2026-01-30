@@ -251,11 +251,13 @@ try {
             $errorInfo = $stmtEntrada->errorInfo();
             throw new Exception('Error al registrar entrada: ' . ($errorInfo[2] ?? 'Error desconocido'));
         }
-        
-        $sqlLastIdMov = "SELECT SCOPE_IDENTITY() as LastID";
-        $stmtLastIdMov = $Conexion->query($sqlLastIdMov);
-        $lastIdMovResult = $stmtLastIdMov->fetchAll(PDO::FETCH_ASSOC);
-        $IdMov = (int)$lastIdMovResult[0]['LastID'];
+
+
+         $IdMov = (int)$Conexion->lastInsertId();
+
+        if ($IdMov <= 0) {
+            throw new Exception("No se pudo obtener el ID de la inserción");
+        }
         
         $sqlRegentSalPer = "INSERT INTO regentsalper (
                             IdPer,
