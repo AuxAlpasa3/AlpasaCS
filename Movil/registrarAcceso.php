@@ -283,11 +283,6 @@ try {
             throw new Exception('Error al registrar en regentsalper: ' . ($errorInfo[2] ?? 'Error desconocido'));
         }
         
-         $IdEntSal = (int)$Conexion->lastInsertId();
-
-        if ($IdEntSal <= 0) {
-            throw new Exception("No se pudo obtener el ID de la inserción");
-        }
         
         $Conexion->commit();
         
@@ -298,7 +293,7 @@ try {
         
         $response['data'] = [
             'idMovimiento' => $IdMov,
-            'IdEntSal' => $IdEntSal,
+            'IdEntSal' => $IdMov,
             'FolMovEnt' => $IdMov,
             'fecha' => $fechaActual,
             'hora' => $horaActual,
