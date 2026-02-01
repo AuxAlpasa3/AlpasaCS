@@ -101,16 +101,16 @@ try {
             }
             
             $sqlMovPendiente = "SELECT 
-                                rp.IdPer, 
-                                rp.Ubicacion, 
-                                rp.fecha as FechaEntrada, 
-                                rp.TiempoMarcaje as HoraEntrada, 
-                                rp.TipoVehiculo, 
-                                rp.IdVeh,
-                                rsp.tieneVehiculo
-                            FROM regentper rp
-                            LEFT JOIN regentsalper rsp ON rp.FolMov = rsp.FolMovEnt
-                            WHERE rp.FolMov = :FolMovEnt";
+                                    t1.IdPer, 
+                                    t1.Ubicacion, 
+                                    t1.fecha as FechaEntrada, 
+                                    t1.TiempoMarcaje as HoraEntrada, 
+                                    t1.TipoVehiculo, 
+                                    t1.IdVeh,
+                                    t2.tieneVehiculo
+                                FROM regentper t1
+                                LEFT JOIN regentsalper t2 ON t1.FolMov = t2.FolMovEnt
+                                WHERE t1.FolMov = 1";
             
             $stmtMovPendiente = $Conexion->prepare($sqlMovPendiente);
             $stmtMovPendiente->bindParam(':FolMovEnt', $FolMovEnt, PDO::PARAM_INT);
@@ -267,14 +267,12 @@ try {
                                     IdUbicacion,
                                     FolMovEnt,
                                     FechaEntrada,
-                                    tieneVehiculo,
                                     StatusRegistro
                                 ) VALUES (
                                     :IdVeh, 
                                     :IdUbicacion, 
                                     :FolMovEnt, 
                                     GETDATE(), 
-                                    1, 
                                     2
                                 )";
                             
@@ -409,14 +407,12 @@ try {
                                     IdUbicacion,
                                     FolMovEnt,
                                     FechaEntrada,
-                                    tieneVehiculo,
                                     StatusRegistro
                                 ) VALUES (
                                     :IdVeh, 
                                     :IdUbicacion, 
                                     :FolMovEnt, 
                                     GETDATE(), 
-                                    1, 
                                     1
                                 )";
             
@@ -431,7 +427,7 @@ try {
             }
         }
         
-        $tieneVehiculo = ($TipoTransporte == 0) ? 0 : 1;
+        $tieneVehiculo =(int)$Conexion->lastInsertId();
         
         $sqlRegentSalPer = "INSERT INTO regentsalper (
                             IdPer,
