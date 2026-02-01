@@ -59,7 +59,7 @@ try {
 
     $movimiento = $stmtMovimiento->fetch(PDO::FETCH_ASSOC);
 
-    if (count($movimiento) > 0) {
+    if ($stmtMovimiento->rowCount() > 0) {
         $sqlEntradaInfo = "SELECT 
                                 IdPer,
                                 Observaciones,
