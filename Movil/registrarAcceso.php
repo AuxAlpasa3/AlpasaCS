@@ -312,7 +312,6 @@ try {
         
         if ($IdVeh && $TipoTransporte != 0) {
             $sqlEntradaVeh = "INSERT INTO regentveh (
-                            IdPer,
                             IdVeh,
                             Ubicacion,
                             DispN,
@@ -323,7 +322,6 @@ try {
                             Usuario,
                             Notificar
                         ) VALUES (
-                            :IdPer, 
                             :IdVeh,
                             :Ubicacion, 
                             :DispN, 
@@ -338,7 +336,6 @@ try {
             $tipoVehiculoVeh = $LibreUso == 1 ? 1 : 2;
             
             $stmtEntradaVeh = $Conexion->prepare($sqlEntradaVeh);
-            $stmtEntradaVeh->bindParam(':IdPer', $IdPersonal, PDO::PARAM_STR);
             $stmtEntradaVeh->bindParam(':IdVeh', $IdVeh, PDO::PARAM_INT);
             $stmtEntradaVeh->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
             $stmtEntradaVeh->bindParam(':DispN', $DispN, PDO::PARAM_STR);
