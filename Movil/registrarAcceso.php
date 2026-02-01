@@ -84,6 +84,7 @@ try {
     
     $salidaRegistrada = false;
     $IdMovSalida = null;
+    $IdMovSalidaVehiculo = null;
     
     $Conexion->beginTransaction();
     
@@ -99,9 +100,17 @@ try {
                 throw new Exception('ID de movimiento pendiente no válido');
             }
             
-            $sqlMovPendiente = "SELECT IdPer, Ubicacion, fecha as FechaEntrada, TiempoMarcaje as HoraEntrada, TipoVehiculo, IdVeh
-                                FROM regentper 
-                                WHERE FolMov = :FolMovEnt";
+            $sqlMovPendiente = "SELECT 
+                                rp.IdPer, 
+                                rp.Ubicacion, 
+                                rp.fecha as FechaEntrada, 
+                                rp.TiempoMarcaje as HoraEntrada, 
+                                rp.TipoVehiculo, 
+                                rp.IdVeh,
+                                rsp.tieneVehiculo
+                            FROM regentper rp
+                            LEFT JOIN regentsalper rsp ON rp.FolMov = rsp.FolMovEnt
+                            WHERE rp.FolMov = :FolMovEnt";
             
             $stmtMovPendiente = $Conexion->prepare($sqlMovPendiente);
             $stmtMovPendiente->bindParam(':FolMovEnt', $FolMovEnt, PDO::PARAM_INT);
@@ -111,9 +120,8 @@ try {
             if (count($movimientoResult) > 0) {
                 
                 $movimiento = $movimientoResult[0];
+                $tieneVehiculoPendiente = (int)$movimiento['tieneVehiculo'];
                 
-                $fechaActual = date('Y-m-d');
-
                 $fechaEntrada = $movimiento['FechaEntrada'];
                 $horaEntrada = isset($movimiento['HoraEntrada']) ? $movimiento['HoraEntrada'] : '00:00:00';
                 
@@ -196,46 +204,90 @@ try {
                     throw new Exception("No se pudo obtener el ID de la inserción");
                 }
 
-                if ($movimiento['IdVeh']) {
-                    $sqlSalidaVehiculo = "INSERT INTO regsalveh (
+                if ($tieneVehiculoPendiente == 1 && $movimiento['IdVeh']) {
+                    $IdVehPendiente = (int)$movimiento['IdVeh'];
+                    
+                    $sqlVerificarEntradaVehiculo = "SELECT FolMov, IdVeh FROM regentveh WHERE FolMov = :FolMovEnt";
+                    $stmtVerificarEntradaVehiculo = $Conexion->prepare($sqlVerificarEntradaVehiculo);
+                    $stmtVerificarEntradaVehiculo->bindParam(':FolMovEnt', $FolMovEnt, PDO::PARAM_INT);
+                    $stmtVerificarEntradaVehiculo->execute();
+                    
+                    $entradaVehiculoResult = $stmtVerificarEntradaVehiculo->fetchAll(PDO::FETCH_ASSOC);
+                    
+                    if (count($entradaVehiculoResult) > 0) {
+                        $entradaVehiculo = $entradaVehiculoResult[0];
+                        $IdVehEntradaAnterior = (int)$entradaVehiculo['IdVeh'];
+                        
+                        if ($IdVeh && $IdVehPendiente == $IdVeh && $IdVehEntradaAnterior == $IdVehPendiente) {
+                            $sqlSalidaVehiculo = "INSERT INTO regsalveh (
+                                        IdVeh,
+                                        IdFolEnt,
+                                        Ubicacion,
+                                        DispN,
+                                        Fecha,
+                                        TiempoMarcaje,
+                                        TipoVehiculo,
+                                        Observaciones,
+                                        Usuario,
+                                        Notificar
+                                    ) VALUES (
+                                        :IdVeh, 
+                                        :IdFolEnt,
+                                        :Ubicacion, 
+                                        :DispN, 
+                                        :FechaSalida, 
+                                        :TiempoMarcaje, 
+                                        :TipoVehiculo, 
+                                        :Observaciones, 
+                                        :Usuario, 
+                                        :Notificar
+                                    )";
+                            
+                            $stmtSalidaVeh = $Conexion->prepare($sqlSalidaVehiculo);
+                            $stmtSalidaVeh->bindParam(':IdVeh', $IdVehPendiente, PDO::PARAM_INT);
+                            $stmtSalidaVeh->bindParam(':IdFolEnt', $FolMovEnt, PDO::PARAM_INT);
+                            $stmtSalidaVeh->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
+                            $stmtSalidaVeh->bindParam(':DispN', $DispN, PDO::PARAM_STR);
+                            $stmtSalidaVeh->bindParam(':FechaSalida', $fechaHoraSalida, PDO::PARAM_STR);
+                            $stmtSalidaVeh->bindParam(':TiempoMarcaje', $HoraSalidaManual, PDO::PARAM_STR);
+                            $stmtSalidaVeh->bindParam(':TipoVehiculo', $TipoTransporte, PDO::PARAM_INT);
+                            $stmtSalidaVeh->bindParam(':Observaciones', $ObservacionesSalida, PDO::PARAM_STR);
+                            $stmtSalidaVeh->bindParam(':Usuario', $IdUsuario, PDO::PARAM_STR);
+                            $stmtSalidaVeh->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
+                            
+                            if (!$stmtSalidaVeh->execute()) {
+                                $errorInfo = $stmtSalidaVeh->errorInfo();
+                                throw new Exception('Error al registrar salida vehículo: ' . ($errorInfo[2] ?? 'Error desconocido'));
+                            }
+                            
+                            $IdMovSalidaVehiculo = (int)$Conexion->lastInsertId();
+                            
+                            $sqlRegentSalVehiculo = "INSERT INTO regentsalveh (
                                     IdVeh,
-                                    IdFolEnt,
-                                    Ubicacion,
-                                    DispN,
-                                    Fecha,
-                                    TiempoMarcaje,
-                                    TipoVehiculo,
-                                    Observaciones,
-                                    Usuario,
-                                    Notificar
+                                    IdUbicacion,
+                                    FolMovEnt,
+                                    FechaEntrada,
+                                    tieneVehiculo,
+                                    StatusRegistro
                                 ) VALUES (
                                     :IdVeh, 
-                                    :IdFolEnt,
-                                    :Ubicacion, 
-                                    :DispN, 
-                                    :FechaSalida, 
-                                    :TiempoMarcaje, 
-                                    :TipoVehiculo, 
-                                    :Observaciones, 
-                                    :Usuario, 
-                                    :Notificar
+                                    :IdUbicacion, 
+                                    :FolMovEnt, 
+                                    GETDATE(), 
+                                    1, 
+                                    2
                                 )";
-                    
-                    $stmtSalidaVeh = $Conexion->prepare($sqlSalidaVehiculo);
-                    $stmtSalidaVeh->bindParam(':IdVeh', $movimiento['IdVeh'], PDO::PARAM_INT);
-                    $stmtSalidaVeh->bindParam(':IdFolEnt', $FolMovEnt, PDO::PARAM_INT);
-                    $stmtSalidaVeh->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
-                    $stmtSalidaVeh->bindParam(':DispN', $DispN, PDO::PARAM_STR);
-                    $stmtSalidaVeh->bindParam(':FechaSalida', $fechaHoraSalida, PDO::PARAM_STR);
-                    $stmtSalidaVeh->bindParam(':TiempoMarcaje', $HoraSalidaManual, PDO::PARAM_STR);
-                    $stmtSalidaVeh->bindParam(':TipoVehiculo', $TipoTransporte, PDO::PARAM_INT);
-                    $stmtSalidaVeh->bindParam(':Observaciones', $ObservacionesSalida, PDO::PARAM_STR);
-                    $stmtSalidaVeh->bindParam(':Usuario', $IdUsuario, PDO::PARAM_STR);
-                    $stmtSalidaVeh->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
-                    
-                    if (!$stmtSalidaVeh->execute()) {
-                        $errorInfo = $stmtSalidaVeh->errorInfo();
-                        throw new Exception('Error al registrar salida vehículo: ' . ($errorInfo[2] ?? 'Error desconocido'));
+                            
+                            $stmtRegentSalVehiculo = $Conexion->prepare($sqlRegentSalVehiculo);
+                            $stmtRegentSalVehiculo->bindParam(':IdVeh', $IdVehPendiente, PDO::PARAM_INT);
+                            $stmtRegentSalVehiculo->bindParam(':IdUbicacion', $Ubicacion, PDO::PARAM_STR);
+                            $stmtRegentSalVehiculo->bindParam(':FolMovEnt', $entradaVehiculo['FolMov'], PDO::PARAM_INT);
+                            
+                            if (!$stmtRegentSalVehiculo->execute()) {
+                                $errorInfo = $stmtRegentSalVehiculo->errorInfo();
+                                throw new Exception('Error al registrar en regentsalveh: ' . ($errorInfo[2] ?? 'Error desconocido'));
+                            }
+                        }
                     }
                 }
             
@@ -349,6 +401,34 @@ try {
                 $errorInfo = $stmtEntradaVeh->errorInfo();
                 throw new Exception('Error al registrar entrada vehículo: ' . ($errorInfo[2] ?? 'Error desconocido'));
             }
+            
+            $IdMovVeh = (int)$Conexion->lastInsertId();
+            
+            $sqlRegentSalVehiculo = "INSERT INTO regentsalveh (
+                                    IdVeh,
+                                    IdUbicacion,
+                                    FolMovEnt,
+                                    FechaEntrada,
+                                    tieneVehiculo,
+                                    StatusRegistro
+                                ) VALUES (
+                                    :IdVeh, 
+                                    :IdUbicacion, 
+                                    :FolMovEnt, 
+                                    GETDATE(), 
+                                    1, 
+                                    1
+                                )";
+            
+            $stmtRegentSalVehiculo = $Conexion->prepare($sqlRegentSalVehiculo);
+            $stmtRegentSalVehiculo->bindParam(':IdVeh', $IdVeh, PDO::PARAM_INT);
+            $stmtRegentSalVehiculo->bindParam(':IdUbicacion', $Ubicacion, PDO::PARAM_STR);
+            $stmtRegentSalVehiculo->bindParam(':FolMovEnt', $IdMovVeh, PDO::PARAM_INT);
+            
+            if (!$stmtRegentSalVehiculo->execute()) {
+                $errorInfo = $stmtRegentSalVehiculo->errorInfo();
+                throw new Exception('Error al registrar en regentsalveh: ' . ($errorInfo[2] ?? 'Error desconocido'));
+            }
         }
         
         $tieneVehiculo = ($TipoTransporte == 0) ? 0 : 1;
@@ -405,6 +485,10 @@ try {
                 'hora_salida' => $HoraSalidaManual,
                 'tiempo_estancia' => $tiempoFormateado
             ];
+            
+            if ($IdMovSalidaVehiculo) {
+                $response['data']['salida_info']['folio_salida_vehiculo'] = $IdMovSalidaVehiculo;
+            }
         }
         
     } catch (Exception $e) {
