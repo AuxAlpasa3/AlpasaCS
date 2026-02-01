@@ -61,6 +61,7 @@ try {
 
     if (count($movimiento) > 0) {
         $sqlEntradaInfo = "SELECT 
+                                IdPer,
                                 Observaciones,
                                 Ubicacion,
                                 DispN,
@@ -75,6 +76,7 @@ try {
         $entradaInfo = $stmtEntrada->fetch(PDO::FETCH_ASSOC);
 
          $sqlEntradaInfoVeh = "SELECT 
+                                IdVeh,
                                 Observaciones,
                                 Ubicacion,
                                 DispN,
