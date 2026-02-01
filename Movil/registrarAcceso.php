@@ -110,7 +110,7 @@ try {
                                     t2.tieneVehiculo
                                 FROM regentper t1
                                 LEFT JOIN regentsalper t2 ON t1.FolMov = t2.FolMovEnt
-                                WHERE t1.FolMov = 1";
+                                WHERE t1.FolMov = :FolMovEnt";
             
             $stmtMovPendiente = $Conexion->prepare($sqlMovPendiente);
             $stmtMovPendiente->bindParam(':FolMovEnt', $FolMovEnt, PDO::PARAM_INT);
@@ -360,6 +360,7 @@ try {
             throw new Exception("No se pudo obtener el ID de la inserción");
         }
         
+        $IdMovVeh = null;
         if ($IdVeh && $TipoTransporte != 0) {
             $sqlEntradaVeh = "INSERT INTO regentveh (
                             IdVeh,
@@ -427,7 +428,7 @@ try {
             }
         }
         
-        $tieneVehiculo =(int)$Conexion->lastInsertId();
+        $tieneVehiculo = $TipoTransporte != 0 ? ($IdMovVeh ?: 0) : 0;
         
         $sqlRegentSalPer = "INSERT INTO regentsalper (
                             IdPer,
