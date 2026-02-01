@@ -273,7 +273,8 @@ try {
                         TipoVehiculo,
                         Observaciones,
                         Usuario,
-                        Notificar
+                        Notificar,
+                        IdVeh
                     ) VALUES (
                         :IdPer, 
                         :Ubicacion, 
@@ -283,7 +284,8 @@ try {
                         :TipoVehiculo, 
                         :Observaciones, 
                         :Usuario, 
-                        :Notificar
+                        :Notificar,
+                        :IdVeh
                     )";
         
         $stmtEntrada = $Conexion->prepare($sqlEntrada);
@@ -295,6 +297,7 @@ try {
         $stmtEntrada->bindParam(':Observaciones', $Observaciones, PDO::PARAM_STR);
         $stmtEntrada->bindParam(':Usuario', $IdUsuario, PDO::PARAM_STR);
         $stmtEntrada->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
+        $stmtEntrada->bindParam(':IdVeh', $IdVeh, PDO::PARAM_INT);
         
         if (!$stmtEntrada->execute()) {
             $errorInfo = $stmtEntrada->errorInfo();
