@@ -111,6 +111,7 @@ try {
     $salidaRegistrada = false;
     $IdMovSalida = null;
     $IdMovSalidaVehiculo = null;
+    $salidaVehiculoRegistrada = false;
     
     $Conexion->beginTransaction();
     
@@ -241,129 +242,6 @@ try {
                 if ($IdMovSalida <= 0) {
                     throw new Exception("No se pudo obtener el ID de la inserción");
                 }
-
-                if ($tieneVehiculoPendiente == 1 && $IdVehPendiente) {
-                    error_log("Procesando salida de vehículo pendiente: ID $IdVehPendiente");
-                    
-                    $sqlVerificarEntradaVehiculo = "SELECT FolMov, IdVeh, TipoVehiculo FROM regentveh WHERE FolMov = :FolMovEnt";
-                    $stmtVerificarEntradaVehiculo = $Conexion->prepare($sqlVerificarEntradaVehiculo);
-                    $stmtVerificarEntradaVehiculo->bindParam(':FolMovEnt', $FolMovEnt, PDO::PARAM_INT);
-                    $stmtVerificarEntradaVehiculo->execute();
-                    
-                    $entradaVehiculoResult = $stmtVerificarEntradaVehiculo->fetchAll(PDO::FETCH_ASSOC);
-                    
-                    error_log("Resultados búsqueda entrada vehículo: " . json_encode($entradaVehiculoResult));
-                    
-                    if (count($entradaVehiculoResult) > 0) {
-                        $entradaVehiculo = $entradaVehiculoResult[0];
-                        $IdVehEntradaAnterior = (int)$entradaVehiculo['IdVeh'];
-                        $TipoVehiculoEntradaAnterior = (int)$entradaVehiculo['TipoVehiculo'];
-                        
-                        error_log("Vehículo entrada anterior ID: $IdVehEntradaAnterior");
-                        error_log("Tipo vehículo entrada anterior: $TipoVehiculoEntradaAnterior");
-                        
-                        $sqlRegentsalvehPendiente = "SELECT FolMovEnt FROM regentsalveh WHERE FolMovEnt = :FolMovEnt AND StatusRegistro = 1";
-                        $stmtRegentsalvehPendiente = $Conexion->prepare($sqlRegentsalvehPendiente);
-                        $stmtRegentsalvehPendiente->bindParam(':FolMovEnt', $entradaVehiculo['FolMov'], PDO::PARAM_INT);
-                        $stmtRegentsalvehPendiente->execute();
-                        $regentsalvehPendienteResult = $stmtRegentsalvehPendiente->fetchAll(PDO::FETCH_ASSOC);
-                        
-                        error_log("Resultados regentsalveh pendiente: " . count($regentsalvehPendienteResult));
-                        
-                        $debeRegistrarSalidaVehiculo = false;
-                        
-                        if ($IdVeh && $IdVehPendiente == $IdVeh && $IdVehEntradaAnterior == $IdVehPendiente) {
-                            error_log("Vehículos coinciden - ID actual: $IdVeh, ID pendiente: $IdVehPendiente, ID entrada anterior: $IdVehEntradaAnterior");
-                            $debeRegistrarSalidaVehiculo = true;
-                        } else if (!$IdVeh && $IdVehPendiente) {
-                            error_log("No hay vehículo actual pero sí hay pendiente - registrando salida de vehículo pendiente");
-                            $debeRegistrarSalidaVehiculo = true;
-                        }
-                        
-                        if ($debeRegistrarSalidaVehiculo && count($regentsalvehPendienteResult) > 0) {
-                            error_log("Registrando salida en regsalveh...");
-                            
-                            $sqlSalidaVehiculo = "INSERT INTO regsalveh (
-                                        IdVeh,
-                                        IdFolEnt,
-                                        Ubicacion,
-                                        DispN,
-                                        Fecha,
-                                        TiempoMarcaje,
-                                        TipoVehiculo,
-                                        Observaciones,
-                                        Usuario,
-                                        Notificar
-                                    ) VALUES (
-                                        :IdVeh, 
-                                        :IdFolEnt,
-                                        :Ubicacion, 
-                                        :DispN, 
-                                        :FechaSalida, 
-                                        :TiempoMarcaje, 
-                                        :TipoVehiculo, 
-                                        :Observaciones, 
-                                        :Usuario, 
-                                        :Notificar
-                                    )";
-                            
-                            $tipoVehiculoSalida = $TipoVehiculoEntradaAnterior;
-                            
-                            $stmtSalidaVeh = $Conexion->prepare($sqlSalidaVehiculo);
-                            $stmtSalidaVeh->bindParam(':IdVeh', $IdVehPendiente, PDO::PARAM_INT);
-                            $stmtSalidaVeh->bindParam(':IdFolEnt', $FolMovEnt, PDO::PARAM_INT);
-                            $stmtSalidaVeh->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
-                            $stmtSalidaVeh->bindParam(':DispN', $DispN, PDO::PARAM_STR);
-                            $stmtSalidaVeh->bindParam(':FechaSalida', $fechaHoraSalida, PDO::PARAM_STR);
-                            $stmtSalidaVeh->bindParam(':TiempoMarcaje', $HoraSalidaManual, PDO::PARAM_STR);
-                            $stmtSalidaVeh->bindParam(':TipoVehiculo', $tipoVehiculoSalida, PDO::PARAM_INT);
-                            $stmtSalidaVeh->bindParam(':Observaciones', $ObservacionesSalida, PDO::PARAM_STR);
-                            $stmtSalidaVeh->bindParam(':Usuario', $IdUsuario, PDO::PARAM_STR);
-                            $stmtSalidaVeh->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
-                            
-                            if (!$stmtSalidaVeh->execute()) {
-                                $errorInfo = $stmtSalidaVeh->errorInfo();
-                                error_log("Error SQL regsalveh: " . json_encode($errorInfo));
-                                throw new Exception('Error al registrar salida vehículo: ' . ($errorInfo[2] ?? 'Error desconocido'));
-                            }
-                            
-                            $IdMovSalidaVehiculo = (int)$Conexion->lastInsertId();
-                            error_log("Salida vehículo registrada ID: $IdMovSalidaVehiculo");
-                            
-                            $sqlUpdateRegentsalveh = "UPDATE regentsalveh SET 
-                                                    FolMovSal = :FolMovSal,
-                                                    FechaSalida = :FechaSalida,
-                                                    Tiempo = :Tiempo,
-                                                    StatusRegistro = 2
-                                                    WHERE FolMovEnt = :FolMovEnt";
-                            
-                            $stmtUpdateRegentsalveh = $Conexion->prepare($sqlUpdateRegentsalveh);
-                            $stmtUpdateRegentsalveh->bindParam(':FolMovSal', $IdMovSalidaVehiculo, PDO::PARAM_INT);
-                            $stmtUpdateRegentsalveh->bindParam(':FechaSalida', $fechaHoraSalida, PDO::PARAM_STR);
-                            $stmtUpdateRegentsalveh->bindParam(':Tiempo', $tiempoFormateado, PDO::PARAM_STR);
-                            $stmtUpdateRegentsalveh->bindParam(':FolMovEnt', $entradaVehiculo['FolMov'], PDO::PARAM_INT);
-                            
-                            if (!$stmtUpdateRegentsalveh->execute()) {
-                                $errorInfo = $stmtUpdateRegentsalveh->errorInfo();
-                                throw new Exception('Error al actualizar regentsalveh: ' . ($errorInfo[2] ?? 'Error desconocido'));
-                            }
-                        } else {
-                            error_log("No se registra salida vehículo porque:");
-                            if (!$debeRegistrarSalidaVehiculo) {
-                                error_log("- No debe registrar salida vehículo");
-                            }
-                            if (count($regentsalvehPendienteResult) == 0) {
-                                error_log("- No hay registro pendiente en regentsalveh");
-                            }
-                        }
-                    } else {
-                        error_log("No se encontró entrada de vehículo para FolMovEnt: $FolMovEnt");
-                    }
-                } else {
-                    error_log("No hay vehículo pendiente o tieneVehiculo no es 1");
-                    error_log("tieneVehiculoPendiente: $tieneVehiculoPendiente");
-                    error_log("IdVehPendiente: " . ($IdVehPendiente ?: 'NULL'));
-                }
             
                 $sqlActualizar = "UPDATE regentsalper SET 
                                   FolMovSal = :FolMovSal,
@@ -433,7 +311,7 @@ try {
         }
 
         $IdMov = (int)$Conexion->lastInsertId();
-        error_log("Entrada registrada ID: $IdMov");
+        error_log("Entrada personal registrada ID: $IdMov");
 
         if ($IdMov <= 0) {
             throw new Exception("No se pudo obtener el ID de la inserción");
@@ -442,6 +320,143 @@ try {
         $IdMovVeh = null;
         if ($IdVeh && $TipoTransporte != 0) {
             error_log("Registrando entrada de vehículo ID: $IdVeh");
+            
+            $tipoVehiculoVeh = $LibreUso == 1 ? 1 : 2;
+            
+            $sqlVerificarEntradaVehiculoPendiente = "SELECT 
+                t1.FolMov as FolMovEntVeh,
+                t1.IdVeh,
+                t1.Ubicacion as UbicacionEntrada,
+                t1.Fecha as FechaEntrada,
+                t1.TiempoMarcaje as HoraEntrada,
+                t1.TipoVehiculo,
+                t2.FolMovEnt,
+                t2.FolMovSal,
+                t2.StatusRegistro
+            FROM regentveh t1
+            LEFT JOIN regentsalveh t2 ON t1.FolMov = t2.FolMovEnt
+            WHERE t1.IdVeh = :IdVeh 
+            AND t2.StatusRegistro = 1
+            ORDER BY t1.Fecha DESC, t1.TiempoMarcaje DESC";
+            
+            $stmtVerificarEntradaVehiculoPendiente = $Conexion->prepare($sqlVerificarEntradaVehiculoPendiente);
+            $stmtVerificarEntradaVehiculoPendiente->bindParam(':IdVeh', $IdVeh, PDO::PARAM_INT);
+            $stmtVerificarEntradaVehiculoPendiente->execute();
+            
+            $entradaVehiculoPendienteResult = $stmtVerificarEntradaVehiculoPendiente->fetchAll(PDO::FETCH_ASSOC);
+            
+            if (count($entradaVehiculoPendienteResult) > 0) {
+                $entradaVehiculoPendiente = $entradaVehiculoPendienteResult[0];
+                $FolMovEntVehPendiente = (int)$entradaVehiculoPendiente['FolMovEntVeh'];
+                $StatusRegistro = (int)$entradaVehiculoPendiente['StatusRegistro'];
+                
+                error_log("Vehículo $IdVeh tiene entrada pendiente: FolMovEntVeh=$FolMovEntVehPendiente, StatusRegistro=$StatusRegistro");
+                
+                if ($StatusRegistro == 1) {
+                    error_log("Registrando salida para vehículo pendiente...");
+                    
+                    $fechaEntradaVehiculo = $entradaVehiculoPendiente['FechaEntrada'];
+                    $horaEntradaVehiculo = $entradaVehiculoPendiente['HoraEntrada'];
+                    $UbicacionEntradaVehiculo = $entradaVehiculoPendiente['UbicacionEntrada'];
+                    
+                    $fechaHoraEntradaVehiculo = date('Y-m-d H:i:s', strtotime($fechaEntradaVehiculo . ' ' . $horaEntradaVehiculo));
+                    
+                    $sqlDiferenciaVehiculo = "SELECT DATEDIFF(MINUTE, 
+                                      CAST(:FechaHoraEntrada AS DATETIME), 
+                                      CAST(:FechaHoraSalida AS DATETIME)) as Minutos";
+                    
+                    $stmtDiferenciaVehiculo = $Conexion->prepare($sqlDiferenciaVehiculo);
+                    $stmtDiferenciaVehiculo->bindParam(':FechaHoraEntrada', $fechaHoraEntradaVehiculo, PDO::PARAM_STR);
+                    $stmtDiferenciaVehiculo->bindParam(':FechaHoraSalida', $fechaHoraNuevaEntrada, PDO::PARAM_STR);
+                    $stmtDiferenciaVehiculo->execute();
+                    
+                    $diferenciaVehiculoResult = $stmtDiferenciaVehiculo->fetchAll(PDO::FETCH_ASSOC);
+                    $diferenciaVehiculo = $diferenciaVehiculoResult[0];
+                    
+                    $minutosTotalesVehiculo = (int)$diferenciaVehiculo['Minutos'];
+                    if ($minutosTotalesVehiculo < 0) {
+                        $minutosTotalesVehiculo = 0;
+                    }
+                    
+                    $horasTotalesVehiculo = floor($minutosTotalesVehiculo / 60);
+                    $minutosRestantesVehiculo = $minutosTotalesVehiculo % 60;
+                    
+                    $tiempoFormateadoVehiculo = sprintf("%02d:%02d", $horasTotalesVehiculo, $minutosRestantesVehiculo);
+                    
+                    error_log("Tiempo vehículo: $tiempoFormateadoVehiculo ($minutosTotalesVehiculo minutos)");
+                    
+                    $sqlSalidaVehiculo = "INSERT INTO regsalveh (
+                                IdVeh,
+                                IdFolEnt,
+                                Ubicacion,
+                                DispN,
+                                Fecha,
+                                TiempoMarcaje,
+                                TipoVehiculo,
+                                Observaciones,
+                                Usuario,
+                                Notificar
+                            ) VALUES (
+                                :IdVeh, 
+                                :IdFolEnt,
+                                :Ubicacion, 
+                                :DispN, 
+                                :FechaSalida, 
+                                :TiempoMarcaje, 
+                                :TipoVehiculo, 
+                                :Observaciones, 
+                                :Usuario, 
+                                :Notificar
+                            )";
+                    
+                    $tipoVehiculoSalida = (int)$entradaVehiculoPendiente['TipoVehiculo'];
+                    $observacionesSalidaVehiculo = "Salida automática - vehículo ingresando a nueva ubicación";
+                    
+                    $stmtSalidaVeh = $Conexion->prepare($sqlSalidaVehiculo);
+                    $stmtSalidaVeh->bindParam(':IdVeh', $IdVeh, PDO::PARAM_INT);
+                    $stmtSalidaVeh->bindParam(':IdFolEnt', $FolMovEntVehPendiente, PDO::PARAM_INT);
+                    $stmtSalidaVeh->bindParam(':Ubicacion', $UbicacionEntradaVehiculo, PDO::PARAM_STR);
+                    $stmtSalidaVeh->bindParam(':DispN', $DispN, PDO::PARAM_STR);
+                    $stmtSalidaVeh->bindParam(':FechaSalida', $FechaNuevaEntrada, PDO::PARAM_STR);
+                    $stmtSalidaVeh->bindParam(':TiempoMarcaje', $HoraNuevaEntrada, PDO::PARAM_STR);
+                    $stmtSalidaVeh->bindParam(':TipoVehiculo', $tipoVehiculoSalida, PDO::PARAM_INT);
+                    $stmtSalidaVeh->bindParam(':Observaciones', $observacionesSalidaVehiculo, PDO::PARAM_STR);
+                    $stmtSalidaVeh->bindParam(':Usuario', $IdUsuario, PDO::PARAM_STR);
+                    $stmtSalidaVeh->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
+                    
+                    if (!$stmtSalidaVeh->execute()) {
+                        $errorInfo = $stmtSalidaVeh->errorInfo();
+                        error_log("Error SQL regsalveh: " . json_encode($errorInfo));
+                        throw new Exception('Error al registrar salida vehículo: ' . ($errorInfo[2] ?? 'Error desconocido'));
+                    }
+                    
+                    $IdMovSalidaVehiculo = (int)$Conexion->lastInsertId();
+                    error_log("Salida vehículo registrada ID: $IdMovSalidaVehiculo");
+                    
+                    $sqlUpdateRegentsalveh = "UPDATE regentsalveh SET 
+                                            FolMovSal = :FolMovSal,
+                                            FechaSalida = :FechaSalida,
+                                            Tiempo = :Tiempo,
+                                            StatusRegistro = 2
+                                            WHERE FolMovEnt = :FolMovEnt";
+                    
+                    $stmtUpdateRegentsalveh = $Conexion->prepare($sqlUpdateRegentsalveh);
+                    $stmtUpdateRegentsalveh->bindParam(':FolMovSal', $IdMovSalidaVehiculo, PDO::PARAM_INT);
+                    $stmtUpdateRegentsalveh->bindParam(':FechaSalida', $fechaHoraNuevaEntrada, PDO::PARAM_STR);
+                    $stmtUpdateRegentsalveh->bindParam(':Tiempo', $tiempoFormateadoVehiculo, PDO::PARAM_STR);
+                    $stmtUpdateRegentsalveh->bindParam(':FolMovEnt', $FolMovEntVehPendiente, PDO::PARAM_INT);
+                    
+                    if (!$stmtUpdateRegentsalveh->execute()) {
+                        $errorInfo = $stmtUpdateRegentsalveh->errorInfo();
+                        throw new Exception('Error al actualizar regentsalveh: ' . ($errorInfo[2] ?? 'Error desconocido'));
+                    }
+                    
+                    $salidaVehiculoRegistrada = true;
+                    error_log("Salida vehículo registrada exitosamente");
+                }
+            } else {
+                error_log("No hay entrada pendiente para vehículo $IdVeh");
+            }
             
             $sqlEntradaVeh = "INSERT INTO regentveh (
                             IdVeh,
@@ -464,8 +479,6 @@ try {
                             :Usuario, 
                             :Notificar
                         )";
-            
-            $tipoVehiculoVeh = $LibreUso == 1 ? 1 : 2;
             
             $stmtEntradaVeh = $Conexion->prepare($sqlEntradaVeh);
             $stmtEntradaVeh->bindParam(':IdVeh', $IdVeh, PDO::PARAM_INT);
@@ -568,10 +581,14 @@ try {
                 'hora_salida' => $HoraSalidaManual,
                 'tiempo_estancia' => $tiempoFormateado
             ];
-            
-            if ($IdMovSalidaVehiculo) {
-                $response['data']['salida_info']['folio_salida_vehiculo'] = $IdMovSalidaVehiculo;
-            }
+        }
+        
+        if ($salidaVehiculoRegistrada) {
+            $response['data']['salida_vehiculo_info'] = [
+                'folio_salida_vehiculo' => $IdMovSalidaVehiculo,
+                'folio_entrada_vehiculo_anterior' => $FolMovEntVehPendiente ?? null,
+                'tiempo_estancia_vehiculo' => $tiempoFormateadoVehiculo ?? null
+            ];
         }
         
     } catch (Exception $e) {
