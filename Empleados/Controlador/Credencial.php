@@ -1,57 +1,158 @@
 <?php
 require_once '../../vendor/autoload.php';
+include '../../api/db/conexion.php';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use chillerlan\QRCode\QRCode;
+use chillerlan\QRCode\QROptions;
+
+if (!isset($_POST['IdPersonal'])) {
+    die('IdPersonal requerido');
+}
+
+$IdPersonal = (int)$_POST['IdPersonal'];
+$sql = "
+    SELECT 
+        IdPersonal,
+        NoEmpleado,
+        CONCAT(Nombre,' ',ApPaterno,' ',ApMaterno) AS NombreCompleto,
+        CONCAT('01_',NoEmpleado) AS CodigoQR
+    FROM t_personal
+    WHERE IdPersonal = :id
+";
+
+$stmt = $Conexion->prepare($sql);
+$stmt->bindParam(':id', $IdPersonal, PDO::PARAM_INT);
+$stmt->execute();
+$data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$data) {
+    die('Empleado no encontrado');
+}
+
+$nombre = $data['NombreCompleto'];
+$id     = $data['IdPersonal'];
+$codigo = $data['CodigoQR'];
+$noempleado = $data['NoEmpleado'];
+
+$optionsQR = new QROptions([
+    'eccLevel'    => QRCode::ECC_H,
+    'scale'       => 20,
+    'outputType'  => QRCode::OUTPUT_IMAGE_PNG,
+    'imageBase64' => true,
+]);
+
+$qr = new QRCode($optionsQR);
+$qrImg = $qr->render($codigo);
 
 $options = new Options();
 $options->set('isRemoteEnabled', true);
-$options->set('defaultFont', 'Arial');
+$options->set('defaultFont', 'Helvetica');
 
 $dompdf = new Dompdf($options);
+$dompdf->setPaper('A4', 'portrait');
 
-$foto_base64 = 'data:image/svg+xml;base64,' . base64_encode('
-<svg width="100" height="120" xmlns="http://www.w3.org/2000/svg">
-    <rect width="100" height="120" fill="#ecf0f1"/>
-    <circle cx="50" cy="50" r="30" fill="#bdc3c7"/>
-    <rect x="30" y="85" width="40" height="30" fill="#bdc3c7" rx="5"/>
-    <text x="50" y="120" text-anchor="middle" font-family="Arial" font-size="12" fill="#7f8c8d">FOTO</text>
-</svg>');
+$HeaderImg = "../../dist/img/LogoAlpasaBlanco.png";
+
+$base64Logo = "";
+if (file_exists($HeaderImg)) {
+    $imageData = file_get_contents($HeaderImg);
+    $base64Logo = 'data:' . mime_content_type($HeaderImg) . ';base64,' . base64_encode($imageData);
+}
 
 $html = '
-<!DOCTYPE html>
-<html>
-<body>
-    <div style="width: 300px; height: 200px; border: 1px solid #000; padding: 10px;">
-        <div style="text-align: center; margin-bottom: 10px;">
-            <h2 style="margin: 0;">Credencial</h2>
-        </div>
-        
-        <div style="display: flex;">
-            <div style="width: 100px;">
-                <img src="' . $foto_base64 . '" style="width: 80px; height: 100px; border: 1px solid #ccc;">
-            </div>
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            @page { margin: 0px; }
             
-            <div style="flex: 1;">
-                <p><strong>Nombre:</strong> Juan Pérez</p>
-                <p><strong>ID:</strong> 12345</p>
-                <p><strong>Cargo:</strong> Desarrollador</p>
-                <p><strong>Fecha:</strong> ' . date('d/m/Y') . '</p>
-            </div>
-        </div>
-        
-        <div style="text-align: center; margin-top: 20px; font-size: 10px;">
-            <hr>
-            Documento oficial - Válido con foto
+            body {
+                margin: 0px;
+                font-family: "Helvetica", sans-serif;
+                width: 100%;
+                height: 100%;
+            }
+
+            .header {
+            background-color: #d9530f;
+            height: 150px;
+            width: 100%;
+            position: absolute;
+            text-align: center;
+            /* Añadimos padding para centrar verticalmente el logo */
+            padding-top: 25px; 
+        }
+
+        .logo-img {
+            padding-top: 10px;
+            width: 600px;
+        }
+
+        .content {
+            text-align: center;
+            padding-top: 80px;
+            height: 500px;
+        }
+
+        .qr-img {
+            padding-top: 100px;
+            width: 700px;
+        }
+
+        .footer {
+            background-color: #d9530f;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 200px;
+            color: white;
+            text-align: center;
+        }
+
+        .footer-content {
+            padding-top: 60px;
+        }
+
+        .name {
+            font-size: 25pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .id {
+            font-size: 25pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+        <img src="'.$base64Logo.'" class="logo-img" />
+    </div>
+    <div class="content">
+        <img src="'.$qrImg.'" class="qr-img">
+    </div>
+
+    <div class="footer">
+        <div class="footer-content">
+            <div class="name">'.$nombre.'</div>
+            <div class="id">NoEmpleado:'.$noempleado.'</div>
         </div>
     </div>
+
 </body>
 </html>';
 
 $dompdf->loadHtml($html);
-$dompdf->setPaper(array(0, 0, 300, 200));
 $dompdf->render();
 
 header('Content-Type: application/pdf');
+header('Content-Disposition: inline; filename="credencial_'.$id.'.pdf"');
 echo $dompdf->output();
-?>
+exit;

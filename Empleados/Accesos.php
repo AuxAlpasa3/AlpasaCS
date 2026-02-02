@@ -15,18 +15,23 @@ include_once "../templates/head.php";
 
     <section class="content">
         <div class="container-fluid">
-            <div class="card card-primary">
-                <div class="card-header text-white" style="background-color: #d94f00; padding: 1rem;">
-                    <h3 class="card-title mb-0">
-                        <i class="fas fa-exchange-alt mr-2"></i>Filtros de Búsqueda
+            <div class="card card-primary mb-4">
+                <div class="card-header text-white" style="background-color: #d94f00; padding: 1rem; cursor: pointer;" id="filtrosHeader">
+                    <h3 class="card-title mb-0 d-flex justify-content-between align-items-center">
+                        <span>
+                            <i class="fas fa-filter mr-2"></i>Filtros de Búsqueda
+                        </span>
+                        <span class="toggle-icon">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
                     </h3>
                 </div>
-                <div class="card-body">
+                <div class="card-body" id="filtrosBody">
                     <div class="row mb-3">
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>Fecha:</label>
-                                <select id="filtro-fecha" class="form-control" style="border-color: #d94f00;">
+                                <label class="form-label">Fecha:</label>
+                                <select id="filtro-fecha" class="form-control form-control-lg" style="width: 100%;">
                                     <option value="hoy">Hoy</option>
                                     <option value="ayer">Ayer</option>
                                     <option value="semana">Esta semana</option>
@@ -38,90 +43,94 @@ include_once "../templates/head.php";
                         
                         <div class="col-md-2" id="rango-fechas-container" style="display: none;">
                             <div class="form-group">
-                                <label>Desde:</label>
-                                <input type="date" id="fecha-inicio" class="form-control" style="border-color: #d94f00;" value="<?php echo date('Y-m-d'); ?>">
+                                <label class="form-label">Desde:</label>
+                                <input type="date" id="fecha-inicio" class="form-control form-control-lg" value="<?php echo date('Y-m-d'); ?>">
                             </div>
                         </div>
                         
                         <div class="col-md-2" id="rango-fechas-hasta-container" style="display: none;">
                             <div class="form-group">
-                                <label>Hasta:</label>
-                                <input type="date" id="fecha-fin" class="form-control" style="border-color: #d94f00;" value="<?php echo date('Y-m-d'); ?>">
+                                <label class="form-label">Hasta:</label>
+                                <input type="date" id="fecha-fin" class="form-control form-control-lg" value="<?php echo date('Y-m-d'); ?>">
                             </div>
                         </div>
                         
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Personal:</label>
-                                <select id="filtro-personal" class="form-control select2-personal" style="border-color: #d94f00; width: 100%;">
-                                    <option value="">Todos</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <!-- Ubicación con Select2 -->
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>Ubicación:</label>
-                                <select id="filtro-ubicacion" class="form-control select2-ubicacion" style="border-color: #d94f00; width: 100%;">
-                                    <option value="">Todas</option>
+                                <label class="form-label">Personal:</label>
+                                <select id="filtro-personal" class="form-control form-control-lg select2-personal" style="width: 100%;">
                                 </select>
                             </div>
                         </div>
                         
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>Tipo:</label>
-                                <select id="filtro-tipo" class="form-control" style="border-color: #d94f00;">
+                                <label class="form-label">Ubicación:</label>
+                                <select id="filtro-ubicacion" class="form-control form-control-lg select2-ubicacion" style="width: 100%;">
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="form-label">Tipo:</label>
+                                <select id="filtro-tipo" class="form-control form-control-lg select2-tipo" style="width: 100%;">
                                     <option value="">Todos</option>
                                     <option value="entrada">Entradas</option>
                                     <option value="salida">Salidas</option>
                                 </select>
                             </div>
                         </div>
-                        
-                        <div class="col-md-1">
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-3">
                             <div class="form-group">
-                                <label>&nbsp;</label>
-                                <button type="button" id="btn-aplicar-filtros" class="btn btn-primary btn-block" style="background-color: #d94f00; border-color: #d94f00;">
-                                    <i class="fas fa-search"></i>
+                                <label class="form-label">ID Personal:</label>
+                                <input type="text" id="filtro-id-personal" class="form-control form-control-lg" placeholder="Buscar por ID...">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-9">
+                            <div class="form-group text-right mt-4">
+                                <button type="button" id="btn-aplicar-filtros" class="btn btn-primary btn-lg" style="background-color: #d94f00; border-color: #d94f00;">
+                                    <i class="fas fa-search mr-1"></i> Buscar
+                                </button>
+                                <button type="button" id="btn-limpiar-filtros" class="btn btn-outline-primary btn-lg">
+                                    <i class="fas fa-broom mr-1"></i> Limpiar
                                 </button>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="row mb-4">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>ID Personal:</label>
-                                <input type="text" id="filtro-id-personal" class="form-control" style="border-color: #d94f00;" placeholder="Buscar por ID...">
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label>&nbsp;</label>
-                                <button type="button" id="btn-limpiar-filtros" class="btn btn-outline-primary btn-block">
-                                    <i class="fas fa-broom"></i> Limpiar
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6 text-right">
-                            <div class="btn-group mt-6" role="group">
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div class="btn-group" role="group">
                                 <button type="button" class="btn btn-outline-primary" id="btn-export-excel">
-                                    <i class="fas fa-file-excel"></i> Excel
+                                    <i class="fas fa-file-excel mr-1"></i> Excel
                                 </button>
                                 <button type="button" class="btn btn-outline-primary" id="btn-export-pdf">
-                                    <i class="fas fa-file-pdf"></i> PDF
+                                    <i class="fas fa-file-pdf mr-1"></i> PDF
                                 </button>
                                 <button type="button" class="btn btn-outline-primary" id="btn-print">
-                                    <i class="fas fa-print"></i> Imprimir
+                                    <i class="fas fa-print mr-1"></i> Imprimir
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" id="btn-refresh">
+                                    <i class="fas fa-sync-alt mr-1"></i> Recargar
                                 </button>
                             </div>
                         </div>
                     </div>
-                    
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header text-white" style="background-color: #d94f00; padding: 1rem;">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-exchange-alt mr-2"></i>Lista de Movimientos
+                    </h3>
+                </div>
+                <div class="card-body">
                     <div id="loading" class="text-center" style="display: none;">
                         <div class="spinner-border text-primary" role="status">
                             <span class="sr-only">Cargando...</span>
@@ -129,7 +138,23 @@ include_once "../templates/head.php";
                         <p class="mt-2 text-primary">Cargando movimientos...</p>
                     </div>
                     
-                    <div id="movimientos-container">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped" id="dataTableMovimientos">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>ID Personal</th>
+                                    <th>Nombre</th>
+                                    <th>Tipo</th>
+                                    <th>Ubicación</th>
+                                    <th>Acción</th>
+                                    <th>Detalles</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -143,7 +168,6 @@ include_once "../templates/head.php";
 include_once '../templates/footer.php';
 ?>
 
-<!-- DataTables JS -->
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
@@ -151,741 +175,497 @@ include_once '../templates/footer.php';
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
-
-<!-- JSZip para Excel -->
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
-
-<!-- PDFMake para PDF -->
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/pdfmake.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/vfs_fonts.js"></script>
-
-<!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script type="text/javascript">
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM completamente cargado, inicializando sistema...');
+$(document).ready(function() {
+    var dataTable = null;
+    var filtrosExpandidos = true;
     
-    $(document).ready(function() {
-        console.log('jQuery listo, versión:', $.fn.jquery);
+    function toggleFiltros() {
+        filtrosExpandidos = !filtrosExpandidos;
         
-        if (typeof $.fn.select2 === 'undefined') {
-            console.error('Select2 no está disponible!');
-            alert('Error: Select2 no se cargó correctamente. Recarga la página.');
+        if (filtrosExpandidos) {
+            $('#filtrosBody').slideDown(300);
+            $('#filtrosHeader .toggle-icon').html('<i class="fas fa-chevron-up"></i>');
+            localStorage.setItem('filtrosExpandidos', 'true');
+        } else {
+            $('#filtrosBody').slideUp(300);
+            $('#filtrosHeader .toggle-icon').html('<i class="fas fa-chevron-down"></i>');
+            localStorage.setItem('filtrosExpandidos', 'false');
+        }
+    }
+    
+    var filtrosGuardados = localStorage.getItem('filtrosExpandidos');
+    if (filtrosGuardados === 'false') {
+        filtrosExpandidos = false;
+        $('#filtrosBody').hide();
+        $('#filtrosHeader .toggle-icon').html('<i class="fas fa-chevron-down"></i>');
+    }
+    
+    $('#filtrosHeader').click(function() {
+        toggleFiltros();
+    });
+    
+    function showNotification(message, type = 'success') {
+        const alertClass = type === 'success' ? 'alert-success' : 
+                         type === 'error' ? 'alert-danger' : 
+                         type === 'warning' ? 'alert-warning' : 'alert-info';
+        
+        const alertHtml = `
+            <div class="alert ${alertClass} alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+                ${message}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        `;
+        
+        $('body').append(alertHtml);
+        
+        setTimeout(() => {
+            $('.alert').alert('close');
+        }, 5000);
+    }
+    
+    function cargarDatosFiltros() {
+        // Configurar Select2 para fecha
+        $('#filtro-fecha').select2({
+            theme: 'custom-theme',
+            width: '100%',
+            dropdownCssClass: 'select2-dropdown-enhanced',
+            selectionCssClass: 'select2-selection-enhanced',
+            language: 'es'
+        });
+        
+        // Configurar Select2 para tipo
+        $('#filtro-tipo').select2({
+            theme: 'custom-theme',
+            placeholder: 'Todos los tipos',
+            allowClear: true,
+            width: '100%',
+            dropdownCssClass: 'select2-dropdown-enhanced',
+            selectionCssClass: 'select2-selection-enhanced',
+            language: 'es'
+        });
+        
+        // Cargar personal
+        $.ajax({
+            url: 'Controlador/ajax_get_personal.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                if (!data.error && Array.isArray(data)) {
+                    var select = $('#filtro-personal');
+                    select.empty();
+                    
+                    $.each(data, function(index, item) {
+                        if (item && item.id && item.nombre) {
+                            var texto = item.nombre;
+                            if (item.codigo) {
+                                texto += ' (ID: ' + item.codigo + ')';
+                            }
+                            select.append('<option value="' + item.id + '">' + texto + '</option>');
+                        }
+                    });
+                    
+                    select.select2({
+                        theme: 'custom-theme',
+                        placeholder: 'Todo el personal',
+                        allowClear: true,
+                        width: '100%',
+                        dropdownCssClass: 'select2-dropdown-enhanced',
+                        selectionCssClass: 'select2-selection-enhanced',
+                        language: 'es',
+                        closeOnSelect: false
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error cargando personal:', error);
+            }
+        });
+        
+        // Cargar ubicaciones
+        $.ajax({
+            url: 'Controlador/ajax_get_ubicaciones.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                if (!data.error && Array.isArray(data)) {
+                    var select = $('#filtro-ubicacion');
+                    select.empty();
+                    
+                    $.each(data, function(index, item) {
+                        if (item && item.id && item.nombre) {
+                            select.append('<option value="' + item.id + '">' + item.nombre + '</option>');
+                        }
+                    });
+                    
+                    select.select2({
+                        theme: 'custom-theme',
+                        placeholder: 'Todas las ubicaciones',
+                        allowClear: true,
+                        width: '100%',
+                        dropdownCssClass: 'select2-dropdown-enhanced',
+                        selectionCssClass: 'select2-selection-enhanced',
+                        language: 'es',
+                        closeOnSelect: false
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error cargando ubicaciones:', error);
+            }
+        });
+    }
+    
+    function inicializarDataTable() {
+        if ($.fn.DataTable.isDataTable('#dataTableMovimientos')) {
+            if (dataTable) {
+                dataTable.destroy();
+            }
+            $('#dataTableMovimientos tbody').empty();
+        }
+        
+        dataTable = $('#dataTableMovimientos').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "Controlador/Obtener_Movimientos.php",
+                type: "POST",
+                data: function(d) {
+                    d.filtro_fecha = $('#filtro-fecha').val();
+                    d.fecha_inicio = $('#fecha-inicio').val();
+                    d.fecha_fin = $('#fecha-fin').val();
+                    d.id_personal = $('#filtro-personal').val();
+                    d.id_ubicacion = $('#filtro-ubicacion').val();
+                    d.tipo_movimiento = $('#filtro-tipo').val();
+                    d.id_personal_especifico = $('#filtro-id-personal').val();
+                },
+                beforeSend: function() {
+                    $('#loading').show();
+                },
+                complete: function() {
+                    $('#loading').hide();
+                },
+                dataSrc: function(json) {
+                    if (json.error) {
+                        showNotification('Error al cargar los datos: ' + json.error, 'error');
+                        return [];
+                    }
+                    
+                    if (json.data && Array.isArray(json.data)) {
+                        return json.data;
+                    } else {
+                        return [];
+                    }
+                },
+                error: function(xhr, error, thrown) {
+                    showNotification('Error al cargar los datos.', 'error');
+                }
+            },
+            columns: [
+                { 
+                    data: "Fecha",
+                    className: "text-center",
+                    orderable: true,
+                    render: function(data, type, row) {
+                        return data ? new Date(data).toLocaleDateString('es-MX') : 'N/A';
+                    }
+                },
+                { 
+                    data: "Hora",
+                    className: "text-center",
+                    orderable: true
+                },
+                { 
+                    data: "IDPersonal",
+                    className: "text-center",
+                    orderable: true
+                },
+                { 
+                    data: "Nombre",
+                    orderable: true
+                },
+                { 
+                    data: "Tipo",
+                    className: "text-center",
+                    orderable: true,
+                    render: function(data, type, row) {
+                        var badgeClass = data === 'entrada' ? 'badge-success' : 'badge-danger';
+                        var tipoTexto = data === 'entrada' ? 'Entrada' : 'Salida';
+                        return `<span class="badge ${badgeClass}">${tipoTexto}</span>`;
+                    }
+                },
+                { 
+                    data: "Ubicacion",
+                    orderable: true,
+                    render: function(data, type, row) {
+                        return data || 'N/A';
+                    }
+                },
+                { 
+                    data: "Accion",
+                    className: "text-center",
+                    orderable: true,
+                    render: function(data, type, row) {
+                        return data || 'N/A';
+                    }
+                },
+                { 
+                    data: null,
+                    className: "text-center",
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        var idMovimiento = row.IdMovimiento || '';
+                        var tipo = row.Tipo || '';
+                        var categoria = row.Categoria || 'Personal';
+                        
+                        if (!idMovimiento) return '';
+                        
+                        return `
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-info btn-ver-detalles" 
+                                        data-id="${idMovimiento}"
+                                        data-tipo="${tipo}"
+                                        data-categoria="${categoria}"
+                                        title="Ver Detalles">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+            ],
+            language: {
+                processing: "Procesando...",
+                lengthMenu: "Mostrar _MENU_ registros",
+                zeroRecords: "No se encontraron resultados",
+                emptyTable: "Ningún dato disponible en esta tabla",
+                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                infoEmpty: "Mostrando 0 a 0 de 0 registros",
+                infoFiltered: "(filtrado de _MAX_ registros totales)",
+                paginate: {
+                    first: "Primero",
+                    last: "Último",
+                    next: "Siguiente",
+                    previous: "Anterior"
+                }
+            },
+            responsive: true,
+            autoWidth: false,
+            pageLength: 25,
+            searching: false,
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+            dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                 "<'row'<'col-sm-12'tr>>" +
+                 "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel"></i> Excel',
+                    className: 'btn-outline-primary',
+                    title: 'Movimientos_' + new Date().toISOString().split('T')[0],
+                    exportOptions: {
+                        columns: ':visible'
+                    }
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                    className: 'btn-outline-primary',
+                    title: 'Movimientos_' + new Date().toISOString().split('T')[0],
+                    orientation: 'landscape',
+                    pageSize: 'A4',
+                    exportOptions: {
+                        columns: ':visible'
+                    },
+                    customize: function(doc) {
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 9;
+                        doc.styles.tableHeader.alignment = 'center';
+                        doc.styles.tableHeader.fillColor = '#d94f00';
+                        doc.styles.tableHeader.color = '#ffffff';
+                    }
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print"></i> Imprimir',
+                    className: 'btn-outline-primary',
+                    title: 'Movimientos_' + new Date().toISOString().split('T')[0],
+                    exportOptions: {
+                        columns: ':visible'
+                    },
+                    customize: function(win) {
+                        $(win.document.body).find('h1').css({
+                            'color': '#d94f00',
+                            'text-align': 'center',
+                            'margin-bottom': '20px'
+                        });
+                        
+                        $(win.document.body).find('table').addClass('table table-bordered table-striped');
+                        $(win.document.body).find('thead th').css({
+                            'background-color': '#d94f00',
+                            'color': 'white',
+                            'padding': '8px',
+                            'text-align': 'center'
+                        });
+                    }
+                }
+            ],
+            initComplete: function(settings, json) {
+                $('#loading').hide();
+                initEvents();
+                showNotification('Movimientos cargados correctamente', 'success');
+            },
+            drawCallback: function(settings) {
+                initEvents();
+            }
+        });
+    }
+    
+    function cargarDetalleMovimiento(idMov, tipo, categoria) {
+        $.ajax({
+            url: 'Modales/Detalle_Movimiento.php',
+            type: 'GET',
+            data: {
+                idMov: idMov,
+                tipo: tipo,
+                categoria: categoria
+            },
+            beforeSend: function() {
+                $('#loading').show();
+            },
+            success: function(response) {
+                $('#loading').hide();
+                $('#modal-container').html(response);
+                $('#DetalleMovimiento').modal('show');
+            },
+            error: function(xhr, status, error) {
+                $('#loading').hide();
+                showNotification('Error al cargar el detalle del movimiento', 'danger');
+            }
+        });
+    }
+    
+    function initEvents() {
+        $(document).off('click', '.btn-ver-detalles').on('click', '.btn-ver-detalles', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            var idMov = $(this).data('id');
+            var tipo = $(this).data('tipo');
+            var categoria = $(this).data('categoria');
+            
+            if (idMov) {
+                cargarDetalleMovimiento(idMov, tipo, categoria);
+            }
+        });
+    }
+    
+    $('#filtro-fecha').change(function() {
+        if ($(this).val() === 'personalizado') {
+            $('#rango-fechas-container').show();
+            $('#rango-fechas-hasta-container').show();
+        } else {
+            $('#rango-fechas-container').hide();
+            $('#rango-fechas-hasta-container').hide();
+        }
+    });
+    
+    $('#btn-aplicar-filtros').click(function() {
+        if (dataTable) {
+            dataTable.ajax.reload();
+        }
+    });
+    
+    $('#btn-limpiar-filtros').click(function() {
+        $('#filtro-fecha').val('hoy').trigger('change');
+        $('#fecha-inicio').val('<?php echo date('Y-m-d'); ?>');
+        $('#fecha-fin').val('<?php echo date('Y-m-d'); ?>');
+        $('#filtro-personal').val(null).trigger('change');
+        $('#filtro-ubicacion').val(null).trigger('change');
+        $('#filtro-tipo').val('').trigger('change');
+        $('#filtro-id-personal').val('');
+        
+        if (dataTable) {
+            dataTable.ajax.reload();
+        }
+        showNotification('Filtros limpiados', 'info');
+    });
+    
+    $('#btn-export-excel').click(function(e) {
+        e.preventDefault();
+        
+        if (!dataTable || dataTable.rows().count() === 0) {
+            showNotification('No hay datos para exportar', 'warning');
             return;
         }
         
-        console.log('Select2 disponible, versión:', $.fn.select2.version);
+        dataTable.button('.buttons-excel').trigger();
+        showNotification('Generando archivo Excel...', 'info');
+    });
+    
+    $('#btn-export-pdf').click(function(e) {
+        e.preventDefault();
         
-        // Variables globales
-        let dataTable = null;
-        let currentData = [];
-        
-        // Función para mostrar notificación
-        function showNotification(message, type = 'success') {
-            const alertClass = type === 'success' ? 'alert-success' : 
-                             type === 'error' ? 'alert-danger' : 
-                             type === 'warning' ? 'alert-warning' : 'alert-info';
-            
-            const alertHtml = `
-                <div class="alert ${alertClass} alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
-                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
-                    ${message}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            `;
-            
-            $('body').append(alertHtml);
-            
-            // Auto-remover después de 5 segundos
-            setTimeout(() => {
-                $('.alert').alert('close');
-            }, 5000);
+        if (!dataTable || dataTable.rows().count() === 0) {
+            showNotification('No hay datos para exportar', 'warning');
+            return;
         }
         
-        function cargarDatosIniciales() {
-            console.log('Cargando datos iniciales...');
-            
-            $.ajax({
-                url: 'Controlador/ajax_get_personal.php',
-                type: 'GET',
-                dataType: 'json',
-                success: function(data) {
-                    console.log('Respuesta de personal:', data);
-                    
-                    if (!data.error && Array.isArray(data)) {
-                        var select = $('#filtro-personal');
-                        select.empty();
-                        select.append('<option value="">Todos</option>');
-                        
-                        $.each(data, function(index, item) {
-                            if (item && item.id && item.nombre) {
-                                var texto = item.nombre;
-                                if (item.codigo) {
-                                    texto += ' (ID: ' + item.codigo + ')';
-                                }
-                                select.append('<option value="' + item.id + '">' + texto + '</option>');
-                            }
-                        });
-                        
-                        select.select2({
-                            theme: 'bootstrap-5',
-                            language: 'es',
-                            placeholder: 'Seleccionar personal...',
-                            allowClear: true,
-                            width: '100%'
-                        });
-                        
-                        console.log('Select2 personal inicializado con ' + data.length + ' registros');
-                    } else if (data.error) {
-                        console.error('Error en datos:', data.error);
-                        $('#filtro-personal').html('<option value="">Error: ' + data.error + '</option>');
-                        showNotification('Error al cargar personal: ' + data.error, 'error');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error AJAX al cargar personal:', error);
-                    $('#filtro-personal').html('<option value="">Error al cargar</option>');
-                    
-                    $('#filtro-personal').select2({
-                        theme: 'bootstrap-5',
-                        language: 'es',
-                        placeholder: 'Error al cargar datos',
-                        allowClear: true,
-                        width: '100%'
-                    });
-                    showNotification('Error al cargar la lista de personal', 'error');
-                }
-            });
-            
-            // Cargar ubicaciones
-            $.ajax({
-                url: 'Controlador/ajax_get_ubicaciones.php',
-                type: 'GET',
-                dataType: 'json',
-                success: function(data) {
-                    console.log('Respuesta de ubicaciones:', data);
-                    
-                    if (!data.error && Array.isArray(data)) {
-                        var select = $('#filtro-ubicacion');
-                        select.empty(); 
-                        select.append('<option value="">Todas</option>');
-                        
-                        $.each(data, function(index, item) {
-                            if (item && item.id && item.nombre) {
-                                select.append('<option value="' + item.id + '">' + item.nombre + '</option>');
-                            }
-                        });
-                        
-                        select.select2({
-                            theme: 'bootstrap-5',
-                            language: 'es',
-                            placeholder: 'Seleccionar ubicación...',
-                            allowClear: true,
-                            width: '100%'
-                        });
-                        
-                        console.log('Select2 ubicaciones inicializado con ' + data.length + ' registros');
-                    } else if (data.error) {
-                        console.error('Error en datos:', data.error);
-                        $('#filtro-ubicacion').html('<option value="">Error: ' + data.error + '</option>');
-                        showNotification('Error al cargar ubicaciones: ' + data.error, 'error');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error AJAX al cargar ubicaciones:', error);
-                    $('#filtro-ubicacion').html('<option value="">Error al cargar</option>');
-                    
-                    $('#filtro-ubicacion').select2({
-                        theme: 'bootstrap-5',
-                        language: 'es',
-                        placeholder: 'Error al cargar datos',
-                        allowClear: true,
-                        width: '100%'
-                    });
-                    showNotification('Error al cargar la lista de ubicaciones', 'error');
-                }
-            });
+        dataTable.button('.buttons-pdf').trigger();
+        showNotification('Generando archivo PDF...', 'info');
+    });
+    
+    $('#btn-print').click(function(e) {
+        e.preventDefault();
+        
+        if (!dataTable || dataTable.rows().count() === 0) {
+            showNotification('No hay datos para imprimir', 'warning');
+            return;
         }
         
-        // Función para cargar movimientos
-        function cargarMovimientos() {
-            console.log('Cargando movimientos con filtros...');
-            $('#loading').show();
-            $('#movimientos-container').empty();
-            
-            var params = {
-                filtro_fecha: $('#filtro-fecha').val(),
-                fecha_inicio: $('#fecha-inicio').val(),
-                fecha_fin: $('#fecha-fin').val(),
-                id_personal: $('#filtro-personal').val(),
-                id_ubicacion: $('#filtro-ubicacion').val(),
-                tipo_movimiento: $('#filtro-tipo').val(),
-                id_personal_especifico: $('#filtro-id-personal').val()
-            };
-            
-            console.log('Parámetros de filtro:', params);
-            
-            $.ajax({
-                url: 'Controlador/ajax_movimientos.php',
-                type: 'GET',
-                data: params,
-                dataType: 'html',
-                success: function(response) {
-                    $('#movimientos-container').html(response);
-                    inicializarDataTable();
-                    $('#loading').hide();
-                    showNotification('Movimientos cargados correctamente', 'success');
-                },
-                error: function(xhr, status, error) {
-                    $('#movimientos-container').html('<div class="alert alert-danger">Error: ' + error + '</div>');
-                    $('#loading').hide();
-                    console.error('Error al cargar movimientos:', error);
-                    showNotification('Error al cargar movimientos: ' + error, 'error');
-                }
-            });
+        dataTable.button('.buttons-print').trigger();
+        showNotification('Preparando impresión...', 'info');
+    });
+    
+    $('#btn-refresh').click(function(e) {
+        e.preventDefault();
+        if (dataTable) {
+            dataTable.ajax.reload(null, false);
+            showNotification('Tabla recargada correctamente', 'success');
         }
-        
-        // Función para inicializar DataTable SIN botones
-        function inicializarDataTable() {
-            console.log('Inicializando DataTable SIN botones...');
-            
-            var $table = $('#dataTableMovimientos');
-            if (!$table.length) {
-                console.warn('La tabla no existe');
-                $('#loading').hide();
-                showNotification('No hay datos para mostrar con los filtros aplicados', 'warning');
-                return;
+    });
+    
+    $('#filtro-id-personal').keypress(function(e) {
+        if (e.which == 13) {
+            if (dataTable) {
+                dataTable.ajax.reload();
             }
-            
-            var hasData = false;
-            $table.find('tbody tr').each(function() {
-                var tdCount = $(this).find('td').length;
-                if (tdCount > 1) {
-                    hasData = true;
-                }
-            });
-            
-            console.log('Tabla tiene datos?', hasData);
-            
-            // Destruir DataTable si ya existe
-            if ($.fn.DataTable.isDataTable('#dataTableMovimientos')) {
-                if (dataTable) {
-                    dataTable.destroy();
-                }
-                $table.removeClass('dataTable no-footer');
-                $table.find('thead').removeAttr('style');
-            }
-            
-            setTimeout(function() {
-                try {
-                    if (hasData) {
-                        // Configurar DataTable SIN botones en el DOM
-                        dataTable = $('#dataTableMovimientos').DataTable({
-                            "language": {
-                                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json",
-                                "emptyTable": "No hay datos disponibles en la tabla",
-                                "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                                "infoEmpty": "Mostrando 0 a 0 de 0 registros",
-                                "infoFiltered": "(filtrado de _MAX_ registros totales)",
-                                "lengthMenu": "Mostrar _MENU_ registros",
-                                "loadingRecords": "Cargando...",
-                                "processing": "Procesando...",
-                                "search": "Buscar:",
-                                "zeroRecords": "No se encontraron registros coincidentes",
-                                "paginate": {
-                                    "first": "Primero",
-                                    "last": "Último",
-                                    "next": "Siguiente",
-                                    "previous": "Anterior"
-                                }
-                            },
-                            "responsive": true,
-                            "autoWidth": false,
-                            "order": [[0, "desc"]],
-                            "pageLength": 25,
-                            "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
-                            // DOM SIN la letra 'B' (sin botones)
-                            "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-                                   "<'row'<'col-sm-12'tr>>" +
-                                   "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                            "initComplete": function(settings, json) {
-                                console.log('DataTable inicializado correctamente SIN botones');
-                                $('#loading').hide();
-                                
-                                // Guardar datos actuales
-                                currentData = dataTable.data().toArray();
-                                
-                                showNotification('Tabla cargada correctamente. Usa los botones de exportación en la parte superior.', 'success');
-                            },
-                            "drawCallback": function(settings) {
-                                $('#loading').hide();
-                            },
-                            "columns": [
-                                { "width": "10%" },
-                                { "width": "20%" },
-                                { "width": "10%" },
-                                { "width": "10%" },
-                                { "width": "15%" },
-                                { "width": "10%" },
-                                { "width": "15%" },
-                                { "width": "10%" }
-                            ]
-                        });
-                        
-                    } else {
-                        console.log('Tabla sin datos, mostrando mensaje estático');
-                        $('#loading').hide();
-                        
-                        $table.addClass('table table-bordered table-striped');
-                        
-                        var $messageRow = $table.find('tbody tr');
-                        if ($messageRow.length) {
-                            $messageRow.find('td').html(
-                                '<div class="text-center py-4">' +
-                                '<i class="fas fa-database fa-3x text-muted mb-3"></i>' +
-                                '<h5 class="text-muted">No se encontraron movimientos</h5>' +
-                                '<p class="small text-muted">Intenta con otros filtros</p>' +
-                                '</div>'
-                            );
-                        }
-                        showNotification('No se encontraron movimientos con los filtros aplicados', 'warning');
-                    }
-                } catch (error) {
-                    console.error('Error al inicializar DataTable:', error);
-                    $('#loading').hide();
-                    $table.addClass('table table-bordered table-striped');
-                    showNotification('Error al inicializar la tabla de datos: ' + error.message, 'error');
-                }
-            }, 100);
         }
-        
-        // Función para exportar a Excel usando DataTables pero de forma manual
-        function exportarExcelDataTable() {
-            if (!dataTable || !$.fn.DataTable.isDataTable('#dataTableMovimientos')) {
-                showNotification('La tabla no está inicializada', 'warning');
-                return;
-            }
-            
-            if (dataTable.rows().count() === 0) {
-                showNotification('No hay datos para exportar', 'warning');
-                return;
-            }
-            
-            showNotification('Generando archivo Excel...', 'info');
-            
-            // Crear un DataTable temporal solo para exportar
-            $.fn.dataTable.ext.buttons.excelHtml5.action.call(
-                { 
-                    node: $('#btn-export-excel')[0],
-                    conf: {
-                        extend: 'excelHtml5',
-                        text: 'Excel',
-                        title: 'Movimientos_' + new Date().toISOString().split('T')[0],
-                        exportOptions: {
-                            columns: ':visible',
-                            modifier: {
-                                page: 'all'
-                            }
-                        },
-                        filename: 'movimientos_' + new Date().toISOString().split('T')[0]
-                    },
-                    dt: dataTable
-                }
-            );
-            
-            setTimeout(() => {
-                showNotification('Archivo Excel generado correctamente', 'success');
-            }, 1000);
-        }
-        
-        function exportarPDFDataTable() {
-            if (!dataTable || !$.fn.DataTable.isDataTable('#dataTableMovimientos')) {
-                showNotification('La tabla no está inicializada', 'warning');
-                return;
-            }
-            
-            if (dataTable.rows().count() === 0) {
-                showNotification('No hay datos para exportar', 'warning');
-                return;
-            }
-            
-            showNotification('Generando archivo PDF...', 'info');
-            
-            $.fn.dataTable.ext.buttons.pdfHtml5.action.call(
-                { 
-                    node: $('#btn-export-pdf')[0],
-                    conf: {
-                        extend: 'pdfHtml5',
-                        text: 'PDF',
-                        title: 'Movimientos_' + new Date().toISOString().split('T')[0],
-                        exportOptions: {
-                            columns: ':visible',
-                            modifier: {
-                                page: 'all'
-                            }
-                        },
-                        orientation: 'landscape',
-                        pageSize: 'A4',
-                        customize: function(doc) {
-                            doc.defaultStyle.fontSize = 8;
-                            doc.styles.tableHeader.fontSize = 9;
-                            doc.styles.tableHeader.alignment = 'center';
-                            doc.styles.tableHeader.fillColor = '#d94f00';
-                            doc.styles.tableHeader.color = '#ffffff';
-                            doc.content[1].table.widths = 
-                                Array(doc.content[1].table.body[0].length).fill('*');
-                            
-                            // Agregar fecha al documento
-                            doc.content.splice(1, 0, {
-                                text: 'Fecha: ' + new Date().toLocaleDateString() + 
-                                      ' • Hora: ' + new Date().toLocaleTimeString(),
-                                fontSize: 10,
-                                alignment: 'right',
-                                margin: [0, 0, 0, 10]
-                            });
-                        }
-                    },
-                    dt: dataTable
-                }
-            );
-            
-            setTimeout(() => {
-                showNotification('Archivo PDF generado correctamente', 'success');
-            }, 1000);
-        }
-        
-        // Función para imprimir usando DataTables pero de forma manual
-        function imprimirDataTable() {
-            if (!dataTable || !$.fn.DataTable.isDataTable('#dataTableMovimientos')) {
-                showNotification('La tabla no está inicializada', 'warning');
-                return;
-            }
-            
-            if (dataTable.rows().count() === 0) {
-                showNotification('No hay datos para imprimir', 'warning');
-                return;
-            }
-            
-            showNotification('Preparando impresión...', 'info');
-            
-            // Crear un DataTable temporal solo para imprimir
-            $.fn.dataTable.ext.buttons.print.action.call(
-                { 
-                    node: $('#btn-print')[0],
-                    conf: {
-                        extend: 'print',
-                        text: 'Imprimir',
-                        title: 'Movimientos_' + new Date().toISOString().split('T')[0],
-                        exportOptions: {
-                            columns: ':visible',
-                            modifier: {
-                                page: 'all'
-                            }
-                        },
-                        customize: function(win) {
-                            $(win.document.body).find('h1').css({
-                                'color': '#d94f00',
-                                'text-align': 'center',
-                                'margin-bottom': '20px'
-                            });
-                            
-                            // Agregar encabezado con fecha
-                            $(win.document.body).prepend(
-                                '<div style="text-align: center; margin-bottom: 20px;">' +
-                                '<h1 style="color: #d94f00;">Reporte de Movimientos</h1>' +
-                                '<p><strong>Fecha:</strong> ' + new Date().toLocaleDateString() + '</p>' +
-                                '<p><strong>Hora:</strong> ' + new Date().toLocaleTimeString() + '</p>' +
-                                '</div>'
-                            );
-                            
-                            $(win.document.body).find('table').addClass('table table-bordered table-striped');
-                            $(win.document.body).find('thead th').css({
-                                'background-color': '#d94f00',
-                                'color': 'white',
-                                'padding': '8px',
-                                'text-align': 'center'
-                            });
-                            $(win.document.body).find('td').css({
-                                'padding': '6px',
-                                'text-align': 'center'
-                            });
-                            
-                            // Agregar pie de página
-                            $(win.document.body).append(
-                                '<div style="margin-top: 20px; text-align: center; font-size: 10px; color: #666;">' +
-                                'Generado el: ' + new Date().toLocaleString() +
-                                '</div>'
-                            );
-                        }
-                    },
-                    dt: dataTable
-                }
-            );
-        }
-        
-        // Event Listeners para botones de exportación en los filtros
-        $('#btn-export-excel').click(function(e) {
-            e.preventDefault();
-            
-            if (dataTable && $.fn.DataTable.isDataTable('#dataTableMovimientos')) {
-                // Usar la función de exportación de DataTable
-                exportarExcelDataTable();
-            } else if (currentData && currentData.length > 0) {
-                // Función de respaldo si no hay DataTable
-                exportarExcelManual();
-            } else {
-                showNotification('No hay datos para exportar', 'warning');
-            }
-        });
-        
-        $('#btn-export-pdf').click(function(e) {
-            e.preventDefault();
-            
-            if (dataTable && $.fn.DataTable.isDataTable('#dataTableMovimientos')) {
-                // Usar la función de exportación de DataTable
-                exportarPDFDataTable();
-            } else if (currentData && currentData.length > 0) {
-                // Función de respaldo si no hay DataTable
-                exportarPDFManual();
-            } else {
-                showNotification('No hay datos para exportar', 'warning');
-            }
-        });
-        
-        $('#btn-print').click(function(e) {
-            e.preventDefault();
-            
-            if (dataTable && $.fn.DataTable.isDataTable('#dataTableMovimientos')) {
-                // Usar la función de impresión de DataTable
-                imprimirDataTable();
-            } else if (currentData && currentData.length > 0) {
-                // Función de respaldo si no hay DataTable
-                imprimirManual();
-            } else {
-                showNotification('No hay datos para imprimir', 'warning');
-            }
-        });
-        
-        // Funciones de respaldo manual (si no hay DataTable)
-        function exportarExcelManual() {
-            const table = $('#dataTableMovimientos');
-            if (!table.length || table.find('tbody tr').length === 0) {
-                showNotification('No hay datos para exportar', 'warning');
-                return;
-            }
-            
-            showNotification('Generando archivo Excel...', 'info');
-            
-            // Crear una tabla HTML para exportar
-            const tableHtml = table.clone();
-            tableHtml.find('th:last, td:last').remove(); // Remover columna de acciones si existe
-            
-            const htmlContent = `
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                    <style>
-                        table { border-collapse: collapse; width: 100%; }
-                        th { background-color: #d94f00; color: white; font-weight: bold; padding: 8px; border: 1px solid #ddd; }
-                        td { padding: 6px; border: 1px solid #ddd; }
-                    </style>
-                </head>
-                <body>
-                    <h2>Reporte de Movimientos</h2>
-                    <p><strong>Fecha:</strong> ${new Date().toLocaleDateString()}</p>
-                    <p><strong>Hora:</strong> ${new Date().toLocaleTimeString()}</p>
-                    ${tableHtml[0].outerHTML}
-                </body>
-                </html>
-            `;
-            
-            // Descargar como archivo
-            const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'movimientos_' + new Date().toISOString().split('T')[0] + '.xls';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            
-            showNotification('Archivo Excel generado correctamente', 'success');
-        }
-        
-        function exportarPDFManual() {
-            const table = $('#dataTableMovimientos');
-            if (!table.length || table.find('tbody tr').length === 0) {
-                showNotification('No hay datos para exportar', 'warning');
-                return;
-            }
-            
-            showNotification('Generando archivo PDF...', 'info');
-            
-            // Abrir ventana para imprimir/guardar como PDF
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Movimientos</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        h1 { color: #d94f00; text-align: center; }
-                        .header-info { text-align: center; margin-bottom: 20px; }
-                        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                        th { background-color: #d94f00; color: white; padding: 10px; border: 1px solid #ddd; text-align: center; }
-                        td { padding: 8px; border: 1px solid #ddd; }
-                        @media print {
-                            @page { margin: 0.5cm; }
-                            body { margin: 0; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <h1>Reporte de Movimientos</h1>
-                    <div class="header-info">
-                        <p><strong>Fecha:</strong> ${new Date().toLocaleDateString()}</p>
-                        <p><strong>Hora:</strong> ${new Date().toLocaleTimeString()}</p>
-                    </div>
-                    ${table[0].outerHTML}
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.focus();
-            printWindow.print();
-            
-            showNotification('Archivo PDF listo para imprimir o guardar', 'success');
-        }
-        
-        function imprimirManual() {
-            const table = $('#dataTableMovimientos');
-            if (!table.length || table.find('tbody tr').length === 0) {
-                showNotification('No hay datos para imprimir', 'warning');
-                return;
-            }
-            
-            // Abrir ventana para imprimir
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Movimientos</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        h1 { color: #d94f00; text-align: center; }
-                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                        th { background-color: #d94f00; color: white; padding: 10px; text-align: left; }
-                        td { padding: 8px; border-bottom: 1px solid #ddd; }
-                    </style>
-                </head>
-                <body>
-                    <h1>Reporte de Movimientos</h1>
-                    <p><strong>Fecha:</strong> ${new Date().toLocaleDateString()}</p>
-                    <p><strong>Hora:</strong> ${new Date().toLocaleTimeString()}</p>
-                    ${table[0].outerHTML}
-                    <script>
-                        window.onload = function() { window.print(); window.close(); }
-                    <\/script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-        }
-        
-        // Event Listeners para filtros
-        $('#filtro-fecha').change(function() {
-            if ($(this).val() === 'personalizado') {
-                $('#rango-fechas-container').show();
-                $('#rango-fechas-hasta-container').show();
-            } else {
-                $('#rango-fechas-container').hide();
-                $('#rango-fechas-hasta-container').hide();
-            }
-        });
-        
-        $('#btn-aplicar-filtros').click(function() {
-            cargarMovimientos();
-        });
-        
-        $('#btn-limpiar-filtros').click(function() {
-            $('#filtro-fecha').val('hoy');
-            $('#rango-fechas-container').hide();
-            $('#rango-fechas-hasta-container').hide();
-            
-            $('#filtro-personal').val('').trigger('change');
-            $('#filtro-ubicacion').val('').trigger('change');
-            
-            $('#filtro-tipo').val('');
-            $('#filtro-id-personal').val('');
-            
-            cargarMovimientos();
-        });
-        
-        $('#filtro-id-personal').keypress(function(e) {
-            if (e.which == 13) {
-                cargarMovimientos();
-            }
-        });
-        
-        // Función para cargar detalles de movimiento
-        function cargarDetalleMovimiento(tipo, idMov, categoria) {
-            $.ajax({
-                url: 'Controlador/ajax_detalle_movimiento.php',
-                type: 'GET',
-                data: { tipo: tipo, idMov: idMov, categoria: categoria },
-                dataType: 'html',
-                beforeSend: function() {
-                    $('#modal-container').html('<div class="text-center p-4"><div class="spinner-border text-primary"></div></div>');
-                },
-                success: function(response) {
-                    $('#modal-container').html(response);
-                    $('.modal').modal('show');
-                },
-                error: function() {
-                    $('#modal-container').html('<div class="alert alert-danger">Error al cargar detalles</div>');
-                }
-            });
-        }
-        
-        // Delegación de eventos para botones de detalles
-        $(document).on('click', '.btn-ver-entrada', function(e) {
-            e.preventDefault();
-            cargarDetalleMovimiento('entrada', $(this).data('id'), 'Personal');
-        });
-        
-        $(document).on('click', '.btn-ver-salida', function(e) {
-            e.preventDefault();
-            cargarDetalleMovimiento('salida', $(this).data('id'), 'Personal');
-        });
-        
-        // Cerrar modales
-        $(document).on('click', '[data-dismiss="modal"], .btn-close', function() {
-            $('.modal').modal('hide');
-        });
-        
-        $(document).on('hidden.bs.modal', '.modal', function() {
-            $('#modal-container').empty();
-        });
-        
-        // Cargar datos iniciales y movimientos
-        cargarDatosIniciales();
-        
-        // Cargar movimientos después de 1 segundo
-        setTimeout(function() {
-            cargarMovimientos();
-        }, 1000);
-        
-        console.log('Sistema completamente inicializado');
+    });
+    
+    cargarDatosFiltros();
+    inicializarDataTable();
+    
+    $(document).on('click', '[data-dismiss="modal"], .btn-close, .modal-close', function() {
+        $('.modal').modal('hide');
+    });
+    
+    $(document).on('hidden.bs.modal', '.modal', function() {
+        $('#modal-container').empty();
     });
 });
 </script>
 
 <style>
-/* Estilos específicos para esta página */
 .badge { 
     padding: 4px 8px; 
     border-radius: 12px; 
@@ -893,46 +673,90 @@ document.addEventListener('DOMContentLoaded', function() {
     font-weight: 600; 
 }
 .badge-success { background-color: #28a745; color: white; }
+.badge-danger { background-color: #dc3545; color: white; }
 .badge-warning { background-color: #ffc107; color: #212529; }
 .badge-info { background-color: #17a2b8; color: white; }
 .badge-secondary { background-color: #6c757d; color: white; }
 .badge-primary { background-color: #d94f00; color: white; }
+.badge-dark { background-color: #343a40; color: white; }
 
 #loading {
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.8);
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 1000;
-    top: 0;
-    left: 0;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    z-index: 99999;
+    text-align: center;
 }
 
-.select2-container--bootstrap-5 {
+/* Estilos mejorados para Select2 */
+.select2-container--custom-theme {
     width: 100% !important;
 }
 
-.select2-container--bootstrap-5 .select2-selection {
-    min-height: 38px;
-    border: 1px solid #ced4da !important;
-    border-radius: 0.25rem !important;
+.select2-container--custom-theme .select2-selection--single {
+    min-height: 48px;
+    border: 2px solid #e9ecef !important;
+    border-radius: 8px !important;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
 }
 
-.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
-    line-height: 36px;
+.select2-container--custom-theme .select2-selection--single .select2-selection__rendered {
+    line-height: 44px;
     padding-left: 12px;
+    color: #495057;
+    font-size: 14px;
 }
 
-.select2-container--bootstrap-5 .select2-selection--single {
-    height: 38px;
+.select2-container--custom-theme.select2-container--focus .select2-selection--single {
+    border-color: #d94f00 !important;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(217, 79, 0, 0.1);
 }
 
-.select2-container--bootstrap-5 .select2-dropdown {
-    border-color: #ced4da;
-    border-radius: 0.25rem;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+.select2-dropdown.select2-dropdown-enhanced {
+    border: 2px solid #d94f00;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    margin-top: 4px;
     z-index: 1060 !important;
+}
+
+.select2-container--custom-theme .select2-selection__arrow {
+    height: 46px;
+    right: 8px;
+    width: 20px;
+}
+
+.select2-container--custom-theme .select2-selection__arrow b {
+    border-color: #6c757d transparent transparent transparent;
+    border-width: 6px 6px 0 6px;
+}
+
+.select2-container--custom-theme.select2-container--open .select2-selection__arrow b {
+    border-color: transparent transparent #6c757d transparent;
+    border-width: 0 6px 6px 6px;
+}
+
+.select2-container--custom-theme .select2-results__option {
+    padding: 10px 15px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.select2-container--custom-theme .select2-results__option--highlighted[aria-selected] {
+    background-color: #d94f00;
+    color: white;
+}
+
+.select2-container--custom-theme .select2-results__option[aria-selected=true] {
+    background-color: rgba(217, 79, 0, 0.1);
+    color: #d94f00;
 }
 
 .modal {
@@ -943,7 +767,6 @@ document.addEventListener('DOMContentLoaded', function() {
     z-index: 1050 !important;
 }
 
-/* Estilos para botones de exportación */
 .btn-outline-primary {
     border-color: #d94f00;
     color: #d94f00;
@@ -955,25 +778,36 @@ document.addEventListener('DOMContentLoaded', function() {
     color: white;
 }
 
-/* Estilos para los botones de exportación en filtros */
-.btn-group.mt-4 {
+.btn-group {
     display: flex;
-    justify-content: flex-end;
     gap: 5px;
+    flex-wrap: wrap;
 }
 
-.btn-group.mt-4 .btn {
+.btn-group .btn {
     padding: 8px 12px;
     font-size: 14px;
 }
 
-/* Estilos para la tabla */
+#filtrosHeader {
+    transition: all 0.3s;
+}
+
+#filtrosHeader:hover {
+    background-color: #b53d00 !important;
+}
+
+#filtrosHeader .toggle-icon {
+    transition: transform 0.3s;
+}
+
 .table th {
     background-color: #d94f00;
     color: white;
     border-color: #b53d00;
     text-align: center;
     vertical-align: middle;
+    font-weight: 600;
 }
 
 .table td {
@@ -984,11 +818,10 @@ document.addEventListener('DOMContentLoaded', function() {
     background-color: rgba(217, 79, 0, 0.05);
 }
 
-.table-hover tbody tr:hover {
-    background-color: rgba(217, 79, 0, 0.1);
+#dataTableMovimientos tbody tr {
+    cursor: default;
 }
 
-/* Estilos para DataTables SIN botones */
 .dataTables_wrapper {
     margin-top: 10px;
 }
@@ -1002,42 +835,144 @@ document.addEventListener('DOMContentLoaded', function() {
     padding-top: 10px;
 }
 
-/* NO habrá estilos para .dt-buttones porque ya no existen */
+/* Estilos para etiquetas de formulario */
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 6px;
+    font-size: 14px;
+    display: block;
+}
 
-/* Responsive */
-@media (max-width: 768px) {
-    .badge { font-size: 0.75em !important; }
+.form-control-lg {
+    min-height: 48px;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s;
+}
+
+.form-control-lg:focus {
+    border-color: #d94f00;
+    box-shadow: 0 0 0 3px rgba(217, 79, 0, 0.1);
+    outline: none;
+}
+
+.btn-lg {
+    padding: 10px 20px;
+    font-size: 15px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+/* Estilos responsivos */
+@media (max-width: 1200px) {
+    .btn-group .btn {
+        padding: 6px 8px !important;
+        font-size: 12px !important;
+        margin: 2px !important;
+    }
     
-    .select2-container--bootstrap-5 .select2-selection {
+    .btn-group .btn i {
+        margin-right: 3px !important;
+    }
+    
+    .form-control-lg {
+        min-height: 42px;
+        padding: 8px 10px;
+    }
+    
+    .select2-container--custom-theme .select2-selection--single {
         min-height: 42px;
     }
     
-    .select2-container--bootstrap-5 .select2-selection--single {
-        height: 42px;
+    .select2-container--custom-theme .select2-selection--single .select2-selection__rendered {
+        line-height: 38px;
     }
-    
-    .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
-        line-height: 40px;
+}
+
+@media (max-width: 768px) {
+    .badge { 
+        font-size: 10px !important; 
+        padding: 3px 6px !important;
     }
     
     .col-md-2, .col-md-3 {
-        margin-bottom: 10px;
+        margin-bottom: 15px !important;
     }
     
-    .btn-group.mt-4 {
+    .form-group label {
+        font-size: 14px !important;
+        margin-bottom: 5px !important;
+    }
+    
+    .btn-group {
         width: 100%;
         justify-content: center;
-        margin-top: 10px;
+        margin-top: 15px !important;
     }
     
-    .btn-group.mt-4 .btn {
+    .btn-group .btn {
         flex: 1;
         margin-bottom: 5px;
+        padding: 6px 8px !important;
+        font-size: 12px !important;
     }
     
     .dataTables_length,
     .dataTables_filter {
-        text-align: center;
+        text-align: center !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .dataTables_filter input {
+        width: 100% !important;
+    }
+    
+    .table td, .table th {
+        font-size: 12px !important;
+        padding: 6px 4px !important;
+    }
+    
+    .form-control-lg {
+        min-height: 38px;
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+    
+    .btn-lg {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 576px) {
+    .btn-group {
+        flex-wrap: wrap;
+    }
+    
+    .btn-group .btn {
+        flex-basis: calc(50% - 5px);
+        margin-bottom: 10px;
+        font-size: 11px !important;
+    }
+    
+    .btn-group .btn i {
+        font-size: 10px !important;
+    }
+    
+    .table-responsive {
+        border: none;
+    }
+    
+    .form-control-lg {
+        font-size: 12px;
+    }
+    
+    .select2-container--custom-theme .select2-results__option {
+        padding: 8px 12px;
+        font-size: 13px;
     }
 }
 
@@ -1050,8 +985,9 @@ document.addEventListener('DOMContentLoaded', function() {
     .dataTables_filter,
     .dataTables_info,
     .dataTables_paginate,
-    .btn-ver-entrada,
-    .btn-ver-salida {
+    .btn-ver-detalles,
+    .select2-container,
+    .toggle-icon {
         display: none !important;
     }
     
@@ -1064,6 +1000,10 @@ document.addEventListener('DOMContentLoaded', function() {
         padding: 0 !important;
     }
     
+    .card-footer {
+        display: none !important;
+    }
+    
     .table th {
         background-color: #f8f9fa !important;
         color: #000 !important;
@@ -1072,6 +1012,47 @@ document.addEventListener('DOMContentLoaded', function() {
     
     body {
         margin: 0.5cm !important;
+        font-size: 10pt !important;
     }
+    
+    .table {
+        font-size: 10pt !important;
+        border: 1px solid #000 !important;
+    }
+    
+    .badge {
+        background-color: transparent !important;
+        color: #000 !important;
+        border: 1px solid #000 !important;
+        padding: 1px 4px !important;
+    }
+    
+    a[href]:after {
+        content: none !important;
+    }
+}
+
+.btn-group .btn {
+    padding: 4px 8px !important;
+    margin: 0 2px !important;
+    font-size: 12px !important;
+}
+
+.btn-group .btn i {
+    font-size: 12px !important;
+}
+
+.btn-sm {
+    min-width: 32px;
+}
+
+@keyframes select2Pulse {
+    0% { box-shadow: 0 0 0 0 rgba(217, 79, 0, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(217, 79, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(217, 79, 0, 0); }
+}
+
+.select2-container--custom-theme.select2-container--focus .select2-selection--single {
+    animation: select2Pulse 1.5s infinite;
 }
 </style>

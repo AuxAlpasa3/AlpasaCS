@@ -30,50 +30,46 @@ include_once "../templates/head.php";
                     <div class="row mb-3">
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>No. Empleado:</label>
-                                <input type="text" id="filtro-noempleado" class="form-control" style="border-color: #d94f00;" placeholder="Ej: 00123">
+                                <label class="form-label">No. Empleado:</label>
+                                <input type="text" id="filtro-noempleado" class="form-control form-control-lg" placeholder="Ej: 00123">
                             </div>
                         </div>
                         
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Nombre:</label>
-                                <input type="text" id="filtro-nombre" class="form-control" style="border-color: #d94f00;" placeholder="Nombre o apellidos">
+                                <label class="form-label">Nombre:</label>
+                                <input type="text" id="filtro-nombre" class="form-control form-control-lg" placeholder="Nombre o apellidos">
                             </div>
                         </div>
                         
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>Cargo:</label>
-                                <select id="filtro-cargo" class="form-control select2-cargo" style="border-color: #d94f00; width: 100%;">
-                                    <option value="">Todos</option>
+                                <label class="form-label">Cargo:</label>
+                                <select id="filtro-cargo" class="form-control form-control-lg select2-cargo" multiple="multiple" style="width: 100%;">
                                 </select>
                             </div>
                         </div>
                         
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>Departamento:</label>
-                                <select id="filtro-departamento" class="form-control select2-departamento" style="border-color: #d94f00; width: 100%;">
-                                    <option value="">Todos</option>
+                                <label class="form-label">Departamento:</label>
+                                <select id="filtro-departamento" class="form-control form-control-lg select2-departamento" multiple="multiple" style="width: 100%;">
                                 </select>
                             </div>
                         </div>
                         
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>Ubicación:</label>
-                                <select id="filtro-ubicacion" class="form-control select2-ubicacion" style="border-color: #d94f00; width: 100%;">
-                                    <option value="">Todas</option>
+                                <label class="form-label">Ubicación:</label>
+                                <select id="filtro-ubicacion" class="form-control form-control-lg select2-ubicacion" multiple="multiple" style="width: 100%;">
                                 </select>
                             </div>
                         </div>
                         
                         <div class="col-md-1">
                             <div class="form-group">
-                                <label>Empresa:</label>
-                                <select id="filtro-empresa" class="form-control select2-empresa" style="border-color: #d94f00; width: 100%;">
-                                    <option value="">Todas</option>
+                                <label class="form-label">Empresa:</label>
+                                <select id="filtro-empresa" class="form-control form-control-lg select2-empresa" multiple="multiple" style="width: 100%;">
                                 </select>
                             </div>
                         </div>
@@ -82,9 +78,8 @@ include_once "../templates/head.php";
                     <div class="row mb-3">
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>Estatus:</label>
-                                <select id="filtro-estatus" class="form-control" style="border-color: #d94f00;">
-                                    <option value="">Todos</option>
+                                <label class="form-label">Estatus:</label>
+                                <select id="filtro-estatus" class="form-control form-control-lg select2-estatus" multiple="multiple" style="width: 100%;">
                                     <option value="Activo">Activo</option>
                                     <option value="Inactivo">Inactivo</option>
                                     <option value="Baja">Baja</option>
@@ -95,8 +90,8 @@ include_once "../templates/head.php";
                         
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>Vehículo:</label>
-                                <select id="filtro-vehiculo" class="form-control" style="border-color: #d94f00;">
+                                <label class="form-label">Vehículo:</label>
+                                <select id="filtro-vehiculo" class="form-control form-control-lg" style="width: 100%;">
                                     <option value="">Todos</option>
                                     <option value="1">Con Vehículo</option>
                                     <option value="0">Sin Vehículo</option>
@@ -106,10 +101,10 @@ include_once "../templates/head.php";
                         
                         <div class="col-md-8">
                             <div class="form-group text-right mt-4">
-                                <button type="button" id="btn-aplicar-filtros" class="btn btn-primary" style="background-color: #d94f00; border-color: #d94f00;">
+                                <button type="button" id="btn-aplicar-filtros" class="btn btn-primary btn-lg" style="background-color: #d94f00; border-color: #d94f00;">
                                     <i class="fas fa-search mr-1"></i> Buscar
                                 </button>
-                                <button type="button" id="btn-limpiar-filtros" class="btn btn-outline-primary">
+                                <button type="button" id="btn-limpiar-filtros" class="btn btn-outline-primary btn-lg">
                                     <i class="fas fa-broom mr-1"></i> Limpiar
                                 </button>
                             </div>
@@ -176,19 +171,6 @@ include_once "../templates/head.php";
                             <tbody>
                             </tbody>
                         </table>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="dataTables_info" id="dataTablePersonal_info" role="status" aria-live="polite">
-                                Mostrando 0 a 0 de 0 registros
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="dataTables_paginate paging_simple_numbers" id="dataTablePersonal_paginate">
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -264,7 +246,6 @@ $(document).ready(function() {
     
     function toggleFiltros() {
         filtrosExpandidos = !filtrosExpandidos;
-        
         if (filtrosExpandidos) {
             $('#filtrosBody').slideDown(300);
             $('#filtrosHeader .toggle-icon').html('<i class="fas fa-chevron-up"></i>');
@@ -288,28 +269,58 @@ $(document).ready(function() {
     });
     
     function showNotification(message, type = 'success') {
-        const alertClass = type === 'success' ? 'alert-success' : 
-                         type === 'error' ? 'alert-danger' : 
-                         type === 'warning' ? 'alert-warning' : 'alert-info';
-        
-        const alertHtml = `
-            <div class="alert ${alertClass} alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+        const alertClass = type === 'success' ? 'alert-success' : type === 'error' ? 'alert-danger' : type === 'warning' ? 'alert-warning' : 'alert-info';
+        const alertHtml = `<div class="alert ${alertClass} alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
                 <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
                 ${message}
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-            </div>
-        `;
-        
+            </div>`;
         $('body').append(alertHtml);
-        
         setTimeout(() => {
             $('.alert').alert('close');
         }, 5000);
     }
     
+    function getSelect2MultipleValue(selector) {
+        try {
+            var value = $(selector).val();
+            if (!value) return '';
+            if (Array.isArray(value)) {
+                return value.filter(function(item) {
+                    return item !== null && item !== undefined && item !== '';
+                }).join(',');
+            }
+            return value.toString();
+        } catch (e) {
+            console.error('Error getting select2 value:', e);
+            return '';
+        }
+    }
+    
     function cargarDatosFiltros() {
+        $('#filtro-estatus').select2({
+            theme: 'custom-theme',
+            placeholder: 'Todos los estatus',
+            allowClear: true,
+            width: '100%',
+            dropdownCssClass: 'select2-dropdown-enhanced',
+            selectionCssClass: 'select2-selection-enhanced',
+            language: 'es',
+            closeOnSelect: false
+        });
+        
+        $('#filtro-vehiculo').select2({
+            theme: 'custom-theme',
+            placeholder: 'Todos',
+            allowClear: true,
+            width: '100%',
+            dropdownCssClass: 'select2-dropdown-enhanced',
+            selectionCssClass: 'select2-selection-enhanced',
+            language: 'es'
+        });
+        
         $.ajax({
             url: 'Controlador/ajax_get_cargos.php',
             type: 'GET',
@@ -318,20 +329,20 @@ $(document).ready(function() {
                 if (!data.error && Array.isArray(data)) {
                     var select = $('#filtro-cargo');
                     select.empty();
-                    select.append('<option value="">Todos</option>');
-                    
                     $.each(data, function(index, item) {
                         if (item && item.id && item.nombre) {
                             select.append('<option value="' + item.id + '">' + item.nombre + '</option>');
                         }
                     });
-                    
                     select.select2({
-                        theme: 'bootstrap4',
-                        language: 'es',
-                        placeholder: 'Seleccionar cargo...',
+                        theme: 'custom-theme',
+                        placeholder: 'Todos los cargos',
                         allowClear: true,
-                        width: '100%'
+                        width: '100%',
+                        dropdownCssClass: 'select2-dropdown-enhanced',
+                        selectionCssClass: 'select2-selection-enhanced',
+                        language: 'es',
+                        closeOnSelect: false
                     });
                 }
             },
@@ -348,20 +359,20 @@ $(document).ready(function() {
                 if (!data.error && Array.isArray(data)) {
                     var select = $('#filtro-departamento');
                     select.empty();
-                    select.append('<option value="">Todos</option>');
-                    
                     $.each(data, function(index, item) {
                         if (item && item.id && item.nombre) {
                             select.append('<option value="' + item.id + '">' + item.nombre + '</option>');
                         }
                     });
-                    
                     select.select2({
-                        theme: 'bootstrap4',
-                        language: 'es',
-                        placeholder: 'Seleccionar departamento...',
+                        theme: 'custom-theme',
+                        placeholder: 'Todos los departamentos',
                         allowClear: true,
-                        width: '100%'
+                        width: '100%',
+                        dropdownCssClass: 'select2-dropdown-enhanced',
+                        selectionCssClass: 'select2-selection-enhanced',
+                        language: 'es',
+                        closeOnSelect: false
                     });
                 }
             },
@@ -378,20 +389,20 @@ $(document).ready(function() {
                 if (!data.error && Array.isArray(data)) {
                     var select = $('#filtro-ubicacion');
                     select.empty();
-                    select.append('<option value="">Todas</option>');
-                    
                     $.each(data, function(index, item) {
                         if (item && item.id && item.nombre) {
                             select.append('<option value="' + item.id + '">' + item.nombre + '</option>');
                         }
                     });
-                    
                     select.select2({
-                        theme: 'bootstrap4',
-                        language: 'es',
-                        placeholder: 'Seleccionar ubicación...',
+                        theme: 'custom-theme',
+                        placeholder: 'Todas las ubicaciones',
                         allowClear: true,
-                        width: '100%'
+                        width: '100%',
+                        dropdownCssClass: 'select2-dropdown-enhanced',
+                        selectionCssClass: 'select2-selection-enhanced',
+                        language: 'es',
+                        closeOnSelect: false
                     });
                 }
             },
@@ -408,20 +419,20 @@ $(document).ready(function() {
                 if (!data.error && Array.isArray(data)) {
                     var select = $('#filtro-empresa');
                     select.empty();
-                    select.append('<option value="">Todas</option>');
-                    
                     $.each(data, function(index, item) {
                         if (item && item.id && item.nombre) {
                             select.append('<option value="' + item.id + '">' + item.nombre + '</option>');
                         }
                     });
-                    
                     select.select2({
-                        theme: 'bootstrap4',
-                        language: 'es',
-                        placeholder: 'Seleccionar empresa...',
+                        theme: 'custom-theme',
+                        placeholder: 'Todas las empresas',
                         allowClear: true,
-                        width: '100%'
+                        width: '100%',
+                        dropdownCssClass: 'select2-dropdown-enhanced',
+                        selectionCssClass: 'select2-selection-enhanced',
+                        language: 'es',
+                        closeOnSelect: false
                     });
                 }
             },
@@ -446,14 +457,14 @@ $(document).ready(function() {
                 url: "Controlador/Obtener_Personal.php",
                 type: "POST",
                 data: function(d) {
-                    d.noempleado = $('#filtro-noempleado').val();
-                    d.nombre = $('#filtro-nombre').val();
-                    d.cargo = $('#filtro-cargo').val();
-                    d.departamento = $('#filtro-departamento').val();
-                    d.ubicacion = $('#filtro-ubicacion').val();
-                    d.estatus = $('#filtro-estatus').val();
-                    d.empresa = $('#filtro-empresa').val();
-                    d.vehiculo = $('#filtro-vehiculo').val();
+                    d.noempleado = $('#filtro-noempleado').val() || '';
+                    d.nombre = $('#filtro-nombre').val() || '';
+                    d.cargo = getSelect2MultipleValue('#filtro-cargo');
+                    d.departamento = getSelect2MultipleValue('#filtro-departamento');
+                    d.ubicacion = getSelect2MultipleValue('#filtro-ubicacion');
+                    d.empresa = getSelect2MultipleValue('#filtro-empresa');
+                    d.estatus = getSelect2MultipleValue('#filtro-estatus');
+                    d.vehiculo = $('#filtro-vehiculo').val() || '';
                 },
                 beforeSend: function() {
                     $('#loading').show();
@@ -466,7 +477,6 @@ $(document).ready(function() {
                         showNotification('Error al cargar los datos: ' + json.error, 'error');
                         return [];
                     }
-                    
                     if (json.data && Array.isArray(json.data)) {
                         return json.data;
                     } else {
@@ -494,7 +504,6 @@ $(document).ready(function() {
                             var apPaterno = row.ApPaterno || '';
                             var iniciales = (nombre.charAt(0) + apPaterno.charAt(0)).toUpperCase();
                             var color = getColorForInitials(iniciales);
-                            
                             return `<div class="employee-initials" style="width: 40px; height: 40px; border-radius: 50%; background-color: ${color}; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto;" data-employee-name="${nombre} ${apPaterno}">${iniciales}</div>`;
                         }
                         return `<img src="${data}" class="thumbnail-image" alt="Foto" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer;" data-full-image="${data}" data-employee-name="${row.Nombre || ''} ${row.ApPaterno || ''}">`;
@@ -534,7 +543,6 @@ $(document).ready(function() {
                         else if (data === 'Inactivo') badgeClass = 'badge-danger';
                         else if (data === 'Vacaciones') badgeClass = 'badge-warning';
                         else if (data === 'Baja') badgeClass = 'badge-dark';
-                        
                         return `<span class="badge ${badgeClass}">${data}</span>`;
                     }
                 },
@@ -557,7 +565,6 @@ $(document).ready(function() {
                         var clickable = tieneVehiculo ? 'cursor-pointer' : '';
                         var noEmpleado = row.NoEmpleado || '';
                         var nombreCompleto = (row.Nombre || '') + ' ' + (row.ApPaterno || '') + ' ' + (row.ApMaterno || '');
-                        
                         if (tieneVehiculo) {
                             return `<span class="badge ${badgeClass} ${clickable} btn-ver-vehiculo" 
                                     data-noempleado="${noEmpleado}" 
@@ -592,7 +599,6 @@ $(document).ready(function() {
                         var estatus = row.Estatus || '';
                         var tieneVehiculo = row.TieneVehiculo || false;
                         var idPersonal = row.IdPersonal  || '';
-                        
                         return `
                             <div class="btn-group" role="group">
                                 <button type="button" class="btn btn-sm btn-primary btn-editar" 
@@ -628,7 +634,6 @@ $(document).ready(function() {
                 info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
                 infoEmpty: "Mostrando 0 a 0 de 0 registros",
                 infoFiltered: "(filtrado de _MAX_ registros totales)",
-                search: "Buscar:",
                 paginate: {
                     first: "Primero",
                     last: "Último",
@@ -639,6 +644,7 @@ $(document).ready(function() {
             responsive: true,
             autoWidth: false,
             pageLength: 10,
+            searching: false,
             lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
             dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
                  "<'row'<'col-sm-12'tr>>" +
@@ -659,18 +665,15 @@ $(document).ready(function() {
             '#d94f00', '#2c3e50', '#3498db', '#e74c3c', '#2ecc71',
             '#9b59b6', '#1abc9c', '#f39c12', '#d35400', '#c0392b'
         ];
-        
         var sum = 0;
         for (var i = 0; i < initials.length; i++) {
             sum += initials.charCodeAt(i);
         }
-        
         return colors[sum % colors.length];
     }
     
     function mostrarInformacionVehiculo(noEmpleado, nombre) {
         $('#loading').show();
-        
         $.ajax({
             url: 'Controlador/ajax_get_vehiculo_personal.php',
             type: 'GET',
@@ -680,7 +683,6 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(response) {
                 $('#loading').hide();
-                
                 if (response.success && response.vehiculo) {
                     var vehiculo = response.vehiculo;
                     var html = `
@@ -747,15 +749,11 @@ $(document).ready(function() {
                             </div>
                         </div>
                     `;
-                    
                     $('#vehiculoModalBody').html(html);
-                    
                     $('#btn-gestionar-vehiculo').off('click').on('click', function() {
                         cargarModalVehiculos(noEmpleado, nombre);
                     });
-                    
                     $('#vehiculoModal').modal('show');
-                    
                 } else if (response.success && !response.vehiculo) {
                     var html = `
                         <div class="text-center py-4">
@@ -769,15 +767,11 @@ $(document).ready(function() {
                             </div>
                         </div>
                     `;
-                    
                     $('#vehiculoModalBody').html(html);
-                    
                     $('#btn-gestionar-vehiculo').off('click').on('click', function() {
                         cargarModalVehiculos(noEmpleado, nombre);
                     });
-                    
                     $('#vehiculoModal').modal('show');
-                    
                 } else {
                     showNotification(response.message || 'Error al obtener información del vehículo', 'error');
                 }
@@ -792,7 +786,6 @@ $(document).ready(function() {
     function mostrarFotoVehiculo(rutaFoto, titulo) {
         $('#modalPhoto').attr('src', rutaFoto);
         $('#modalEmployeeName').text(titulo);
-        
         setTimeout(function() {
             $('#photoModal').modal('show');
             $('#photoModal').css('z-index', '99999');
@@ -801,7 +794,6 @@ $(document).ready(function() {
     
     function cargarModalVehiculos(noEmpleado, nombre) {
         $('#vehiculoModal').modal('hide');
-        
         $.ajax({
             url: 'Modales/Gestionar_Vehiculos.php',
             type: 'GET',
@@ -874,16 +866,11 @@ $(document).ready(function() {
         $(document).off('click', '.employee-initials, .thumbnail-image').on('click', '.employee-initials, .thumbnail-image', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
             var fullImage = $(this).data('full-image') || null;
-            var employeeName = $(this).data('employee-name') || $(this).closest('tr').find('td:eq(2)').text() + ' ' + 
-                              $(this).closest('tr').find('td:eq(3)').text() + ' ' + 
-                              $(this).closest('tr').find('td:eq(4)').text();
-            
+            var employeeName = $(this).data('employee-name') || $(this).closest('tr').find('td:eq(2)').text() + ' ' + $(this).closest('tr').find('td:eq(3)').text() + ' ' + $(this).closest('tr').find('td:eq(4)').text();
             if ($(this).hasClass('employee-initials')) {
                 return;
             }
-            
             if (fullImage) {
                 $('#modalPhoto').attr('src', fullImage);
                 $('#modalEmployeeName').text(employeeName);
@@ -894,10 +881,8 @@ $(document).ready(function() {
         $(document).off('click', '.btn-ver-vehiculo').on('click', '.btn-ver-vehiculo', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
             var noEmpleado = $(this).data('noempleado');
             var nombre = $(this).data('nombre');
-            
             if (noEmpleado) {
                 mostrarInformacionVehiculo(noEmpleado, nombre);
             }
@@ -906,7 +891,6 @@ $(document).ready(function() {
         $(document).off('click', '.btn-editar').on('click', '.btn-editar', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
             var noEmpleado = $(this).data('noempleado');
             if (noEmpleado) {
                 cargarModalEditar(noEmpleado);
@@ -916,11 +900,9 @@ $(document).ready(function() {
         $(document).off('click', '.btn-cambiar-estatus').on('click', '.btn-cambiar-estatus', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
             var noEmpleado = $(this).data('noempleado');
             var nombre = $(this).data('nombre');
             var estatus = $(this).data('estatus');
-            
             if (noEmpleado) {
                 cargarModalCambiarEstatus(noEmpleado, nombre, estatus);
             }
@@ -929,10 +911,8 @@ $(document).ready(function() {
         $(document).off('click', '.btn-gestion-vehiculo').on('click', '.btn-gestion-vehiculo', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
             var noEmpleado = $(this).data('noempleado');
             var nombre = $(this).data('nombre');
-            
             if (noEmpleado) {
                 cargarModalVehiculos(noEmpleado, nombre);
             }
@@ -948,13 +928,12 @@ $(document).ready(function() {
     $('#btn-limpiar-filtros').click(function() {
         $('#filtro-noempleado').val('');
         $('#filtro-nombre').val('');
-        $('#filtro-cargo').val('').trigger('change');
-        $('#filtro-departamento').val('').trigger('change');
-        $('#filtro-ubicacion').val('').trigger('change');
-        $('#filtro-empresa').val('').trigger('change');
-        $('#filtro-estatus').val('');
-        $('#filtro-vehiculo').val('');
-        
+        $('#filtro-cargo').val(null).trigger('change');
+        $('#filtro-departamento').val(null).trigger('change');
+        $('#filtro-ubicacion').val(null).trigger('change');
+        $('#filtro-empresa').val(null).trigger('change');
+        $('#filtro-estatus').val(null).trigger('change');
+        $('#filtro-vehiculo').val('').trigger('change');
         if (dataTable) {
             dataTable.ajax.reload();
         }
@@ -963,76 +942,64 @@ $(document).ready(function() {
     
     $('#btn-export-excel').click(function(e) {
         e.preventDefault();
-        
         if (!dataTable || dataTable.rows().count() === 0) {
             showNotification('No hay datos para exportar', 'warning');
             return;
         }
-        
         var params = {
-            noempleado: $('#filtro-noempleado').val(),
-            nombre: $('#filtro-nombre').val(),
-            cargo: $('#filtro-cargo').val(),
-            departamento: $('#filtro-departamento').val(),
-            ubicacion: $('#filtro-ubicacion').val(),
-            estatus: $('#filtro-estatus').val(),
-            empresa: $('#filtro-empresa').val(),
-            vehiculo: $('#filtro-vehiculo').val()
+            noempleado: $('#filtro-noempleado').val() || '',
+            nombre: $('#filtro-nombre').val() || '',
+            cargo: getSelect2MultipleValue('#filtro-cargo'),
+            departamento: getSelect2MultipleValue('#filtro-departamento'),
+            ubicacion: getSelect2MultipleValue('#filtro-ubicacion'),
+            estatus: getSelect2MultipleValue('#filtro-estatus'),
+            empresa: getSelect2MultipleValue('#filtro-empresa'),
+            vehiculo: $('#filtro-vehiculo').val() || ''
         };
-        
         var url = 'Controlador/Exportar_Excel.php?' + $.param(params);
         window.open(url, '_blank');
-        
         showNotification('Generando archivo Excel...', 'info');
     });
     
     $('#btn-export-pdf').click(function(e) {
         e.preventDefault();
-        
         if (!dataTable || dataTable.rows().count() === 0) {
             showNotification('No hay datos para exportar', 'warning');
             return;
         }
-        
         var params = {
-            noempleado: $('#filtro-noempleado').val(),
-            nombre: $('#filtro-nombre').val(),
-            cargo: $('#filtro-cargo').val(),
-            departamento: $('#filtro-departamento').val(),
-            ubicacion: $('#filtro-ubicacion').val(),
-            estatus: $('#filtro-estatus').val(),
-            empresa: $('#filtro-empresa').val(),
-            vehiculo: $('#filtro-vehiculo').val()
+            noempleado: $('#filtro-noempleado').val() || '',
+            nombre: $('#filtro-nombre').val() || '',
+            cargo: getSelect2MultipleValue('#filtro-cargo'),
+            departamento: getSelect2MultipleValue('#filtro-departamento'),
+            ubicacion: getSelect2MultipleValue('#filtro-ubicacion'),
+            estatus: getSelect2MultipleValue('#filtro-estatus'),
+            empresa: getSelect2MultipleValue('#filtro-empresa'),
+            vehiculo: $('#filtro-vehiculo').val() || ''
         };
-        
         var url = 'Controlador/Exportar_PDF.php?' + $.param(params);
         window.open(url, '_blank');
-        
         showNotification('Generando archivo PDF...', 'info');
     });
     
     $('#btn-print').click(function(e) {
         e.preventDefault();
-        
         if (!dataTable || dataTable.rows().count() === 0) {
             showNotification('No hay datos para imprimir', 'warning');
             return;
         }
-        
         var params = {
-            noempleado: $('#filtro-noempleado').val(),
-            nombre: $('#filtro-nombre').val(),
-            cargo: $('#filtro-cargo').val(),
-            departamento: $('#filtro-departamento').val(),
-            ubicacion: $('#filtro-ubicacion').val(),
-            estatus: $('#filtro-estatus').val(),
-            empresa: $('#filtro-empresa').val(),
-            vehiculo: $('#filtro-vehiculo').val()
+            noempleado: $('#filtro-noempleado').val() || '',
+            nombre: $('#filtro-nombre').val() || '',
+            cargo: getSelect2MultipleValue('#filtro-cargo'),
+            departamento: getSelect2MultipleValue('#filtro-departamento'),
+            ubicacion: getSelect2MultipleValue('#filtro-ubicacion'),
+            estatus: getSelect2MultipleValue('#filtro-estatus'),
+            empresa: getSelect2MultipleValue('#filtro-empresa'),
+            vehiculo: $('#filtro-vehiculo').val() || ''
         };
-        
         var url = 'Controlador/Imprimir.php?' + $.param(params);
         window.open(url, '_blank', 'width=1024,height=768');
-        
         showNotification('Abriendo vista de impresión...', 'info');
     });
     
@@ -1046,7 +1013,6 @@ $(document).ready(function() {
     
     $('#btn-nuevo-personal').click(function(e) {
         e.preventDefault();
-        
         $.ajax({
             url: 'Modales/Nuevo.php',
             type: 'GET',
@@ -1082,11 +1048,9 @@ $(document).ready(function() {
         var formData = new FormData(this);
         var action = form.attr('action');
         var method = form.attr('method') || 'POST';
-        
         var submitBtn = form.find('button[type="submit"]');
         var originalText = submitBtn.html();
         submitBtn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Procesando...');
-        
         $.ajax({
             url: action,
             type: method,
@@ -1101,7 +1065,6 @@ $(document).ready(function() {
                     if (dataTable) {
                         dataTable.ajax.reload(null, false);
                     }
-                    
                     if (form.attr('id') === 'formNuevoPersonal') {
                         form[0].reset();
                         if ($.fn.select2) {
@@ -1170,30 +1133,166 @@ $(document).ready(function() {
     text-align: center;
 }
 
-.select2-container--bootstrap4 {
+.select2-container--custom-theme {
     width: 100% !important;
 }
 
-.select2-container--bootstrap4 .select2-selection {
-    min-height: 38px;
-    border: 1px solid #ced4da !important;
-    border-radius: 0.25rem !important;
+.select2-container--custom-theme .select2-selection--multiple {
+    min-height: 48px;
+    border: 2px solid #e9ecef !important;
+    border-radius: 8px !important;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+    padding: 4px 8px;
 }
 
-.select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
-    line-height: 36px;
+.select2-container--custom-theme .select2-selection--single {
+    min-height: 48px;
+    border: 2px solid #e9ecef !important;
+    border-radius: 8px !important;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.select2-container--custom-theme .select2-selection--single .select2-selection__rendered {
+    line-height: 44px;
     padding-left: 12px;
+    color: #495057;
+    font-size: 14px;
 }
 
-.select2-container--bootstrap4 .select2-selection--single {
-    height: 38px;
+.select2-container--custom-theme .select2-selection--multiple .select2-selection__rendered {
+    margin: 0;
+    padding: 0;
 }
 
-.select2-container--bootstrap4 .select2-dropdown {
-    border-color: #ced4da;
-    border-radius: 0.25rem;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+.select2-container--custom-theme .select2-selection--multiple .select2-selection__choice {
+    background-color: #d94f00;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    padding: 4px 8px;
+    margin: 4px 4px 4px 0;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.select2-container--custom-theme .select2-selection--multiple .select2-selection__choice__remove {
+    color: rgba(255,255,255,0.8);
+    margin-right: 4px;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 2px;
+}
+
+.select2-container--custom-theme .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: white;
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+}
+
+.select2-container--custom-theme.select2-container--focus .select2-selection--multiple,
+.select2-container--custom-theme.select2-container--focus .select2-selection--single {
+    border-color: #d94f00 !important;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(217, 79, 0, 0.1);
+}
+
+.select2-container--custom-theme.select2-container--open .select2-selection--multiple,
+.select2-container--custom-theme.select2-container--open .select2-selection--single {
+    border-color: #d94f00 !important;
+    background-color: white;
+}
+
+.select2-dropdown.select2-dropdown-enhanced {
+    border: 2px solid #d94f00;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    margin-top: 4px;
     z-index: 1060 !important;
+}
+
+.select2-container--custom-theme .select2-search--dropdown .select2-search__field {
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 8px;
+    width: calc(100% - 16px) !important;
+}
+
+.select2-container--custom-theme .select2-search--dropdown .select2-search__field:focus {
+    border-color: #d94f00;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(217, 79, 0, 0.1);
+}
+
+.select2-container--custom-theme .select2-results__option {
+    padding: 10px 15px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.select2-container--custom-theme .select2-results__option--highlighted[aria-selected] {
+    background-color: #d94f00;
+    color: white;
+}
+
+.select2-container--custom-theme .select2-results__option[aria-selected=true] {
+    background-color: rgba(217, 79, 0, 0.1);
+    color: #d94f00;
+}
+
+.select2-container--custom-theme .select2-selection__clear {
+    color: #6c757d;
+    font-size: 18px;
+    margin-right: 8px;
+    padding: 2px;
+}
+
+.select2-container--custom-theme .select2-selection__clear:hover {
+    color: #dc3545;
+    background: rgba(220, 53, 69, 0.1);
+    border-radius: 50%;
+}
+
+.select2-selection-enhanced {
+    cursor: pointer !important;
+}
+
+.select2-container--custom-theme .select2-selection__arrow {
+    height: 46px;
+    right: 8px;
+    width: 20px;
+}
+
+.select2-container--custom-theme .select2-selection__arrow b {
+    border-color: #6c757d transparent transparent transparent;
+    border-width: 6px 6px 0 6px;
+}
+
+.select2-container--custom-theme.select2-container--open .select2-selection__arrow b {
+    border-color: transparent transparent #6c757d transparent;
+    border-width: 0 6px 6px 6px;
+}
+
+.select2-container--custom-theme .select2-selection--single .select2-selection__placeholder,
+.select2-container--custom-theme .select2-selection--multiple .select2-selection__placeholder {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.select2-selection__choice-count {
+    background: rgba(255, 255, 255, 0.9);
+    color: #d94f00;
+    border-radius: 12px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-left: 4px;
 }
 
 .modal {
@@ -1285,6 +1384,36 @@ $(document).ready(function() {
     padding-top: 10px;
 }
 
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 6px;
+    font-size: 14px;
+    display: block;
+}
+
+.form-control-lg {
+    min-height: 48px;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s;
+}
+
+.form-control-lg:focus {
+    border-color: #d94f00;
+    box-shadow: 0 0 0 3px rgba(217, 79, 0, 0.1);
+    outline: none;
+}
+
+.btn-lg {
+    padding: 10px 20px;
+    font-size: 15px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
 @media (max-width: 1200px) {
     .btn-group .btn {
         padding: 6px 8px !important;
@@ -1295,24 +1424,26 @@ $(document).ready(function() {
     .btn-group .btn i {
         margin-right: 3px !important;
     }
+    
+    .form-control-lg {
+        min-height: 42px;
+        padding: 8px 10px;
+    }
+    
+    .select2-container--custom-theme .select2-selection--multiple,
+    .select2-container--custom-theme .select2-selection--single {
+        min-height: 42px;
+    }
+    
+    .select2-container--custom-theme .select2-selection--single .select2-selection__rendered {
+        line-height: 38px;
+    }
 }
 
 @media (max-width: 768px) {
     .badge { 
         font-size: 10px !important; 
         padding: 3px 6px !important;
-    }
-    
-    .select2-container--bootstrap4 .select2-selection {
-        min-height: 42px;
-    }
-    
-    .select2-container--bootstrap4 .select2-selection--single {
-        height: 42px;
-    }
-    
-    .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
-        line-height: 40px;
     }
     
     .col-md-2, .col-md-3 {
@@ -1356,6 +1487,22 @@ $(document).ready(function() {
         width: 35px !important;
         height: 35px !important;
     }
+    
+    .form-control-lg {
+        min-height: 38px;
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+    
+    .btn-lg {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    
+    .select2-container--custom-theme .select2-selection--multiple .select2-selection__choice {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
 }
 
 @media (max-width: 576px) {
@@ -1375,6 +1522,15 @@ $(document).ready(function() {
     
     .table-responsive {
         border: none;
+    }
+    
+    .form-control-lg {
+        font-size: 12px;
+    }
+    
+    .select2-container--custom-theme .select2-results__option {
+        padding: 8px 12px;
+        font-size: 13px;
     }
 }
 
@@ -1468,5 +1624,23 @@ $(document).ready(function() {
 
 .btn-sm {
     min-width: 32px;
+}
+
+.select2-multiple-hint {
+    display: block;
+    font-size: 11px;
+    color: #6c757d;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+@keyframes select2Pulse {
+    0% { box-shadow: 0 0 0 0 rgba(217, 79, 0, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(217, 79, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(217, 79, 0, 0); }
+}
+
+.select2-container--custom-theme.select2-container--focus .select2-selection--multiple {
+    animation: select2Pulse 1.5s infinite;
 }
 </style>

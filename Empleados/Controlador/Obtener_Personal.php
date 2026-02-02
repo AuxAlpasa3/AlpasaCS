@@ -56,7 +56,6 @@ try {
                     t1.Empresa,
                     t1.Status,
                     t1.IdUbicacion,
-                    t1.status as Acceso,
                     (CASE 
                         WHEN t1.Cargo = 0 THEN 'Sin Cargo' 
                         ELSE t3.NomCargo 
@@ -224,8 +223,6 @@ try {
             default: $badgeClass = 'badge-secondary';
         }
         
-        $accesoActivo = ($Personal->Acceso == 1);
-        
         $foto = !empty($Personal->RutaFoto) ? $Personal->RutaFoto : $imagenPorDefecto;
         $nombreCompleto = trim($Personal->Nombre . ' ' . $Personal->ApPaterno . ' ' . $Personal->ApMaterno);
         
@@ -248,15 +245,15 @@ try {
             $vehiculoHTML = '<span class="badge badge-secondary">Sin Vehículo</span>';
         }
         
-        $accesoHTML = '';
-        if ($accesoActivo) {
-            $accesoHTML = 'Activo';
-        } else {
-            $accesoHTML = 'Inactivo';
-        }
+        $accesoHTML = '<form action="Controlador/Credencial.php" method="POST" target="_blank" style="display: inline;">
+                          <input type="hidden" name="IdPersonal" value="' . htmlspecialchars($Personal->IdPersonal) . '">
+                          <button type="submit" class="btn btn-sm btn-outline-primary">
+                              <i class="fas fa-id-card"></i> Credencial
+                          </button>
+                      </form>';
         
         $rowData = [
-             'IdPersonal' => htmlspecialchars($Personal->IdPersonal),
+            'IdPersonal' => htmlspecialchars($Personal->IdPersonal),
             'NoEmpleado' => htmlspecialchars($Personal->NoEmpleado),
             'Foto' => $fotoHTML,
             'Nombre' => htmlspecialchars($Personal->Nombre),
@@ -271,7 +268,6 @@ try {
             'Acceso' => $accesoHTML,
             'TieneVehiculo' => $tieneVehiculo,
             'EstatusId' => $Personal->Status,
-            'AccesoActivo' => $accesoActivo,
             'FotoURL' => $foto
         ];
         
