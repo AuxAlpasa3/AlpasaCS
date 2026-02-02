@@ -443,7 +443,7 @@ try {
                     $stmtUpdateRegentsalveh = $Conexion->prepare($sqlUpdateRegentsalveh);
                     $stmtUpdateRegentsalveh->bindParam(':FolMovSal', $IdMovSalidaVehiculo, PDO::PARAM_INT);
                     $stmtUpdateRegentsalveh->bindParam(':FechaSalida', $fechaHoraNuevaEntrada, PDO::PARAM_STR);
-                    $stmtUpdateRegentsalveh->bindParam(':Tiempo', $tiempoFormateadoVehiculo, PDO::PARAM_STR);
+                    $stmtUpdateRegentsalveh->bindParam(':Tiempo', $tiempoFormateado, PDO::PARAM_STR);
                     $stmtUpdateRegentsalveh->bindParam(':FolMovEnt', $FolMovEntVehPendiente, PDO::PARAM_INT);
                     
                     if (!$stmtUpdateRegentsalveh->execute()) {
