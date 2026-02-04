@@ -51,9 +51,9 @@ $options->set('isRemoteEnabled', true);
 $options->set('defaultFont', 'Helvetica');
 
 $dompdf = new Dompdf($options);
-$dompdf->setPaper('A4', 'portrait');
+$dompdf->setPaper([0, 0, 595, 963], 'portrait'); // 210mm x 340mm
 
-$HeaderImg = "../../dist/img/LogoAlpasaBlanco.png";
+$HeaderImg = "../../dist/img/LogoAlpasaC.png";
 
 $base64Logo = "";
 if (file_exists($HeaderImg)) {
@@ -82,7 +82,6 @@ $html = '
             width: 100%;
             position: absolute;
             text-align: center;
-            /* Añadimos padding para centrar verticalmente el logo */
             padding-top: 25px; 
         }
 
@@ -99,7 +98,7 @@ $html = '
 
         .qr-img {
             padding-top: 100px;
-            width: 700px;
+            width: 900px;
         }
 
         .footer {
@@ -142,7 +141,7 @@ $html = '
     <div class="footer">
         <div class="footer-content">
             <div class="name">'.$nombre.'</div>
-            <div class="id">NoEmpleado:'.$noempleado.'</div>
+            <div class="id">N° Empleado: '.$noempleado.'</div>
         </div>
     </div>
 

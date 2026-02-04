@@ -1,6 +1,8 @@
 <?php
 include '../../api/db/conexion.php';
 
+header('Content-Type: text/html; charset=utf-8');
+
 $filtro_fecha = $_GET['filtro_fecha'] ?? 'hoy';
 $fecha_inicio = $_GET['fecha_inicio'] ?? date('Y-m-d');
 $fecha_fin = $_GET['fecha_fin'] ?? date('Y-m-d');
@@ -16,7 +18,8 @@ function formatSqlServerDate($dateValue) {
     
     $dateStr = (string)$dateValue;
     if (strpos($dateStr, '1900-01-01') !== false || 
-        strpos($dateStr, '0000-00-00') !== false) {
+        strpos($dateStr, '0000-00-00') !== false ||
+        strpos($dateStr, '1753-01-01') !== false) {
         return 'No existe un movimiento';
     }
     
@@ -34,7 +37,7 @@ try {
                 CONCAT(t2.Nombre, ' ', t2.ApPaterno, ' ', t2.ApMaterno) as Personal,
                 t2.IdPersonal as CodigoPersonal,
                 CASE 
-                    WHEN t1.IdUbicacion = 0 THEN 'SinUbicacion' 
+                    WHEN t1.IdUbicacion = 0 OR t1.IdUbicacion IS NULL THEN 'SinUbicacion' 
                     ELSE t5.NomCorto 
                 END as NomCorto,
                 t1.IdUbicacion,
@@ -42,11 +45,14 @@ try {
                 t1.FechaEntrada,
                 t1.FolMovSal,
                 t1.FechaSalida,
-                t1.tiempo as Tiempo
+                t1.tiempo as Tiempo,
+                t2.RutaFoto
             FROM regentsalper as t1 
             LEFT JOIN t_ubicacion as t5 ON t5.IdUbicacion = t1.IdUbicacion 
             INNER JOIN t_personal as t2 ON t1.IdPer = t2.IdPersonal
             WHERE t2.status = 1";
+    
+    $params = [];
     
     switch($filtro_fecha) {
         case 'hoy':
@@ -65,30 +71,35 @@ try {
             break;
         case 'personalizado':
             if (!empty($fecha_inicio) && !empty($fecha_fin)) {
-                $sql .= " AND CONVERT(DATE, t1.FechaEntrada) BETWEEN :fecha_inicio AND :fecha_fin";
+                $sql .= " AND CONVERT(DATE, t1.FechaEntrada) BETWEEN ? AND ?";
+                $params[] = $fecha_inicio;
+                $params[] = $fecha_fin;
             }
             break;
     }
     
     if (!empty($id_personal)) {
-        $sql .= " AND t2.IdPersonal = :id_personal";
+        $sql .= " AND t2.IdPersonal = ?";
+        $params[] = $id_personal;
     }
     
     if (!empty($id_personal_especifico)) {
-        $sql .= " AND t2.IdPersonal LIKE :id_personal_especifico";
+        $sql .= " AND t2.IdPersonal LIKE ?";
+        $params[] = '%' . $id_personal_especifico . '%';
     }
     
     if (!empty($id_ubicacion)) {
-        $sql .= " AND t1.IdUbicacion = :id_ubicacion";
+        $sql .= " AND t1.IdUbicacion = ?";
+        $params[] = $id_ubicacion;
     }
     
     if (!empty($tipo_movimiento)) {
         if ($tipo_movimiento == 'entrada') {
             $sql .= " AND t1.FechaEntrada IS NOT NULL 
-                      AND t1.FechaEntrada NOT LIKE '%1900-01-01%'";
+                      AND CONVERT(VARCHAR, t1.FechaEntrada) NOT LIKE '%1900-01-01%'";
         } elseif ($tipo_movimiento == 'salida') {
             $sql .= " AND t1.FechaSalida IS NOT NULL 
-                      AND t1.FechaSalida NOT LIKE '%1900-01-01%'";
+                      AND CONVERT(VARCHAR, t1.FechaSalida) NOT LIKE '%1900-01-01%'";
         }
     }
     
@@ -96,32 +107,21 @@ try {
     
     $stmt = $Conexion->prepare($sql);
     
-    if ($filtro_fecha == 'personalizado' && !empty($fecha_inicio) && !empty($fecha_fin)) {
-        $stmt->bindParam(':fecha_inicio', $fecha_inicio);
-        $stmt->bindParam(':fecha_fin', $fecha_fin);
-    }
-    
-    if (!empty($id_personal)) {
-        $stmt->bindParam(':id_personal', $id_personal, PDO::PARAM_INT);
-    }
-    
-    if (!empty($id_ubicacion)) {
-        $stmt->bindParam(':id_ubicacion', $id_ubicacion, PDO::PARAM_INT);
-    }
-    
-    if (!empty($id_personal_especifico)) {
-        $search_term = '%' . $id_personal_especifico . '%';
-        $stmt->bindParam(':id_personal_especifico', $search_term);
+    if (!empty($params)) {
+        foreach($params as $key => $value) {
+            $stmt->bindValue($key + 1, $value);
+        }
     }
     
     $stmt->execute();
     $rows = $stmt->fetchAll(PDO::FETCH_OBJ);
     
+    $count = count($rows);
+    
 } catch (PDOException $e) {
-    die('<div class="alert alert-danger">Error: ' . $e->getMessage() . '</div>');
+    echo '<div class="alert alert-danger">Error: ' . $e->getMessage() . '</div>';
+    exit;
 }
-
-$count = count($rows);
 ?>
 
 <div class="table-responsive">
@@ -148,16 +148,40 @@ $count = count($rows);
                 </td>
             </tr>
             <?php else: ?>
-                <?php foreach($rows as $row): ?>
+                <?php foreach($rows as $row): 
+                    $fechaEntrada = formatSqlServerDate($row->FechaEntrada);
+                    $fechaSalida = formatSqlServerDate($row->FechaSalida);
+                ?>
                 <tr>
                     <td style="text-align: center"><?php echo htmlspecialchars($row->IdMovEntSal); ?></td>
                     <td style="text-align: center">
-                        <div><?php echo htmlspecialchars($row->Personal); ?></div>
-                        <small class="text-muted">
-                            <span class="badge badge-primary" style="font-size: 0.8em;">
-                                ID: <?php echo htmlspecialchars($row->CodigoPersonal); ?>
-                            </span>
-                        </small>
+                        <div class="d-flex align-items-center justify-content-center">
+                            <?php if(!empty($row->Foto) && file_exists($row->Foto)): ?>
+                                <img src="<?php echo htmlspecialchars($row->Foto); ?>" 
+                                     alt="Foto" 
+                                     class="rounded-circle mr-2" 
+                                     style="width: 40px; height: 40px; object-fit: cover;">
+                            <?php else: ?>
+                                <div class="employee-initials rounded-circle mr-2 d-flex align-items-center justify-content-center" 
+                                     style="width: 40px; height: 40px; background-color: #d94f00; color: white; font-weight: bold;">
+                                    <?php 
+                                    $initials = '';
+                                    $nameParts = explode(' ', $row->Personal);
+                                    if(isset($nameParts[0][0])) $initials .= $nameParts[0][0];
+                                    if(isset($nameParts[1][0])) $initials .= $nameParts[1][0];
+                                    echo strtoupper($initials);
+                                    ?>
+                                </div>
+                            <?php endif; ?>
+                            <div class="text-left">
+                                <div><?php echo htmlspecialchars($row->Personal); ?></div>
+                                <small class="text-muted">
+                                    <span class="badge badge-primary" style="font-size: 0.8em;">
+                                        ID: <?php echo htmlspecialchars($row->CodigoPersonal); ?>
+                                    </span>
+                                </small>
+                            </div>
+                        </div>
                     </td>
                     <td style="text-align: center">
                         <?php 
@@ -170,51 +194,55 @@ $count = count($rows);
                     <td style="text-align: center">
                         <?php if ($row->FolMovEnt == 0): ?>
                             <span class="badge badge-warning p-2">
-                                No existe un movimiento
+                                <i class="fas fa-times"></i> Sin movimiento
                             </span>
                         <?php else: ?>
-                            <button type="button" class="btn btn-info btn-sm btn-ver-entrada" data-id="<?php echo htmlspecialchars($row->IdMovEntSal); ?>">
-                                <i class="fa fa-eye"></i> Ver <?php echo htmlspecialchars($row->FolMovEnt); ?>
+                            <button type="button" class="btn btn-info btn-sm btn-ver-entrada" 
+                                    data-id="<?php echo htmlspecialchars($row->IdMovEntSal); ?>"
+                                    title="Ver detalles de entrada">
+                                <i class="fas fa-eye"></i> Ver <?php echo htmlspecialchars($row->FolMovEnt); ?>
                             </button>
                         <?php endif; ?>
                     </td>
                     <td style="text-align: center">
                         <?php 
-                        $fechaEntrada = formatSqlServerDate($row->FechaEntrada);
                         if($fechaEntrada == 'No existe un movimiento' || $fechaEntrada == 'Fecha inválida') {
-                            echo '<span class="badge badge-warning">' . $fechaEntrada . '</span>';
+                            echo '<span class="badge badge-warning"><i class="fas fa-exclamation-triangle"></i> ' . $fechaEntrada . '</span>';
                         } else {
-                            echo htmlspecialchars($fechaEntrada);
+                            $date = new DateTime($fechaEntrada);
+                            echo '<span class="badge badge-success">' . $date->format('d/m/Y H:i:s') . '</span>';
                         }
                         ?>
                     </td>
                     <td style="text-align: center">
                         <?php if ($row->FolMovSal == 0): ?>
                             <span class="badge badge-warning p-2">
-                                No existe un movimiento
+                                <i class="fas fa-times"></i> Sin movimiento
                             </span>
                         <?php else: ?>
-                            <button type="button" class="btn btn-info btn-sm btn-ver-salida" data-id="<?php echo htmlspecialchars($row->IdMovEntSal); ?>">
-                                <i class="fa fa-eye"></i> Ver <?php echo htmlspecialchars($row->FolMovSal); ?>
+                            <button type="button" class="btn btn-info btn-sm btn-ver-salida" 
+                                    data-id="<?php echo htmlspecialchars($row->IdMovEntSal); ?>"
+                                    title="Ver detalles de salida">
+                                <i class="fas fa-eye"></i> Ver <?php echo htmlspecialchars($row->FolMovSal); ?>
                             </button>
                         <?php endif; ?>
                     </td>
                     <td style="text-align: center">
                         <?php 
-                        $fechaSalida = formatSqlServerDate($row->FechaSalida);
                         if($fechaSalida == 'No existe un movimiento' || $fechaSalida == 'Fecha inválida') {
-                            echo '<span class="badge badge-warning">' . $fechaSalida . '</span>';
+                            echo '<span class="badge badge-warning"><i class="fas fa-exclamation-triangle"></i> ' . $fechaSalida . '</span>';
                         } else {
-                            echo htmlspecialchars($fechaSalida);
+                            $date = new DateTime($fechaSalida);
+                            echo '<span class="badge badge-danger">' . $date->format('d/m/Y H:i:s') . '</span>';
                         }
                         ?>
                     </td>
                     <td style="text-align: center">
                         <?php 
-                        if(!empty($row->Tiempo) && $row->Tiempo != '00:00:00') {
-                            echo '<span class="badge badge-success p-2">' . htmlspecialchars($row->Tiempo) . '</span>';
+                        if(!empty($row->Tiempo) && $row->Tiempo != '00:00:00' && $row->Tiempo != '1900-01-01 00:00:00.000') {
+                            echo '<span class="badge badge-primary p-2"><i class="fas fa-clock"></i> ' . htmlspecialchars($row->Tiempo) . '</span>';
                         } else {
-                            echo '<span class="badge badge-secondary p-2">N/A</span>';
+                            echo '<span class="badge badge-secondary p-2"><i class="fas fa-clock"></i> N/A</span>';
                         }
                         ?>
                     </td>
@@ -229,7 +257,12 @@ $count = count($rows);
 <div class="row mt-2">
     <div class="col-md-12">
         <p class="text-muted text-center">
-            <small>Mostrando <?php echo $count; ?> movimiento(s)</small>
+            <small>
+                <i class="fas fa-info-circle"></i> 
+                Mostrando <?php echo $count; ?> movimiento(s) | 
+                Total entradas: <?php echo count(array_filter($rows, function($r) { return $r->FolMovEnt > 0; })); ?> | 
+                Total salidas: <?php echo count(array_filter($rows, function($r) { return $r->FolMovSal > 0; })); ?>
+            </small>
         </p>
     </div>
 </div>

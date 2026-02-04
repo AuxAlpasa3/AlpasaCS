@@ -28,6 +28,31 @@ include_once "../templates/head.php";
                 </div>
                 <div class="card-body" id="filtrosBody">
                     <div class="row mb-3">
+                         <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">ID Personal:</label>
+                                <input type="text" id="filtro-id-personal" class="form-control form-control-lg" placeholder="Buscar por ID...">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Personal:</label>
+                                <select id="filtro-personal" class="form-control form-control-lg select2-personal" style="width: 100%;">
+                                    <option value="">Todo el personal</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Ubicación:</label>
+                                <select id="filtro-ubicacion" class="form-control form-control-lg select2-ubicacion" style="width: 100%;">
+                                    <option value="">Todas las ubicaciones</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label class="form-label">Fecha:</label>
@@ -47,7 +72,6 @@ include_once "../templates/head.php";
                                 <input type="date" id="fecha-inicio" class="form-control form-control-lg" value="<?php echo date('Y-m-d'); ?>">
                             </div>
                         </div>
-                        
                         <div class="col-md-2" id="rango-fechas-hasta-container" style="display: none;">
                             <div class="form-group">
                                 <label class="form-label">Hasta:</label>
@@ -55,43 +79,9 @@ include_once "../templates/head.php";
                             </div>
                         </div>
                         
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label class="form-label">Personal:</label>
-                                <select id="filtro-personal" class="form-control form-control-lg select2-personal" style="width: 100%;">
-                                </select>
-                            </div>
-                        </div>
+                       
                         
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label class="form-label">Ubicación:</label>
-                                <select id="filtro-ubicacion" class="form-control form-control-lg select2-ubicacion" style="width: 100%;">
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label class="form-label">Tipo:</label>
-                                <select id="filtro-tipo" class="form-control form-control-lg select2-tipo" style="width: 100%;">
-                                    <option value="">Todos</option>
-                                    <option value="entrada">Entradas</option>
-                                    <option value="salida">Salidas</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="form-label">ID Personal:</label>
-                                <input type="text" id="filtro-id-personal" class="form-control form-control-lg" placeholder="Buscar por ID...">
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-9">
+                        <div class="col-md-4">
                             <div class="form-group text-right mt-4">
                                 <button type="button" id="btn-aplicar-filtros" class="btn btn-primary btn-lg" style="background-color: #d94f00; border-color: #d94f00;">
                                     <i class="fas fa-search mr-1"></i> Buscar
@@ -138,23 +128,13 @@ include_once "../templates/head.php";
                         <p class="mt-2 text-primary">Cargando movimientos...</p>
                     </div>
                     
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped" id="dataTableMovimientos">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Hora</th>
-                                    <th>ID Personal</th>
-                                    <th>Nombre</th>
-                                    <th>Tipo</th>
-                                    <th>Ubicación</th>
-                                    <th>Acción</th>
-                                    <th>Detalles</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
+                    <!-- Aquí se cargarán los resultados -->
+                    <div id="resultados-movimientos">
+                        <div class="text-center text-muted p-5">
+                            <i class="fas fa-exchange-alt fa-3x mb-3"></i>
+                            <h4>Seleccione filtros y presione "Buscar"</h4>
+                            <p>Los movimientos aparecerán aquí</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -168,21 +148,10 @@ include_once "../templates/head.php";
 include_once '../templates/footer.php';
 ?>
 
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.bootstrap4.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/pdfmake.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/vfs_fonts.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script type="text/javascript">
 $(document).ready(function() {
-    var dataTable = null;
     var filtrosExpandidos = true;
     
     function toggleFiltros() {
@@ -245,8 +214,6 @@ $(document).ready(function() {
         // Configurar Select2 para tipo
         $('#filtro-tipo').select2({
             theme: 'custom-theme',
-            placeholder: 'Todos los tipos',
-            allowClear: true,
             width: '100%',
             dropdownCssClass: 'select2-dropdown-enhanced',
             selectionCssClass: 'select2-selection-enhanced',
@@ -262,6 +229,7 @@ $(document).ready(function() {
                 if (!data.error && Array.isArray(data)) {
                     var select = $('#filtro-personal');
                     select.empty();
+                    select.append('<option value="">Todo el personal</option>');
                     
                     $.each(data, function(index, item) {
                         if (item && item.id && item.nombre) {
@@ -280,8 +248,7 @@ $(document).ready(function() {
                         width: '100%',
                         dropdownCssClass: 'select2-dropdown-enhanced',
                         selectionCssClass: 'select2-selection-enhanced',
-                        language: 'es',
-                        closeOnSelect: false
+                        language: 'es'
                     });
                 }
             },
@@ -299,6 +266,7 @@ $(document).ready(function() {
                 if (!data.error && Array.isArray(data)) {
                     var select = $('#filtro-ubicacion');
                     select.empty();
+                    select.append('<option value="">Todas las ubicaciones</option>');
                     
                     $.each(data, function(index, item) {
                         if (item && item.id && item.nombre) {
@@ -313,8 +281,7 @@ $(document).ready(function() {
                         width: '100%',
                         dropdownCssClass: 'select2-dropdown-enhanced',
                         selectionCssClass: 'select2-selection-enhanced',
-                        language: 'es',
-                        closeOnSelect: false
+                        language: 'es'
                     });
                 }
             },
@@ -324,220 +291,49 @@ $(document).ready(function() {
         });
     }
     
-    function inicializarDataTable() {
-        if ($.fn.DataTable.isDataTable('#dataTableMovimientos')) {
-            if (dataTable) {
-                dataTable.destroy();
-            }
-            $('#dataTableMovimientos tbody').empty();
-        }
+    function cargarMovimientos() {
+        var filtros = {
+            filtro_fecha: $('#filtro-fecha').val(),
+            fecha_inicio: $('#fecha-inicio').val(),
+            fecha_fin: $('#fecha-fin').val(),
+            id_personal: $('#filtro-personal').val(),
+            id_ubicacion: $('#filtro-ubicacion').val(),
+            tipo_movimiento: $('#filtro-tipo').val(),
+            id_personal_especifico: $('#filtro-id-personal').val()
+        };
         
-        dataTable = $('#dataTableMovimientos').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "Controlador/Obtener_Movimientos.php",
-                type: "POST",
-                data: function(d) {
-                    d.filtro_fecha = $('#filtro-fecha').val();
-                    d.fecha_inicio = $('#fecha-inicio').val();
-                    d.fecha_fin = $('#fecha-fin').val();
-                    d.id_personal = $('#filtro-personal').val();
-                    d.id_ubicacion = $('#filtro-ubicacion').val();
-                    d.tipo_movimiento = $('#filtro-tipo').val();
-                    d.id_personal_especifico = $('#filtro-id-personal').val();
-                },
-                beforeSend: function() {
-                    $('#loading').show();
-                },
-                complete: function() {
-                    $('#loading').hide();
-                },
-                dataSrc: function(json) {
-                    if (json.error) {
-                        showNotification('Error al cargar los datos: ' + json.error, 'error');
-                        return [];
-                    }
-                    
-                    if (json.data && Array.isArray(json.data)) {
-                        return json.data;
-                    } else {
-                        return [];
-                    }
-                },
-                error: function(xhr, error, thrown) {
-                    showNotification('Error al cargar los datos.', 'error');
-                }
-            },
-            columns: [
-                { 
-                    data: "Fecha",
-                    className: "text-center",
-                    orderable: true,
-                    render: function(data, type, row) {
-                        return data ? new Date(data).toLocaleDateString('es-MX') : 'N/A';
-                    }
-                },
-                { 
-                    data: "Hora",
-                    className: "text-center",
-                    orderable: true
-                },
-                { 
-                    data: "IDPersonal",
-                    className: "text-center",
-                    orderable: true
-                },
-                { 
-                    data: "Nombre",
-                    orderable: true
-                },
-                { 
-                    data: "Tipo",
-                    className: "text-center",
-                    orderable: true,
-                    render: function(data, type, row) {
-                        var badgeClass = data === 'entrada' ? 'badge-success' : 'badge-danger';
-                        var tipoTexto = data === 'entrada' ? 'Entrada' : 'Salida';
-                        return `<span class="badge ${badgeClass}">${tipoTexto}</span>`;
-                    }
-                },
-                { 
-                    data: "Ubicacion",
-                    orderable: true,
-                    render: function(data, type, row) {
-                        return data || 'N/A';
-                    }
-                },
-                { 
-                    data: "Accion",
-                    className: "text-center",
-                    orderable: true,
-                    render: function(data, type, row) {
-                        return data || 'N/A';
-                    }
-                },
-                { 
-                    data: null,
-                    className: "text-center",
-                    orderable: false,
-                    searchable: false,
-                    render: function(data, type, row) {
-                        var idMovimiento = row.IdMovimiento || '';
-                        var tipo = row.Tipo || '';
-                        var categoria = row.Categoria || 'Personal';
-                        
-                        if (!idMovimiento) return '';
-                        
-                        return `
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-sm btn-info btn-ver-detalles" 
-                                        data-id="${idMovimiento}"
-                                        data-tipo="${tipo}"
-                                        data-categoria="${categoria}"
-                                        title="Ver Detalles">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                        `;
-                    }
-                }
-            ],
-            language: {
-                processing: "Procesando...",
-                lengthMenu: "Mostrar _MENU_ registros",
-                zeroRecords: "No se encontraron resultados",
-                emptyTable: "Ningún dato disponible en esta tabla",
-                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                infoEmpty: "Mostrando 0 a 0 de 0 registros",
-                infoFiltered: "(filtrado de _MAX_ registros totales)",
-                paginate: {
-                    first: "Primero",
-                    last: "Último",
-                    next: "Siguiente",
-                    previous: "Anterior"
-                }
-            },
-            responsive: true,
-            autoWidth: false,
-            pageLength: 25,
-            searching: false,
-            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
-            dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-                 "<'row'<'col-sm-12'tr>>" +
-                 "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-            buttons: [
-                {
-                    extend: 'excelHtml5',
-                    text: '<i class="fas fa-file-excel"></i> Excel',
-                    className: 'btn-outline-primary',
-                    title: 'Movimientos_' + new Date().toISOString().split('T')[0],
-                    exportOptions: {
-                        columns: ':visible'
-                    }
-                },
-                {
-                    extend: 'pdfHtml5',
-                    text: '<i class="fas fa-file-pdf"></i> PDF',
-                    className: 'btn-outline-primary',
-                    title: 'Movimientos_' + new Date().toISOString().split('T')[0],
-                    orientation: 'landscape',
-                    pageSize: 'A4',
-                    exportOptions: {
-                        columns: ':visible'
-                    },
-                    customize: function(doc) {
-                        doc.defaultStyle.fontSize = 8;
-                        doc.styles.tableHeader.fontSize = 9;
-                        doc.styles.tableHeader.alignment = 'center';
-                        doc.styles.tableHeader.fillColor = '#d94f00';
-                        doc.styles.tableHeader.color = '#ffffff';
-                    }
-                },
-                {
-                    extend: 'print',
-                    text: '<i class="fas fa-print"></i> Imprimir',
-                    className: 'btn-outline-primary',
-                    title: 'Movimientos_' + new Date().toISOString().split('T')[0],
-                    exportOptions: {
-                        columns: ':visible'
-                    },
-                    customize: function(win) {
-                        $(win.document.body).find('h1').css({
-                            'color': '#d94f00',
-                            'text-align': 'center',
-                            'margin-bottom': '20px'
-                        });
-                        
-                        $(win.document.body).find('table').addClass('table table-bordered table-striped');
-                        $(win.document.body).find('thead th').css({
-                            'background-color': '#d94f00',
-                            'color': 'white',
-                            'padding': '8px',
-                            'text-align': 'center'
-                        });
-                    }
-                }
-            ],
-            initComplete: function(settings, json) {
+        $('#loading').show();
+        $('#resultados-movimientos').hide();
+        
+        $.ajax({
+            url: 'Controlador/ajax_movimientos.php',
+            type: 'GET',
+            data: filtros,
+            success: function(response) {
                 $('#loading').hide();
+                $('#resultados-movimientos').html(response).show();
                 initEvents();
                 showNotification('Movimientos cargados correctamente', 'success');
             },
-            drawCallback: function(settings) {
-                initEvents();
+            error: function(xhr, status, error) {
+                $('#loading').hide();
+                $('#resultados-movimientos').html(`
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i> Error al cargar los movimientos: ${error}
+                    </div>
+                `).show();
+                showNotification('Error al cargar los movimientos', 'error');
             }
         });
     }
     
-    function cargarDetalleMovimiento(idMov, tipo, categoria) {
+    function cargarDetalleMovimiento(idMov, tipo) {
         $.ajax({
             url: 'Modales/Detalle_Movimiento.php',
             type: 'GET',
             data: {
                 idMov: idMov,
-                tipo: tipo,
-                categoria: categoria
+                tipo: tipo
             },
             beforeSend: function() {
                 $('#loading').show();
@@ -545,7 +341,11 @@ $(document).ready(function() {
             success: function(response) {
                 $('#loading').hide();
                 $('#modal-container').html(response);
-                $('#DetalleMovimiento').modal('show');
+                if (tipo === 'entrada') {
+                    $('#DetalleEntrada').modal('show');
+                } else {
+                    $('#DetalleSalida').modal('show');
+                }
             },
             error: function(xhr, status, error) {
                 $('#loading').hide();
@@ -555,16 +355,15 @@ $(document).ready(function() {
     }
     
     function initEvents() {
-        $(document).off('click', '.btn-ver-detalles').on('click', '.btn-ver-detalles', function(e) {
+        $(document).off('click', '.btn-ver-entrada, .btn-ver-salida').on('click', '.btn-ver-entrada, .btn-ver-salida', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
             var idMov = $(this).data('id');
-            var tipo = $(this).data('tipo');
-            var categoria = $(this).data('categoria');
+            var tipo = $(this).hasClass('btn-ver-entrada') ? 'entrada' : 'salida';
             
             if (idMov) {
-                cargarDetalleMovimiento(idMov, tipo, categoria);
+                cargarDetalleMovimiento(idMov, tipo);
             }
         });
     }
@@ -580,9 +379,7 @@ $(document).ready(function() {
     });
     
     $('#btn-aplicar-filtros').click(function() {
-        if (dataTable) {
-            dataTable.ajax.reload();
-        }
+        cargarMovimientos();
     });
     
     $('#btn-limpiar-filtros').click(function() {
@@ -594,66 +391,81 @@ $(document).ready(function() {
         $('#filtro-tipo').val('').trigger('change');
         $('#filtro-id-personal').val('');
         
-        if (dataTable) {
-            dataTable.ajax.reload();
-        }
         showNotification('Filtros limpiados', 'info');
     });
     
     $('#btn-export-excel').click(function(e) {
         e.preventDefault();
         
-        if (!dataTable || dataTable.rows().count() === 0) {
+        if ($('#resultados-movimientos').find('tbody tr').length === 0 || 
+            $('#resultados-movimientos').find('.alert-info').length > 0) {
             showNotification('No hay datos para exportar', 'warning');
             return;
         }
         
-        dataTable.button('.buttons-excel').trigger();
-        showNotification('Generando archivo Excel...', 'info');
+        // Implementar exportación a Excel
+        var table = $('#dataTableMovimientos').clone();
+        table.find('.btn, .badge').remove();
+        
+        // Crear y descargar archivo Excel
+        var html = '<table>' + table.html() + '</table>';
+        var blob = new Blob([html], {type: 'application/vnd.ms-excel'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'movimientos_' + new Date().toISOString().split('T')[0] + '.xls';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        showNotification('Archivo Excel generado', 'success');
     });
     
     $('#btn-export-pdf').click(function(e) {
         e.preventDefault();
         
-        if (!dataTable || dataTable.rows().count() === 0) {
+        if ($('#resultados-movimientos').find('tbody tr').length === 0 || 
+            $('#resultados-movimientos').find('.alert-info').length > 0) {
             showNotification('No hay datos para exportar', 'warning');
             return;
         }
         
-        dataTable.button('.buttons-pdf').trigger();
-        showNotification('Generando archivo PDF...', 'info');
+        // Implementar exportación a PDF usando html2canvas y jsPDF
+        showNotification('Función PDF en desarrollo', 'info');
     });
     
     $('#btn-print').click(function(e) {
         e.preventDefault();
         
-        if (!dataTable || dataTable.rows().count() === 0) {
+        if ($('#resultados-movimientos').find('tbody tr').length === 0 || 
+            $('#resultados-movimientos').find('.alert-info').length > 0) {
             showNotification('No hay datos para imprimir', 'warning');
             return;
         }
         
-        dataTable.button('.buttons-print').trigger();
-        showNotification('Preparando impresión...', 'info');
+        var printContent = $('#resultados-movimientos').html();
+        var originalContent = $('body').html();
+        
+        $('body').html('<div class="container-fluid">' + printContent + '</div>');
+        window.print();
+        $('body').html(originalContent);
+        cargarDatosFiltros();
+        
+        showNotification('Página lista para imprimir', 'info');
     });
     
     $('#btn-refresh').click(function(e) {
         e.preventDefault();
-        if (dataTable) {
-            dataTable.ajax.reload(null, false);
-            showNotification('Tabla recargada correctamente', 'success');
-        }
+        cargarMovimientos();
     });
     
     $('#filtro-id-personal').keypress(function(e) {
         if (e.which == 13) {
-            if (dataTable) {
-                dataTable.ajax.reload();
-            }
+            cargarMovimientos();
         }
     });
     
     cargarDatosFiltros();
-    inicializarDataTable();
     
     $(document).on('click', '[data-dismiss="modal"], .btn-close, .modal-close', function() {
         $('.modal').modal('hide');
@@ -666,20 +478,72 @@ $(document).ready(function() {
 </script>
 
 <style>
+
+:root {
+    --primary-orange: #d94f00;
+    --primary-orange-dark: #b53d00;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --secondary-color: #6c757d;
+    --dark-color: #343a40;
+    --border-color: #e9ecef;
+    --table-striped: rgba(217, 79, 0, 0.05);
+    --table-hover: rgba(217, 79, 0, 0.08);
+}
+
 .badge { 
     padding: 4px 8px; 
     border-radius: 12px; 
     font-size: 12px; 
-    font-weight: 600; 
+    font-weight: 600;
 }
-.badge-success { background-color: #28a745; color: white; }
-.badge-danger { background-color: #dc3545; color: white; }
-.badge-warning { background-color: #ffc107; color: #212529; }
-.badge-info { background-color: #17a2b8; color: white; }
-.badge-secondary { background-color: #6c757d; color: white; }
-.badge-primary { background-color: #d94f00; color: white; }
-.badge-dark { background-color: #343a40; color: white; }
 
+.badge-success { 
+    background-color: var(--success-color);
+    color: white; 
+}
+
+.badge-danger { 
+    background-color: var(--danger-color);
+    color: white; 
+}
+
+.badge-warning { 
+    background-color: var(--warning-color);
+    color: #212529; 
+}
+
+.badge-info { 
+    background-color: var(--info-color);
+    color: white; 
+}
+
+.badge-secondary { 
+    background-color: var(--secondary-color);
+    color: white; 
+}
+
+.badge-primary { 
+    background-color: var(--primary-orange);
+    color: white; 
+}
+
+.badge-dark { 
+    background-color: var(--dark-color);
+    color: white; 
+}
+
+.vehicle-badge {
+    cursor: pointer;
+}
+
+.vehicle-badge:hover {
+    opacity: 0.9;
+}
+
+/* Loading spinner */
 #loading {
     position: fixed;
     top: 50%;
@@ -693,17 +557,36 @@ $(document).ready(function() {
     text-align: center;
 }
 
-/* Estilos mejorados para Select2 */
+#loading .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.25em;
+    color: var(--primary-orange);
+}
+
+#loading p {
+    margin-top: 10px;
+    color: var(--primary-orange);
+    font-size: 14px;
+}
+
+/* Select2 personalizado */
 .select2-container--custom-theme {
     width: 100% !important;
 }
 
+.select2-container--custom-theme .select2-selection--multiple {
+    min-height: 48px;
+    border: 2px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    padding: 4px 8px;
+}
+
 .select2-container--custom-theme .select2-selection--single {
     min-height: 48px;
-    border: 2px solid #e9ecef !important;
+    border: 2px solid var(--border-color) !important;
     border-radius: 8px !important;
-    background-color: #f8f9fa;
-    transition: all 0.3s ease;
+    padding: 4px 8px;
 }
 
 .select2-container--custom-theme .select2-selection--single .select2-selection__rendered {
@@ -713,18 +596,93 @@ $(document).ready(function() {
     font-size: 14px;
 }
 
+.select2-container--custom-theme .select2-selection--multiple .select2-selection__rendered {
+    margin: 0;
+    padding: 0;
+}
+
+.select2-container--custom-theme .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--primary-orange);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    padding: 4px 8px;
+    margin: 4px 4px 4px 0;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+}
+
+.select2-container--custom-theme .select2-selection--multiple .select2-selection__choice__remove {
+    color: rgba(255,255,255,0.8);
+    margin-right: 4px;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 2px;
+}
+
+.select2-container--custom-theme .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: white;
+}
+
+.select2-container--custom-theme.select2-container--focus .select2-selection--multiple,
 .select2-container--custom-theme.select2-container--focus .select2-selection--single {
-    border-color: #d94f00 !important;
-    background-color: white;
+    border-color: var(--primary-orange) !important;
     box-shadow: 0 0 0 3px rgba(217, 79, 0, 0.1);
 }
 
 .select2-dropdown.select2-dropdown-enhanced {
-    border: 2px solid #d94f00;
+    border: 2px solid var(--primary-orange);
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     margin-top: 4px;
     z-index: 1060 !important;
+}
+
+.select2-container--custom-theme .select2-search--dropdown .select2-search__field {
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 8px;
+    width: calc(100% - 16px) !important;
+}
+
+.select2-container--custom-theme .select2-search--dropdown .select2-search__field:focus {
+    border-color: var(--primary-orange);
+    outline: none;
+}
+
+.select2-container--custom-theme .select2-results__option {
+    padding: 10px 15px;
+    font-size: 14px;
+}
+
+.select2-container--custom-theme .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--primary-orange);
+    color: white;
+}
+
+.select2-container--custom-theme .select2-results__option[aria-selected=true] {
+    background-color: rgba(217, 79, 0, 0.1);
+    color: var(--primary-orange);
+}
+
+.select2-container--custom-theme .select2-selection__clear {
+    color: var(--secondary-color);
+    font-size: 18px;
+    margin-right: 8px;
+    padding: 2px;
+}
+
+.select2-container--custom-theme .select2-selection__clear:hover {
+    color: var(--danger-color);
+}
+
+.select2-selection-enhanced {
+    cursor: pointer !important;
 }
 
 .select2-container--custom-theme .select2-selection__arrow {
@@ -734,31 +692,32 @@ $(document).ready(function() {
 }
 
 .select2-container--custom-theme .select2-selection__arrow b {
-    border-color: #6c757d transparent transparent transparent;
+    border-color: var(--secondary-color) transparent transparent transparent;
     border-width: 6px 6px 0 6px;
 }
 
 .select2-container--custom-theme.select2-container--open .select2-selection__arrow b {
-    border-color: transparent transparent #6c757d transparent;
+    border-color: transparent transparent var(--secondary-color) transparent;
     border-width: 0 6px 6px 6px;
 }
 
-.select2-container--custom-theme .select2-results__option {
-    padding: 10px 15px;
-    font-size: 14px;
-    transition: all 0.2s;
+.select2-container--custom-theme .select2-selection--single .select2-selection__placeholder,
+.select2-container--custom-theme .select2-selection--multiple .select2-selection__placeholder {
+    color: var(--secondary-color);
+    font-style: italic;
 }
 
-.select2-container--custom-theme .select2-results__option--highlighted[aria-selected] {
-    background-color: #d94f00;
-    color: white;
+.select2-selection__choice-count {
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--primary-orange);
+    border-radius: 12px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-left: 4px;
 }
 
-.select2-container--custom-theme .select2-results__option[aria-selected=true] {
-    background-color: rgba(217, 79, 0, 0.1);
-    color: #d94f00;
-}
-
+/* Modales */
 .modal {
     z-index: 1060 !important;
 }
@@ -768,16 +727,17 @@ $(document).ready(function() {
 }
 
 .btn-outline-primary {
-    border-color: #d94f00;
-    color: #d94f00;
+    border-color: var(--primary-orange);
+    color: var(--primary-orange);
 }
 
 .btn-outline-primary:hover {
-    background-color: #d94f00;
-    border-color: #d94f00;
+    background-color: var(--primary-orange);
+    border-color: var(--primary-orange);
     color: white;
 }
 
+/* Grupos de botones */
 .btn-group {
     display: flex;
     gap: 5px;
@@ -789,39 +749,62 @@ $(document).ready(function() {
     font-size: 14px;
 }
 
+/* Header de filtros */
 #filtrosHeader {
-    transition: all 0.3s;
+    transition: background-color 0.2s;
 }
 
 #filtrosHeader:hover {
-    background-color: #b53d00 !important;
+    background-color: var(--primary-orange-dark) !important;
 }
 
 #filtrosHeader .toggle-icon {
-    transition: transform 0.3s;
+    transition: transform 0.2s;
 }
 
+/* Tabla */
 .table th {
-    background-color: #d94f00;
+    background-color: var(--primary-orange);
     color: white;
-    border-color: #b53d00;
+    border-color: var(--primary-orange-dark);
     text-align: center;
     vertical-align: middle;
     font-weight: 600;
+    padding: 1rem;
 }
 
 .table td {
     vertical-align: middle;
+    padding: 0.75rem;
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(217, 79, 0, 0.05);
+    background-color: var(--table-striped);
 }
 
-#dataTableMovimientos tbody tr {
+#dataTablePersonal tbody tr {
     cursor: default;
 }
 
+#dataTablePersonal tbody tr:hover {
+    background-color: var(--table-hover);
+}
+
+/* Imágenes */
+.thumbnail-image {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.thumbnail-image:hover {
+    transform: scale(1.05);
+}
+
+.employee-initials {
+    cursor: default;
+}
+
+/* DataTables */
 .dataTables_wrapper {
     margin-top: 10px;
 }
@@ -835,7 +818,7 @@ $(document).ready(function() {
     padding-top: 10px;
 }
 
-/* Estilos para etiquetas de formulario */
+/* Formularios */
 .form-label {
     font-weight: 600;
     color: #495057;
@@ -849,12 +832,11 @@ $(document).ready(function() {
     padding: 10px 12px;
     font-size: 14px;
     border-radius: 8px;
-    border: 2px solid #e9ecef;
-    transition: all 0.3s;
+    border: 2px solid var(--border-color);
 }
 
 .form-control-lg:focus {
-    border-color: #d94f00;
+    border-color: var(--primary-orange);
     box-shadow: 0 0 0 3px rgba(217, 79, 0, 0.1);
     outline: none;
 }
@@ -866,7 +848,7 @@ $(document).ready(function() {
     font-weight: 600;
 }
 
-/* Estilos responsivos */
+/* Responsive */
 @media (max-width: 1200px) {
     .btn-group .btn {
         padding: 6px 8px !important;
@@ -883,6 +865,7 @@ $(document).ready(function() {
         padding: 8px 10px;
     }
     
+    .select2-container--custom-theme .select2-selection--multiple,
     .select2-container--custom-theme .select2-selection--single {
         min-height: 42px;
     }
@@ -935,6 +918,11 @@ $(document).ready(function() {
         padding: 6px 4px !important;
     }
     
+    .thumbnail-image, .employee-initials {
+        width: 35px !important;
+        height: 35px !important;
+    }
+    
     .form-control-lg {
         min-height: 38px;
         padding: 6px 10px;
@@ -944,6 +932,11 @@ $(document).ready(function() {
     .btn-lg {
         padding: 8px 16px;
         font-size: 14px;
+    }
+    
+    .select2-container--custom-theme .select2-selection--multiple .select2-selection__choice {
+        font-size: 11px;
+        padding: 3px 6px;
     }
 }
 
@@ -976,6 +969,7 @@ $(document).ready(function() {
     }
 }
 
+/* Impresión */
 @media print {
     .btn-group,
     .card-header,
@@ -985,7 +979,9 @@ $(document).ready(function() {
     .dataTables_filter,
     .dataTables_info,
     .dataTables_paginate,
-    .btn-ver-detalles,
+    .btn-ver-vehiculo,
+    .employee-initials,
+    .thumbnail-image,
     .select2-container,
     .toggle-icon {
         display: none !important;
@@ -1032,6 +1028,28 @@ $(document).ready(function() {
     }
 }
 
+/* Z-index modales */
+#photoModal {
+    z-index: 99999 !important;
+}
+
+#photoModal .modal-dialog {
+    z-index: 99999 !important;
+}
+
+.modal.fade.show {
+    z-index: 99999 !important;
+}
+
+.modal-backdrop.show {
+    z-index: 99998 !important;
+}
+
+.modal.fade.show ~ .modal-backdrop {
+    z-index: 99998 !important;
+}
+
+/* Botones pequeños */
 .btn-group .btn {
     padding: 4px 8px !important;
     margin: 0 2px !important;
@@ -1046,13 +1064,12 @@ $(document).ready(function() {
     min-width: 32px;
 }
 
-@keyframes select2Pulse {
-    0% { box-shadow: 0 0 0 0 rgba(217, 79, 0, 0.4); }
-    70% { box-shadow: 0 0 0 6px rgba(217, 79, 0, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(217, 79, 0, 0); }
+.select2-multiple-hint {
+    display: block;
+    font-size: 11px;
+    color: var(--secondary-color);
+    margin-top: 4px;
+    font-style: italic;
 }
 
-.select2-container--custom-theme.select2-container--focus .select2-selection--single {
-    animation: select2Pulse 1.5s infinite;
-}
 </style>
