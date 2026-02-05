@@ -142,31 +142,64 @@ try {
                         <div class="card-header bg-primary text-white">
                             <h6 class="mb-0">Fotografías (<?php echo count($fotografias); ?>)</h6>
                         </div>
-                        <div class="card-body">
-                            <?php if($fotografias && count($fotografias) > 0): ?>
-                                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-                                    <?php foreach($fotografias as $index => $foto): ?>
-                                        <div class="col">
-                                            <div class="card h-100 border-0 shadow-sm">
-                                                <img src="<?php echo htmlspecialchars($foto->RutaFoto); ?>" 
-                                                    class="card-img-top" 
-                                                    alt="<?php echo htmlspecialchars($foto->NombreFoto); ?>"
-                                                    style="height: 120px; object-fit: cover;">
-                                                <div class="card-body p-2">
-                                                    <p class="card-text small text-center mb-0">
-                                                        <?php echo htmlspecialchars($foto->NombreFoto); ?>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php else: ?>
-                                <div class="alert alert-info mb-0 text-center">
-                                    No se encontraron fotografías
-                                </div>
-                            <?php endif; ?>
-                        </div>
+                      <div class="card-body">
+    <?php if($fotografias && count($fotografias) > 0): ?>
+        <!-- Carrusel Bootstrap -->
+        <div id="fotografiasCarousel" class="carousel slide" data-bs-ride="carousel">
+            <!-- Indicadores -->
+            <div class="carousel-indicators">
+                <?php foreach($fotografias as $index => $foto): ?>
+                    <button type="button" data-bs-target="#fotografiasCarousel" 
+                            data-bs-slide-to="<?php echo $index; ?>" 
+                            class="<?php echo $index === 0 ? 'active' : ''; ?>"
+                            aria-current="<?php echo $index === 0 ? 'true' : 'false'; ?>"
+                            aria-label="Slide <?php echo $index + 1; ?>">
+                    </button>
+                <?php endforeach; ?>
+            </div>
+            
+            <!-- Slides -->
+            <div class="carousel-inner">
+                <?php foreach($fotografias as $index => $foto): ?>
+                    <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>">
+                        <img src="<?php echo htmlspecialchars($foto->RutaFoto); ?>" 
+                             class="d-block w-100" 
+                             alt="<?php echo htmlspecialchars($foto->NombreFoto); ?>"
+                             style="height: 400px; object-fit: cover;">
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            
+            <button class="carousel-control-prev" type="button" data-bs-target="#fotografiasCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#fotografiasCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Siguiente</span>
+            </button>
+        </div>
+        
+        <div class="row mt-3">
+            <?php foreach($fotografias as $index => $foto): ?>
+                <div class="col-3 col-md-2">
+                    <a href="#fotografiasCarousel" data-bs-slide-to="<?php echo $index; ?>" 
+                       class="d-block <?php echo $index === 0 ? 'active' : ''; ?>">
+                        <img src="<?php echo htmlspecialchars($foto->RutaFoto); ?>" 
+                             class="img-thumbnail" 
+                             alt="Miniatura <?php echo htmlspecialchars($foto->NombreFoto); ?>"
+                             style="height: 80px; width: 100%; object-fit: cover;">
+                    </a>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        
+    <?php else: ?>
+        <div class="alert alert-info mb-0 text-center">
+            No se encontraron fotografías
+        </div>
+    <?php endif; ?>
+</div>
                     </div>
                     </div>
                     

@@ -28,12 +28,7 @@ try {
         throw new Exception('Datos no válidos');
     }
 
-    $placa = $input['Placa'] ?? '';
-    $ubicacion = $input['Ubicacion'] ?? '';
-
-    if (empty($placa) || strlen($placa) < 3) {
-        throw new Exception('La placa debe tener al menos 3 caracteres');
-    }
+    $NoEmpleado = $input['NoEmpleado'] ?? 0;
 
     $sql = "SELECT 
                 t1.IdVehiculo,
@@ -43,13 +38,20 @@ try {
                 t1.Color,
                 t1.LibreUso,
                 t1.IdAsociado,
+                t1.RutaFoto,
                 CONCAT(t2.Nombre,' ',t2.ApPaterno,' ',t2.ApMaterno) as NombreCompleto
             FROM t_vehiculos as t1
             LEFT JOIN t_personal as t2 ON t1.IdAsociado = t2.NoEmpleado
-            WHERE t1.Activo = 1
-            AND UPPER(t1.Placas) LIKE UPPER(:placa)";
+            WHERE t1.Activo = 1";
 
-    $params = [':placa' => "%$placa%"];
+    $params = [];
+    
+    
+    if ($NoEmpleado !== '' && $NoEmpleado !== null) {
+        $sql .= " AND t1.IdAsociado = :NoEmpleado";
+        $params[':NoEmpleado'] = $NoEmpleado;
+    }
+
     
     $sql .= " ORDER BY t1.Placas ASC";
     
@@ -63,13 +65,13 @@ try {
     $vehiculos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $response['success'] = true;
-    $response['message'] = count($vehiculos) . ' vehículo(s) encontrado(s)';
+    $response['message'] = 'Vehículos obtenidos correctamente';
     $response['data'] = $vehiculos;
 
 } catch (Exception $e) {
     $response['success'] = false;
     $response['message'] = $e->getMessage();
-    error_log('Error en buscarVehiculoPorPlaca: ' . $e->getMessage());
+    error_log('Error en obtenerVehiculosPorTipo: ' . $e->getMessage());
     http_response_code(400);
 } finally {
     $Conexion = null;
