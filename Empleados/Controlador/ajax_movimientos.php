@@ -156,23 +156,6 @@ try {
                     <td style="text-align: center"><?php echo htmlspecialchars($row->IdMovEntSal); ?></td>
                     <td style="text-align: center">
                         <div class="d-flex align-items-center justify-content-center">
-                            <?php if(!empty($row->Foto) && file_exists($row->Foto)): ?>
-                                <img src="<?php echo htmlspecialchars($row->Foto); ?>" 
-                                     alt="Foto" 
-                                     class="rounded-circle mr-2" 
-                                     style="width: 40px; height: 40px; object-fit: cover;">
-                            <?php else: ?>
-                                <div class="employee-initials rounded-circle mr-2 d-flex align-items-center justify-content-center" 
-                                     style="width: 40px; height: 40px; background-color: #d94f00; color: white; font-weight: bold;">
-                                    <?php 
-                                    $initials = '';
-                                    $nameParts = explode(' ', $row->Personal);
-                                    if(isset($nameParts[0][0])) $initials .= $nameParts[0][0];
-                                    if(isset($nameParts[1][0])) $initials .= $nameParts[1][0];
-                                    echo strtoupper($initials);
-                                    ?>
-                                </div>
-                            <?php endif; ?>
                             <div class="text-left">
                                 <div><?php echo htmlspecialchars($row->Personal); ?></div>
                                 <small class="text-muted">

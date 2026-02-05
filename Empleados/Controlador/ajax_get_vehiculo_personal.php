@@ -16,7 +16,7 @@ try {
     
     $sql = "SELECT 
                 IdVehiculo,
-                NoEmpleado,
+                IdAsociado,
                 Marca,
                 Modelo,
                 Num_Serie,
@@ -26,7 +26,7 @@ try {
                 Activo,
                 RutaFoto
             FROM t_vehiculos 
-            WHERE NoEmpleado = ? AND Activo = 1";
+            WHERE IdAsociado = ? AND Activo = 1";
     
     $stmt = $Conexion->prepare($sql);
     $stmt->execute([$noEmpleado]);

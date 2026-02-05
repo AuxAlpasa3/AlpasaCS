@@ -152,8 +152,6 @@ try {
             $queryFiltered .= " AND t1.Status = 0";
         } elseif ($estatus === 'Baja') {
             $queryFiltered .= " AND t1.Status = 2";
-        } elseif ($estatus === 'Vacaciones') {
-            $queryFiltered .= " AND t1.Status = 3";
         }
     }
     
@@ -167,12 +165,12 @@ try {
         if ($vehiculo === '1') {
             $queryFiltered .= " AND EXISTS (
                 SELECT 1 FROM t_vehiculos v 
-                WHERE v.NoEmpleado = t1.NoEmpleado AND v.Activo = 1
+                WHERE v.IdAsociado = t1.NoEmpleado AND v.Activo = 1
             )";
         } elseif ($vehiculo === '0') {
             $queryFiltered .= " AND NOT EXISTS (
                 SELECT 1 FROM t_vehiculos v 
-                WHERE v.NoEmpleado = t1.NoEmpleado AND v.Activo = 1
+                WHERE v.IdAsociado = t1.NoEmpleado AND v.Activo = 1
             )";
         }
     }
@@ -207,7 +205,7 @@ try {
     foreach($Personales as $Personal) {
         $queryVehiculo = "SELECT COUNT(*) as tieneVehiculo 
                           FROM t_vehiculos 
-                          WHERE NoEmpleado = :noempleado 
+                          WHERE IdAsociado = :noempleado 
                           AND Activo = 1";
         
         $stmtVehiculo = $Conexion->prepare($queryVehiculo);

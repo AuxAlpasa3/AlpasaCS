@@ -3,7 +3,7 @@ header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Device-Id, Device-Name, Device-Location, Device-Location-Id');
 
-require_once '../api/db/conexion2.php';
+require_once '../../api/db/conexion2.php';
 
 try {
         $sql = "SELECT t1.IdBoletas,
