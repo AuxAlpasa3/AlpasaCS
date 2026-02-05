@@ -30,14 +30,14 @@ try {
 
     error_log('Payload recibido: ' . json_encode($input));
 
-    $requiredFields = ['IdPersonalExterno', 'IdUsuario', 'TipoTransporte', 'Ubicacion'];
+    $requiredFields = ['IdProveedor', 'IdUsuario', 'TipoTransporte', 'Ubicacion'];
     foreach ($requiredFields as $field) {
         if (!isset($input[$field]) || (is_string($input[$field]) && trim($input[$field]) === '')) {
             throw new Exception("Campo requerido faltante: $field");
         }
     }
 
-    $IdPersonalExterno = $input['IdPersonalExterno'];
+    $IdProveedor = $input['IdProveedor'];
     $IdUsuario = $input['IdUsuario'];
     $Ubicacion = $input['Ubicacion'];
     
@@ -84,27 +84,27 @@ try {
     }
     
     $sqlPersonal = "SELECT 
-                        t1.IdPersonalExterno,
+                        t1.IdProveedor,
                         t1.NumeroIdentificacion,
                         CONCAT(t1.Nombre,' ',t1.ApPaterno,' ',t1.ApMaterno) as NombreCompleto,
                         t1.Email,
                         t2.NomCargo,
                         t1.AreaVisita,
                         t1.EmpresaProcedencia as NomEmpresa
-                    FROM t_personal_externo t1
+                    FROM t_proveedor t1
                     LEFT JOIN t_cargoExterno t2 ON t1.Cargo = t2.IdCargo
-                    WHERE t1.IdPersonalExterno= :IdPersonalExterno";
+                    WHERE t1.IdProveedor= :IdProveedor";
     
     $stmtPersonal = $Conexion->prepare($sqlPersonal);
-    $stmtPersonal->bindParam(':IdPersonalExterno', $IdPersonalExterno, PDO::PARAM_STR);
+    $stmtPersonal->bindParam(':IdProveedor', $IdProveedor, PDO::PARAM_STR);
     $stmtPersonal->execute();
     
     $personalResult = $stmtPersonal->fetchAll(PDO::FETCH_ASSOC);
     if (count($personalResult) === 0) {
-        throw new Exception('PersonalExterno no encontrado');
+        throw new Exception('proveedor no encontrado');
     }
     
-    $personalExterno = $personalResult[0];
+    $proveedor = $personalResult[0];
     
     $salidaRegistrada = false;
     $IdMovSalida = null;
@@ -128,15 +128,15 @@ try {
             error_log("Procesando movimiento pendiente: IdMovEnTSal=$IdMovEnTSal, FolMovEnt=$FolMovEnt");
             
             $sqlMovPendiente = "SELECT 
-                                    t1.IdExt, 
+                                    t1.IdProv, 
                                     t1.Ubicacion, 
                                     t1.fecha as FechaEntrada, 
                                     t1.TiempoMarcaje as HoraEntrada, 
                                     t1.TipoVehiculo, 
                                     t1.IdVeh,
                                     t2.tieneVehiculo
-                                FROM regentext t1
-                                LEFT JOIN regentsalext t2 ON t1.FolMov = t2.FolMovEnt
+                                FROM regentProv t1
+                                LEFT JOIN regentsalProv t2 ON t1.FolMov = t2.FolMovEnt
                                 WHERE t1.FolMov = :FolMovEnt";
             
             $stmtMovPendiente = $Conexion->prepare($sqlMovPendiente);
@@ -190,8 +190,8 @@ try {
                 
                 error_log("Tiempo total estancia: $tiempoFormateado ($minutosTotales minutos)");
                 
-                $sqlSalida = "INSERT INTO regsalext (
-                                IdExt,
+                $sqlSalida = "INSERT INTO regsalProv (
+                                IdProv,
                                 IdFolEnt,
                                 Ubicacion,
                                 DispN,
@@ -203,7 +203,7 @@ try {
                                 Notificar,
                                 IdVeh
                             ) VALUES (
-                                :IdExt, 
+                                :IdProv, 
                                 :IdFolEnt,
                                 :Ubicacion, 
                                 :DispN, 
@@ -217,7 +217,7 @@ try {
                             )";
                 
                 $stmtSalida = $Conexion->prepare($sqlSalida);
-                $stmtSalida->bindParam(':IdExt', $movimiento['IdExt'], PDO::PARAM_STR);
+                $stmtSalida->bindParam(':IdProv', $movimiento['IdProv'], PDO::PARAM_STR);
                 $stmtSalida->bindParam(':IdFolEnt', $FolMovEnt, PDO::PARAM_STR);
                 $stmtSalida->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
                 $stmtSalida->bindParam(':DispN', $DispN, PDO::PARAM_STR);
@@ -235,13 +235,13 @@ try {
                 }
 
                 $IdMovSalida = (int)$Conexion->lastInsertId();
-                error_log("Salida personalExterno registrada ID: $IdMovSalida");
+                error_log("Salida proveedor registrada ID: $IdMovSalida");
 
                 if ($IdMovSalida <= 0) {
                     throw new Exception("No se pudo obtener el ID de la inserción");
                 }
             
-                $sqlActualizar = "UPDATE regentsalext SET 
+                $sqlActualizar = "UPDATE regentsalProv SET 
                                   FolMovSal = :FolMovSal,
                                   FechaSalida = :FechaSalida,
                                   Tiempo = :Tiempo,
@@ -267,8 +267,8 @@ try {
         $fechaHoraNuevaEntrada = $FechaNuevaEntrada . ' ' . $HoraNuevaEntrada;
         error_log("Registrando nueva entrada: $fechaHoraNuevaEntrada");
         
-        $sqlEntrada = "INSERT INTO regentext (
-                        IdExt,
+        $sqlEntrada = "INSERT INTO regentProv (
+                        IdProv,
                         Ubicacion,
                         DispN,
                         Fecha,
@@ -279,7 +279,7 @@ try {
                         Notificar,
                         IdVeh
                     ) VALUES (
-                        :IdExt, 
+                        :IdProv, 
                         :Ubicacion, 
                         :DispN, 
                         :Fecha, 
@@ -292,7 +292,7 @@ try {
                     )";
         
         $stmtEntrada = $Conexion->prepare($sqlEntrada);
-        $stmtEntrada->bindParam(':IdExt', $IdPersonalExterno, PDO::PARAM_STR);
+        $stmtEntrada->bindParam(':IdProv', $IdProveedor, PDO::PARAM_STR);
         $stmtEntrada->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
         $stmtEntrada->bindParam(':DispN', $DispN, PDO::PARAM_STR);
         $stmtEntrada->bindParam(':Fecha', $FechaNuevaEntrada, PDO::PARAM_STR);
@@ -309,7 +309,7 @@ try {
         }
 
         $IdMov = (int)$Conexion->lastInsertId();
-        error_log("Entrada personalExterno registrada ID: $IdMov");
+        error_log("Entrada proveedor registrada ID: $IdMov");
 
         if ($IdMov <= 0) {
             throw new Exception("No se pudo obtener el ID de la inserción");
@@ -525,15 +525,15 @@ try {
         
         $tieneVehiculo = $TipoTransporte != 0 ? ($IdMovVeh ?: 0) : 0;
         
-        $sqlRegentSalPer = "INSERT INTO regentsalext (
-                            IdExt,
+        $sqlRegentSalPer = "INSERT INTO regentsalProv (
+                            IdProv,
                             IdUbicacion,
                             FolMovEnt,
                             FechaEntrada,
                             tieneVehiculo,
                             StatusRegistro
                         ) VALUES (
-                            :IdExt, 
+                            :IdProv, 
                             :IdUbicacion, 
                             :FolMovEnt, 
                             :FechaEntrada, 
@@ -542,7 +542,7 @@ try {
                         )";
         
         $stmtRegentSalPer = $Conexion->prepare($sqlRegentSalPer);
-        $stmtRegentSalPer->bindParam(':IdExt', $IdPersonalExterno, PDO::PARAM_STR);
+        $stmtRegentSalPer->bindParam(':IdProv', $IdProveedor, PDO::PARAM_STR);
         $stmtRegentSalPer->bindParam(':IdUbicacion', $Ubicacion, PDO::PARAM_STR);
         $stmtRegentSalPer->bindParam(':FolMovEnt', $IdMov, PDO::PARAM_INT);
         $stmtRegentSalPer->bindParam(':FechaEntrada', $fechaHoraNuevaEntrada, PDO::PARAM_STR);
@@ -550,7 +550,7 @@ try {
         
         if (!$stmtRegentSalPer->execute()) {
             $errorInfo = $stmtRegentSalPer->errorInfo();
-            throw new Exception('Error al registrar en regentsalext: ' . ($errorInfo[2] ?? 'Error desconocido'));
+            throw new Exception('Error al registrar en regentsalProv: ' . ($errorInfo[2] ?? 'Error desconocido'));
         }
         
         $Conexion->commit();
@@ -565,9 +565,9 @@ try {
             'FolMovEnt' => $IdMov,
             'fecha' => $FechaNuevaEntrada,
             'hora' => $HoraNuevaEntrada,
-            'personalExterno' => [
-                'nombre' => $personalExterno['NombreCompleto'],
-                'numeroIdentificacion' => $personalExterno['NumeroIdentificacion']
+            'proveedor' => [
+                'nombre' => $proveedor['NombreCompleto'],
+                'idPersonal' => $proveedor['IdPersonal']
             ],
             'salida_registrada' => $salidaRegistrada
         ];

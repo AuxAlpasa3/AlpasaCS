@@ -28,14 +28,14 @@ try {
         throw new Exception('Datos no válidos');
     }
 
-    $requiredFields = ['IdPersonalExterno'];
+    $requiredFields = ['IdProveedor'];
     foreach ($requiredFields as $field) {
         if (!isset($input[$field]) || (is_string($input[$field]) && trim($input[$field]) === '')) {
             throw new Exception("Campo requerido faltante: $field");
         }
     }
 
-    $IdPersonalExterno =$input['IdPersonalExterno'];
+    $IdProveedor =$input['IdProveedor'];
 
     $sqlMovimientoPendiente = "SELECT
                             t1.IdMovEnTSal,
@@ -46,27 +46,27 @@ try {
                             FORMAT(t1.FechaEntrada, 'HH:mm:ss') as HoraEntrada,
                             t1.tieneVehiculo
                             FROM
-                            regentsalext as t1
+                            regentsalprov as t1
                             LEFT JOIN t_ubicacion_interna as t2
                             on t1.IdUbicacion=t2.IdUbicacion
-                            where t1.IdExt =:IdPersonalExterno 
+                            where t1.IdProv =:IdProveedor 
                             and t1.FolMovSal IS NULL
                             and t1.StatusRegistro= 1 ";
     
     $stmtMovimiento = $Conexion->prepare($sqlMovimientoPendiente);
-    $stmtMovimiento->bindParam(':IdPersonalExterno', $IdPersonalExterno);
+    $stmtMovimiento->bindParam(':IdProveedor', $IdProveedor);
     $stmtMovimiento->execute();
 
     $movimiento = $stmtMovimiento->fetch(PDO::FETCH_ASSOC);
 
     if ($movimiento) {  
         $sqlEntradaInfo = "SELECT 
-                                IdExt,
+                                IdProv,
                                 Observaciones,
                                 Ubicacion,
                                 DispN,
                                 TipoVehiculo
-                           FROM regentext 
+                           FROM regentprov 
                            WHERE FolMov = :FolMovEnt";
         
         $stmtEntrada = $Conexion->prepare($sqlEntradaInfo);

@@ -3,7 +3,7 @@ header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
 
-require_once '../api/db/conexion.php';
+require_once '../../api/db/conexion.php';
 
 $IdVisitanteProgramado = $_POST['IdVisitanteProgramado'] ?? '';
 $idUsuario = $_POST['IdUsuario'] ?? '';
