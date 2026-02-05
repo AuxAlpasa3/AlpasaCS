@@ -37,7 +37,7 @@ try {
                 t1.Placas,
                 t1.Color,
                 t1.LibreUso,
-                t1.NoEmpleado,
+                t1.IdAsociado,
                 t1.RutaFoto,
                 CONCAT(t2.Nombre,' ',t2.ApPaterno,' ',t2.ApMaterno) as NombreCompleto
             FROM t_vehiculos as t1
