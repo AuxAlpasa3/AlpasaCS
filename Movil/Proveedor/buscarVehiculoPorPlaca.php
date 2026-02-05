@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit();
 }
 
-include '../api/db/conexion.php';
+require_once '../../api/db/conexion.php';
 
 $response = [
     'success' => false,
@@ -29,7 +29,6 @@ try {
     }
 
     $placa = $input['Placa'] ?? '';
-    $ubicacion = $input['Ubicacion'] ?? '';
 
     if (empty($placa) || strlen($placa) < 3) {
         throw new Exception('La placa debe tener al menos 3 caracteres');
@@ -42,12 +41,21 @@ try {
                 t1.Placas,
                 t1.Color,
                 t1.LibreUso,
-                t1.NoEmpleado,
-                CONCAT(t2.Nombre,' ',t2.ApPaterno,' ',t2.ApMaterno) as NombreCompleto
+                t1.IdAsociado,
+                (CASE 
+                    WHEN t1.TipoVehiculo=1 then CONCAT(t2.Nombre,' ',t2.ApPaterno,' ',t2.ApMaterno) 
+                    WHEN t1.TipoVehiculo=2 then CONCAT(t3.Nombre,' ',t3.ApPaterno,' ',t3.ApMaterno) 
+                    WHEN t1.TipoVehiculo=3 then t4.NombreProveedor
+                    WHEN t1.TipoVehiculo=4 then CONCAT(t5.Nombre,' ',t5.ApPaterno,' ',t5.ApMaterno) 
+                    WHEN t1.TipoVehiculo=5 then t6.MotivoVisita
+                    END)as NombreCompleto
             FROM t_vehiculos as t1
-            LEFT JOIN t_personal as t2 ON t1.NoEmpleado = t2.NoEmpleado
-            WHERE t1.Activo = 1
-            AND UPPER(t1.Placas) LIKE UPPER(:placa)";
+            LEFT JOIN t_personal as t2 ON t1.IdAsociado = t2.NoEmpleado
+            LEFT JOIN t_personal_externo as t3 ON t1.IdAsociado = t3.IdPersonalExterno
+            LEFT JOIN t_Proveedor as t4 ON t1.IdAsociado = t4.IdProveedor
+            LEFT JOIN t_visitantes_espontaneos as t5 on t1.IdAsociado= t5.IdVisitanteEspontaneo
+            LEFT JOIN t_visitantes_programados as t6 on t1.IdAsociado= t6.IdVisitanteProgramado
+            WHERE t1.Activo = 1 AND UPPER(t1.Placas) LIKE UPPER(:placa)";
 
     $params = [':placa' => "%$placa%"];
     
