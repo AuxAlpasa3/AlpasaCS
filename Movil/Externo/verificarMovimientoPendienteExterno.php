@@ -43,14 +43,15 @@ try {
                             t1.FechaEntrada,
                             t1.IdUbicacion as UbicacionAnterior,
                             t2.NomLargo as NombreUbicacionAnterior,
-                            FORMAT(t1.FechaEntrada, 'HH:mm:ss') as HoraEntrada
+                            FORMAT(t1.FechaEntrada, 'HH:mm:ss') as HoraEntrada,
+                            t1.tieneVehiculo
                             FROM
                             regentsalext as t1
                             LEFT JOIN t_ubicacion_interna as t2
                             on t1.IdUbicacion=t2.IdUbicacion
                             where t1.IdExt =:IdPersonalExterno 
                             and t1.FolMovSal IS NULL
-                            and t1.StatusRegistro= 1";
+                            and t1.StatusRegistro= 1 ";
     
     $stmtMovimiento = $Conexion->prepare($sqlMovimientoPendiente);
     $stmtMovimiento->bindParam(':IdPersonalExterno', $IdPersonalExterno);
@@ -58,8 +59,9 @@ try {
 
     $movimiento = $stmtMovimiento->fetch(PDO::FETCH_ASSOC);
 
-    if (count($movimiento) > 0) {
+    if ($movimiento) {  
         $sqlEntradaInfo = "SELECT 
+                                IdExt,
                                 Observaciones,
                                 Ubicacion,
                                 DispN,
@@ -72,6 +74,23 @@ try {
         $stmtEntrada->execute();
         
         $entradaInfo = $stmtEntrada->fetch(PDO::FETCH_ASSOC);
+
+         $sqlEntradaInfoVeh = "SELECT 
+                                IdVeh,
+                                Observaciones,
+                                Ubicacion,
+                                DispN,
+                                TipoVehiculo
+                            FROM regentveh 
+                            WHERE FolMov = :FolMovEnt";
+        
+        $stmtEntradaVeh = $Conexion->prepare($sqlEntradaInfoVeh);
+        $stmtEntradaVeh->bindParam(':FolMovEnt', $movimiento['tieneVehiculo'], PDO::PARAM_INT);
+        $stmtEntradaVeh->execute();
+        
+        $entradaInfoVeh = $stmtEntradaVeh->fetch(PDO::FETCH_ASSOC);
+
+        
         
         $response['success'] = true;
         $response['message'] = 'Existe un movimiento de entrada sin salida registrada';
@@ -83,7 +102,8 @@ try {
             'HoraEntrada' => $movimiento['HoraEntrada'],
             'UbicacionAnterior' => $movimiento['UbicacionAnterior'],
             'NombreUbicacionAnterior' => $movimiento['NombreUbicacionAnterior'] ?? 'Ubicación desconocida',
-            'DetalleEntrada' => $entradaInfo ?: []
+            'DetalleEntrada' => $entradaInfo ?: [],
+            'DetalleVehiculo' => $entradaInfoVeh?: []
         ];
     } else {
         $response['success'] = true;
