@@ -71,7 +71,7 @@ try {
 
     $sqlFotografias= "SELECT RutaFoto,NombreFoto,NextIdFoto
     from t_fotografias_Encabezado as t1 
-    INNER JOIN t_fotografias_Detalle as t2 on t1.IdFotografias=t2.IdFotoEntSal
+    INNER JOIN t_fotografias_Detalle as t2 on t1.IdFotografias=t2.IdFotografiaRef
     WHERE  IdEntSal= ? and TipoMov= ?";
 
     $stmtFotografias = $Conexion->prepare($sqlFotografias);
