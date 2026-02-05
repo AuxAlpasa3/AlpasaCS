@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit();
 }
 
-include '../api/db/conexion.php';
+require_once '../../api/db/conexion.php';
 
 $response = [
     'success' => false,
