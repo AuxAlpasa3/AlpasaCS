@@ -56,18 +56,17 @@ try {
         $sentenciaVehiculo = $Conexion->prepare("
             SELECT 
                 IdVehiculo,
-                IdProveedor,
+                IdAsociado,
                 Marca,
                 Modelo,
-                Num_Serie,
                 Placas,
                 Anio,
                 Color,
                 RutaFoto,
                 Activo
-            FROM t_Proveedor_vehiculo
-            WHERE IdProveedor = ?
-            AND Activo = 1
+            FROM t_vehiculos
+            WHERE IdAsociado = ?
+            AND Activo = 1 and TipoVehiculo=3
             ORDER BY Marca, Modelo, Placas
         ");
         
