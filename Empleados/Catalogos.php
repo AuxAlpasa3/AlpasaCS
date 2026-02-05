@@ -45,7 +45,7 @@ include_once "../templates/head.php";
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label class="form-label">Cargo:</label>
-                                <select id="filtro-cargo" class="form-control form-control-lg select2-cargo" multiple="multiple" style="width: 100%;">
+                                <select id="filtro-cargo" class="form-control form-control-lg" multiple="multiple" style="width: 100%;">
                                 </select>
                             </div>
                         </div>
@@ -53,7 +53,7 @@ include_once "../templates/head.php";
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label class="form-label">Departamento:</label>
-                                <select id="filtro-departamento" class="form-control form-control-lg select2-departamento" multiple="multiple" style="width: 100%;">
+                                <select id="filtro-departamento" class="form-control form-control-lg" multiple="multiple" style="width: 100%;">
                                 </select>
                             </div>
                         </div>
@@ -61,7 +61,7 @@ include_once "../templates/head.php";
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label class="form-label">Ubicación:</label>
-                                <select id="filtro-ubicacion" class="form-control form-control-lg select2-ubicacion" multiple="multiple" style="width: 100%;">
+                                <select id="filtro-ubicacion" class="form-control form-control-lg" multiple="multiple" style="width: 100%;">
                                 </select>
                             </div>
                         </div>
@@ -73,14 +73,14 @@ include_once "../templates/head.php";
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label class="form-label">Empresa:</label>
-                                <select id="filtro-empresa" class="form-control form-control-lg select2-empresa" multiple="multiple" style="width: 100%;">
+                                <select id="filtro-empresa" class="form-control form-control-lg" multiple="multiple" style="width: 100%;">
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label class="form-label">Estatus:</label>
-                                <select id="filtro-estatus" class="form-control form-control-lg select2-estatus" multiple="multiple" style="width: 100%;">
+                                <select id="filtro-estatus" class="form-control form-control-lg" multiple="multiple" style="width: 100%;">
                                     <option value="Activo">Activo</option>
                                     <option value="Inactivo">Inactivo</option>
                                     <option value="Baja">Baja</option>
@@ -243,6 +243,7 @@ include_once '../templates/footer.php';
 $(document).ready(function() {
     var dataTable = null;
     var filtrosExpandidos = true;
+    var select2Instances = {};
     
     function toggleFiltros() {
         filtrosExpandidos = !filtrosExpandidos;
@@ -299,26 +300,52 @@ $(document).ready(function() {
         }
     }
     
-    function cargarDatosFiltros() {
-        $('#filtro-estatus').select2({
+    function safeSelect2Destroy(selector) {
+        if ($(selector).hasClass('select2-hidden-accessible')) {
+            try {
+                $(selector).select2('destroy');
+                delete select2Instances[selector];
+            } catch (e) {
+                console.warn('Error destroying Select2:', e);
+            }
+        }
+    }
+    
+    function safeSelect2Init(selector, options) {
+        safeSelect2Destroy(selector);
+        
+        var defaultOptions = {
             theme: 'custom-theme',
-            placeholder: 'Todos los estatus',
             allowClear: true,
             width: '100%',
-            dropdownCssClass: 'select2-dropdown-enhanced',
-            selectionCssClass: 'select2-selection-enhanced',
             language: 'es',
             closeOnSelect: false
+        };
+        
+        var finalOptions = $.extend({}, defaultOptions, options);
+        
+        var instance = $(selector).select2(finalOptions);
+        select2Instances[selector] = instance;
+        return instance;
+    }
+    
+    function destroyAllSelect2() {
+        Object.keys(select2Instances).forEach(function(selector) {
+            safeSelect2Destroy(selector);
+        });
+        select2Instances = {};
+    }
+    
+    function cargarDatosFiltros() {
+        destroyAllSelect2();
+        
+        safeSelect2Init('#filtro-estatus', {
+            placeholder: 'Todos los estatus'
         });
         
-        $('#filtro-vehiculo').select2({
-            theme: 'custom-theme',
+        safeSelect2Init('#filtro-vehiculo', {
             placeholder: 'Todos',
-            allowClear: true,
-            width: '100%',
-            dropdownCssClass: 'select2-dropdown-enhanced',
-            selectionCssClass: 'select2-selection-enhanced',
-            language: 'es'
+            closeOnSelect: true
         });
         
         $.ajax({
@@ -334,15 +361,8 @@ $(document).ready(function() {
                             select.append('<option value="' + item.id + '">' + item.nombre + '</option>');
                         }
                     });
-                    select.select2({
-                        theme: 'custom-theme',
-                        placeholder: 'Todos los cargos',
-                        allowClear: true,
-                        width: '100%',
-                        dropdownCssClass: 'select2-dropdown-enhanced',
-                        selectionCssClass: 'select2-selection-enhanced',
-                        language: 'es',
-                        closeOnSelect: false
+                    safeSelect2Init('#filtro-cargo', {
+                        placeholder: 'Todos los cargos'
                     });
                 }
             },
@@ -364,15 +384,8 @@ $(document).ready(function() {
                             select.append('<option value="' + item.id + '">' + item.nombre + '</option>');
                         }
                     });
-                    select.select2({
-                        theme: 'custom-theme',
-                        placeholder: 'Todos los departamentos',
-                        allowClear: true,
-                        width: '100%',
-                        dropdownCssClass: 'select2-dropdown-enhanced',
-                        selectionCssClass: 'select2-selection-enhanced',
-                        language: 'es',
-                        closeOnSelect: false
+                    safeSelect2Init('#filtro-departamento', {
+                        placeholder: 'Todos los departamentos'
                     });
                 }
             },
@@ -394,15 +407,8 @@ $(document).ready(function() {
                             select.append('<option value="' + item.id + '">' + item.nombre + '</option>');
                         }
                     });
-                    select.select2({
-                        theme: 'custom-theme',
-                        placeholder: 'Todas las ubicaciones',
-                        allowClear: true,
-                        width: '100%',
-                        dropdownCssClass: 'select2-dropdown-enhanced',
-                        selectionCssClass: 'select2-selection-enhanced',
-                        language: 'es',
-                        closeOnSelect: false
+                    safeSelect2Init('#filtro-ubicacion', {
+                        placeholder: 'Todas las ubicaciones'
                     });
                 }
             },
@@ -424,15 +430,8 @@ $(document).ready(function() {
                             select.append('<option value="' + item.id + '">' + item.nombre + '</option>');
                         }
                     });
-                    select.select2({
-                        theme: 'custom-theme',
-                        placeholder: 'Todas las empresas',
-                        allowClear: true,
-                        width: '100%',
-                        dropdownCssClass: 'select2-dropdown-enhanced',
-                        selectionCssClass: 'select2-selection-enhanced',
-                        language: 'es',
-                        closeOnSelect: false
+                    safeSelect2Init('#filtro-empresa', {
+                        placeholder: 'Todas las empresas'
                     });
                 }
             },
@@ -863,7 +862,7 @@ $(document).ready(function() {
     }
     
     function initEvents() {
-        $(document).off('click', '.employee-initials, .thumbnail-image').on('click', '.employee-initials, .thumbnail-image', function(e) {
+        $(document).off('click.personal').on('click.personal', '.employee-initials, .thumbnail-image', function(e) {
             e.preventDefault();
             e.stopPropagation();
             var fullImage = $(this).data('full-image') || null;
@@ -878,7 +877,7 @@ $(document).ready(function() {
             }
         });
         
-        $(document).off('click', '.btn-ver-vehiculo').on('click', '.btn-ver-vehiculo', function(e) {
+        $(document).off('click.vehiculo').on('click.vehiculo', '.btn-ver-vehiculo', function(e) {
             e.preventDefault();
             e.stopPropagation();
             var noEmpleado = $(this).data('noempleado');
@@ -888,7 +887,7 @@ $(document).ready(function() {
             }
         });
         
-        $(document).off('click', '.btn-editar').on('click', '.btn-editar', function(e) {
+        $(document).off('click.editar').on('click.editar', '.btn-editar', function(e) {
             e.preventDefault();
             e.stopPropagation();
             var noEmpleado = $(this).data('noempleado');
@@ -897,7 +896,7 @@ $(document).ready(function() {
             }
         });
         
-        $(document).off('click', '.btn-cambiar-estatus').on('click', '.btn-cambiar-estatus', function(e) {
+        $(document).off('click.estatus').on('click.estatus', '.btn-cambiar-estatus', function(e) {
             e.preventDefault();
             e.stopPropagation();
             var noEmpleado = $(this).data('noempleado');
@@ -908,7 +907,7 @@ $(document).ready(function() {
             }
         });
         
-        $(document).off('click', '.btn-gestion-vehiculo').on('click', '.btn-gestion-vehiculo', function(e) {
+        $(document).off('click.gestion').on('click.gestion', '.btn-gestion-vehiculo', function(e) {
             e.preventDefault();
             e.stopPropagation();
             var noEmpleado = $(this).data('noempleado');
@@ -928,12 +927,26 @@ $(document).ready(function() {
     $('#btn-limpiar-filtros').click(function() {
         $('#filtro-noempleado').val('');
         $('#filtro-nombre').val('');
-        $('#filtro-cargo').val(null).trigger('change');
-        $('#filtro-departamento').val(null).trigger('change');
-        $('#filtro-ubicacion').val(null).trigger('change');
-        $('#filtro-empresa').val(null).trigger('change');
-        $('#filtro-estatus').val(null).trigger('change');
-        $('#filtro-vehiculo').val('').trigger('change');
+        
+        destroyAllSelect2();
+        
+        $('#filtro-estatus').val(null);
+        $('#filtro-vehiculo').val('');
+        
+        safeSelect2Init('#filtro-estatus', {
+            placeholder: 'Todos los estatus'
+        });
+        
+        safeSelect2Init('#filtro-vehiculo', {
+            placeholder: 'Todos',
+            closeOnSelect: true
+        });
+        
+        $('#filtro-cargo').val(null);
+        $('#filtro-departamento').val(null);
+        $('#filtro-ubicacion').val(null);
+        $('#filtro-empresa').val(null);
+        
         if (dataTable) {
             dataTable.ajax.reload();
         }
@@ -1022,7 +1035,19 @@ $(document).ready(function() {
             success: function(response) {
                 $('#loading').hide();
                 $('#modal-container').html(response);
-                $('#NuevoPersonal').modal('show');
+                $('#NuevoPersonal').on('shown.bs.modal', function() {
+                    $('#NuevoPersonal .select2').each(function() {
+                        var selectId = '#' + $(this).attr('id');
+                        if (!select2Instances[selectId]) {
+                            safeSelect2Init(selectId, {
+                                placeholder: 'Seleccione una opción',
+                                allowClear: true,
+                                width: '100%',
+                                dropdownParent: $('#NuevoPersonal')
+                            });
+                        }
+                    });
+                }).modal('show');
             },
             error: function(xhr, status, error) {
                 $('#loading').hide();
@@ -1036,6 +1061,21 @@ $(document).ready(function() {
             if (dataTable) {
                 dataTable.ajax.reload();
             }
+        }
+    });
+    
+    $(window).on('beforeunload', function() {
+        destroyAllSelect2();
+    });
+    
+    $(document).on('hidden.bs.modal', '.modal', function() {
+        if ($(this).attr('id') === 'NuevoPersonal' || $(this).attr('id') === 'ModificarPersonal' || 
+            $(this).attr('id') === 'GestionarVehiculos' || $(this).attr('id') === 'CambiarEstatusPersonal') {
+            $(this).find('.select2').each(function() {
+                var selectId = '#' + $(this).attr('id');
+                safeSelect2Destroy(selectId);
+            });
+            $('#modal-container').empty();
         }
     });
     
@@ -1067,9 +1107,7 @@ $(document).ready(function() {
                     }
                     if (form.attr('id') === 'formNuevoPersonal') {
                         form[0].reset();
-                        if ($.fn.select2) {
-                            form.find('select').val(null).trigger('change');
-                        }
+                        form.find('select').val(null);
                     }
                 } else {
                     showNotification(response.message || 'Error en la operación', 'danger');
@@ -1085,19 +1123,12 @@ $(document).ready(function() {
     });
     
     $(document).on('click', '[data-dismiss="modal"], .btn-close, .modal-close', function() {
-        $('.modal').modal('hide');
-    });
-    
-    $(document).on('hidden.bs.modal', '.modal', function() {
-        if ($(this).attr('id') !== 'photoModal' && $(this).attr('id') !== 'vehiculoModal') {
-            $('#modal-container').empty();
-        }
+        $(this).closest('.modal').modal('hide');
     });
 });
 </script>
 
 <style>
-
 :root {
     --primary-orange: #d94f00;
     --primary-orange-dark: #b53d00;
@@ -1162,7 +1193,6 @@ $(document).ready(function() {
     opacity: 0.9;
 }
 
-/* Loading spinner */
 #loading {
     position: fixed;
     top: 50%;
@@ -1189,7 +1219,6 @@ $(document).ready(function() {
     font-size: 14px;
 }
 
-/* Select2 personalizado */
 .select2-container--custom-theme {
     width: 100% !important;
 }
@@ -1336,7 +1365,6 @@ $(document).ready(function() {
     margin-left: 4px;
 }
 
-/* Modales */
 .modal {
     z-index: 1060 !important;
 }
@@ -1356,7 +1384,6 @@ $(document).ready(function() {
     color: white;
 }
 
-/* Grupos de botones */
 .btn-group {
     display: flex;
     gap: 5px;
@@ -1368,7 +1395,6 @@ $(document).ready(function() {
     font-size: 14px;
 }
 
-/* Header de filtros */
 #filtrosHeader {
     transition: background-color 0.2s;
 }
@@ -1381,7 +1407,6 @@ $(document).ready(function() {
     transition: transform 0.2s;
 }
 
-/* Tabla */
 .table th {
     background-color: var(--primary-orange);
     color: white;
@@ -1409,7 +1434,6 @@ $(document).ready(function() {
     background-color: var(--table-hover);
 }
 
-/* Imágenes */
 .thumbnail-image {
     cursor: pointer;
     transition: transform 0.2s;
@@ -1423,7 +1447,6 @@ $(document).ready(function() {
     cursor: default;
 }
 
-/* DataTables */
 .dataTables_wrapper {
     margin-top: 10px;
 }
@@ -1437,7 +1460,6 @@ $(document).ready(function() {
     padding-top: 10px;
 }
 
-/* Formularios */
 .form-label {
     font-weight: 600;
     color: #495057;
@@ -1467,7 +1489,6 @@ $(document).ready(function() {
     font-weight: 600;
 }
 
-/* Responsive */
 @media (max-width: 1200px) {
     .btn-group .btn {
         padding: 6px 8px !important;
@@ -1588,7 +1609,6 @@ $(document).ready(function() {
     }
 }
 
-/* Impresión */
 @media print {
     .btn-group,
     .card-header,
@@ -1647,7 +1667,6 @@ $(document).ready(function() {
     }
 }
 
-/* Z-index modales */
 #photoModal {
     z-index: 99999 !important;
 }
@@ -1668,7 +1687,6 @@ $(document).ready(function() {
     z-index: 99998 !important;
 }
 
-/* Botones pequeños */
 .btn-group .btn {
     padding: 4px 8px !important;
     margin: 0 2px !important;
@@ -1690,5 +1708,4 @@ $(document).ready(function() {
     margin-top: 4px;
     font-style: italic;
 }
-
 </style>

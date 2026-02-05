@@ -10,19 +10,20 @@ if ($idMov <= 0) {
 }
 
 try {
-    // Obtener información básica del movimiento
     $sql = "SELECT 
                 t1.*,
                 CONCAT(t2.Nombre, ' ', t2.ApPaterno, ' ', t2.ApMaterno) as Personal,
                 t2.IdPersonal,
                 t2.RutaFoto as Foto,
-                t2.Cargo,
-                t2.Departamento,
+                t4.NomCargo as Cargo,
+                t5.NomDepto as Departamento,
                 t3.NomCorto as Ubicacion
             FROM regentsalper as t1 
             INNER JOIN t_personal as t2 ON t1.IdPer = t2.IdPersonal
             LEFT JOIN t_ubicacion as t3 ON t1.IdUbicacion = t3.IdUbicacion
-            WHERE t1.IdMovEntSal = ?";
+            INNER JOIN t_cargo as t4 on t2.Cargo=t4.IdCargo
+            INNER JOIN t_departamento as t5 on t2.Departamento=t5.IdDepartamento
+            WHERE t1.IdMovEntSal= ?";
     
     $stmt = $Conexion->prepare($sql);
     $stmt->execute([$idMov]);
@@ -39,20 +40,43 @@ try {
         $titulo = 'Entrada';
         $icono = 'fa-sign-in-alt';
         $color = 'success';
+        $TipoMov = 1;
     } else {
         $tabla = 'regsalper';
         $campoFolio = 'FolMovSal';
         $titulo = 'Salida';
         $icono = 'fa-sign-out-alt';
         $color = 'danger';
+        $TipoMov = 2;
     }
     
     $folio = $movimiento->{$campoFolio};
     
-    $sqlDetalle = "SELECT * FROM $tabla WHERE FolMov = ?";
+    $sqlDetalle= "SELECT t2.NoEmpleado, t3.NomCorto, t1.DispN, CONVERT(varchar, t1.Fecha, 103) as Fecha, 
+    CONVERT(varchar, t1.TiempoMarcaje, 108) as TiempoMarcaje, (CASE WHEN t1.TipoVehiculo=0 then 'Sin Vehiculo'
+    WHEN t1.TipoVehiculo=1 THEN 'Vehiculo Empresa' WHEN t1.TipoVehiculo=2 then 'Vehiculo Propio' 
+    WHEN t1.tipovehiculo=3 THEN 'Vehiculo Registrado' END) AS TipoVehiculo, 
+    t4.Marca, t4.Modelo, t4.Placas,t1.Observaciones, t5.Usuario, 
+    (case when t1.Notificar =0 then 'Sin Notificar a Supervisor' else 'Se Notifico a Supervisor' End) as Notificar
+    FROM $tabla AS t1 
+    INNER JOIN t_personal AS t2 on t1.IdPer=t2.IdPersonal
+    INNER JOIN t_ubicacion AS t3 on t1.Ubicacion=t3.IdUbicacion
+    INNER JOIN t_vehiculos AS t4 on t1.IdVeh=t4.IdVehiculo
+    INNER JOIN t_usuario as t5 on t1.Usuario=t5.IdUsuario
+    WHERE FolMov = ?";
+
     $stmtDetalle = $Conexion->prepare($sqlDetalle);
     $stmtDetalle->execute([$folio]);
     $detalle = $stmtDetalle->fetch(PDO::FETCH_OBJ);
+
+    $sqlFotografias= "SELECT RutaFoto,NombreFoto,NextIdFoto
+    from t_fotografias_Encabezado as t1 
+    INNER JOIN t_fotografias_Detalle as t2 on t1.IdFotografias=t2.IdFotoEntSal
+    WHERE  IdEntSal= ? and TipoMov= ?";
+
+    $stmtFotografias = $Conexion->prepare($sqlFotografias);
+    $stmtFotografias->execute([$folio,$TipoMov]);
+    $fotografias = $stmtFotografias->fetchALL(PDO::FETCH_OBJ);
     
 } catch (PDOException $e) {
     echo '<div class="alert alert-danger">Error: ' . $e->getMessage() . '</div>';
@@ -74,21 +98,20 @@ try {
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <!-- Información del Personal -->
                     <div class="col-md-4">
                         <div class="card mb-3">
                             <div class="card-header bg-primary text-white">
                                 <h6 class="mb-0"><i class="fas fa-user mr-2"></i>Información Personal</h6>
                             </div>
                             <div class="card-body text-center">
-                                <?php if(!empty($movimiento->Foto) && file_exists($movimiento->Foto)): ?>
+                                <?php if(!empty($movimiento->Foto) && filter_var($movimiento->Foto, FILTER_VALIDATE_URL)): ?>
                                     <img src="<?php echo htmlspecialchars($movimiento->Foto); ?>" 
-                                         alt="Foto" 
-                                         class="rounded-circle mb-3" 
-                                         style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #d94f00;">
+                                        alt="Foto" 
+                                        class="rounded-circle mb-3" 
+                                        style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #d94f00;">
                                 <?php else: ?>
                                     <div class="employee-initials rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center" 
-                                         style="width: 100px; height: 100px; background-color: #d94f00; color: white; font-weight: bold; font-size: 2rem; border: 3px solid #d94f00;">
+                                        style="width: 100px; height: 100px; background-color: #d94f00; color: white; font-weight: bold; font-size: 2rem; border: 3px solid #d94f00;">
                                         <?php 
                                         $initials = '';
                                         $nameParts = explode(' ', $movimiento->Personal);
@@ -101,7 +124,7 @@ try {
                                 
                                 <h5 class="mb-1"><?php echo htmlspecialchars($movimiento->Personal); ?></h5>
                                 <p class="text-muted mb-1">
-                                    <i class="fas fa-id-card"></i> ID: <?php echo htmlspecialchars($movimiento->IdPersonal); ?>
+                                    <i class="fas fa-id-card"></i> No Empleado: <?php echo htmlspecialchars($movimiento->IdPersonal); ?>
                                 </p>
                                 <?php if(!empty($movimiento->Cargo)): ?>
                                     <p class="mb-1">
@@ -115,9 +138,39 @@ try {
                                 <?php endif; ?>
                             </div>
                         </div>
+                        <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">Fotografías (<?php echo count($fotografias); ?>)</h6>
+                        </div>
+                        <div class="card-body">
+                            <?php if($fotografias && count($fotografias) > 0): ?>
+                                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+                                    <?php foreach($fotografias as $index => $foto): ?>
+                                        <div class="col">
+                                            <div class="card h-100 border-0 shadow-sm">
+                                                <img src="<?php echo htmlspecialchars($foto->RutaFoto); ?>" 
+                                                    class="card-img-top" 
+                                                    alt="<?php echo htmlspecialchars($foto->NombreFoto); ?>"
+                                                    style="height: 120px; object-fit: cover;">
+                                                <div class="card-body p-2">
+                                                    <p class="card-text small text-center mb-0">
+                                                        <?php echo htmlspecialchars($foto->NombreFoto); ?>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="alert alert-info mb-0 text-center">
+                                    No se encontraron fotografías
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                     </div>
                     
-                    <!-- Información del Movimiento -->
+                    
                     <div class="col-md-8">
                         <div class="card mb-3">
                             <div class="card-header bg-<?php echo $color; ?> text-white">
@@ -134,6 +187,19 @@ try {
                                                 <?php echo strtoupper($titulo); ?>
                                             </span>
                                         </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Ubicación:</strong><br>
+                                            <?php if(!empty($movimiento->Ubicacion)): ?>
+                                                <span class="badge badge-info"><?php echo htmlspecialchars($movimiento->Ubicacion); ?></span>
+                                                <?php if(!empty($movimiento->DescUbicacion)): ?>
+                                                    <small class="text-muted d-block"><?php echo htmlspecialchars($movimiento->DescUbicacion); ?></small>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <span class="badge badge-secondary">Sin ubicación asignada</span>
+                                            <?php endif; ?>
+                                        </p>
+                                        
                                         <p><strong>Fecha <?php echo $titulo; ?>:</strong><br>
                                             <?php 
                                             $fechaCampo = ($tipo === 'entrada') ? 'FechaEntrada' : 'FechaSalida';
@@ -147,35 +213,14 @@ try {
                                             ?>
                                         </p>
                                     </div>
-                                    <div class="col-md-6">
-                                        <p><strong>Ubicación:</strong><br>
-                                            <?php if(!empty($movimiento->Ubicacion)): ?>
-                                                <span class="badge badge-info"><?php echo htmlspecialchars($movimiento->Ubicacion); ?></span>
-                                                <?php if(!empty($movimiento->DescUbicacion)): ?>
-                                                    <small class="text-muted d-block"><?php echo htmlspecialchars($movimiento->DescUbicacion); ?></small>
-                                                <?php endif; ?>
-                                            <?php else: ?>
-                                                <span class="badge badge-secondary">Sin ubicación asignada</span>
-                                            <?php endif; ?>
-                                        </p>
-                                        <p><strong>ID Movimiento:</strong> <?php echo $idMov; ?></p>
-                                        <p><strong>Tiempo Total:</strong><br>
-                                            <?php if(!empty($movimiento->tiempo) && $movimiento->tiempo != '00:00:00'): ?>
-                                                <span class="badge badge-primary"><?php echo htmlspecialchars($movimiento->tiempo); ?></span>
-                                            <?php else: ?>
-                                                <span class="badge badge-secondary">N/A</span>
-                                            <?php endif; ?>
-                                        </p>
-                                    </div>
                                 </div>
                                 
-                                <!-- Información adicional si existe detalle -->
                                 <?php if($detalle): ?>
                                 <hr>
                                 <h6><i class="fas fa-clipboard-list mr-2"></i>Información Adicional</h6>
                                 <div class="row mt-3">
                                     <?php 
-                                    $camposExcluir = ['FolMov', 'IdPersonal', 'FechaRegistro'];
+                                    $camposExcluir = ['FolMov', 'IdPersonal', 'FechaRegistro','IdVehiculo'];
                                     foreach($detalle as $key => $value):
                                         if(in_array($key, $camposExcluir)) continue;
                                         if(empty($value) || strpos($value, '1900-01-01') !== false) continue;
@@ -186,7 +231,7 @@ try {
                                         if(strpos($key, 'Fecha') !== false || strpos($key, 'fecha') !== false) {
                                             try {
                                                 $date = new DateTime($value);
-                                                echo $date->format('d/m/Y H:i:s');
+                                                echo $date->format('d/m/Y');
                                             } catch (Exception $e) {
                                                 echo htmlspecialchars($value);
                                             }
@@ -202,27 +247,10 @@ try {
                         </div>
                     </div>
                 </div>
-                
-                <!-- Observaciones -->
-                <div class="card">
-                    <div class="card-header bg-secondary text-white">
-                        <h6 class="mb-0"><i class="fas fa-sticky-note mr-2"></i>Observaciones</h6>
-                    </div>
-                    <div class="card-body">
-                        <?php if(!empty($movimiento->Observaciones)): ?>
-                            <p><?php echo nl2br(htmlspecialchars($movimiento->Observaciones)); ?></p>
-                        <?php else: ?>
-                            <p class="text-muted"><i>No hay observaciones registradas para este movimiento.</i></p>
-                        <?php endif; ?>
-                    </div>
-                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     <i class="fas fa-times mr-1"></i> Cerrar
-                </button>
-                <button type="button" class="btn btn-primary" onclick="window.print()">
-                    <i class="fas fa-print mr-1"></i> Imprimir
                 </button>
             </div>
         </div>
@@ -231,10 +259,8 @@ try {
 
 <script>
 $(document).ready(function() {
-    // Mostrar el modal automáticamente
     $('#Detalle<?php echo ucfirst($tipo); ?>').modal('show');
     
-    // Cerrar modal al hacer clic en el botón cerrar
     $('#Detalle<?php echo ucfirst($tipo); ?>').on('hidden.bs.modal', function () {
         $('#modal-container').empty();
     });

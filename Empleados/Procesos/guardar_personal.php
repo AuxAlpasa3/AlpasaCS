@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Manejo de la foto
         $rutaFoto = '';
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
-            $directorio = "../../uploads/fotos_personal/";
+            $directorio = "../fotos_personal/";
             if (!file_exists($directorio)) {
                 mkdir($directorio, 0777, true);
             }
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         // Insertar en la base de datos
         $sql = "INSERT INTO t_personal (Nombre, ApPaterno, ApMaterno, Empresa, Cargo, Departamento, IdUbicacion, RutaFoto, Status, FechaCreacion) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
         
         $stmt = $Conexion->prepare($sql);
         $stmt->execute([$nombre, $ap_paterno, $ap_materno, $empresa, $cargo, $departamento, $ubicacion, $rutaFoto, $status]);

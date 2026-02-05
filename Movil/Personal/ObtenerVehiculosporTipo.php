@@ -41,7 +41,7 @@ try {
                 t1.RutaFoto,
                 CONCAT(t2.Nombre,' ',t2.ApPaterno,' ',t2.ApMaterno) as NombreCompleto
             FROM t_vehiculos as t1
-            LEFT JOIN t_personal as t2 ON t1.NoEmpleado = t2.NoEmpleado
+            LEFT JOIN t_personal as t2 ON t1.IdAsociado = t2.NoEmpleado
             WHERE t1.Activo = 1";
 
     $params = [];
