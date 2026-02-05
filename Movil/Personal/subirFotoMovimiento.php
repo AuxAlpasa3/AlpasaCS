@@ -41,6 +41,7 @@ try {
     $IdUsuario = $input['IdUsuario'];
     $base64Image = $input['FotoBase64'];
     $nextId = isset($input['nextId']) ? $input['nextId'] : 1;
+    $Tipo= 1;
     
     $RutaLocal = getenv('VERSION');
 
@@ -48,17 +49,17 @@ try {
     
     try {
         $sqlCheckEncabezado = "SELECT IdFotografias FROM t_fotografias_Encabezado 
-                               WHERE IdEntSal = :IdEntSal AND Tipo = 1";
+                               WHERE IdEntSal = :IdEntSal AND Tipo = :tipo";
         $stmtCheck = $Conexion->prepare($sqlCheckEncabezado);
         $stmtCheck->bindParam(':IdEntSal', $IdMovimiento, PDO::PARAM_STR);
+        $stmtCheck->bindParam(':tipo', $Tipo, PDO::PARAM_INT);
         $stmtCheck->execute();
-        
         $existingEncabezado = $stmtCheck->fetch(PDO::FETCH_ASSOC);
         
         if ($existingEncabezado) {
             $IdFotografias = $existingEncabezado['IdFotografias'];
         } else {
-            $sqlEncabezado = "INSERT INTO t_fotografias_Encabezado (
+             $sqlEncabezado = "INSERT INTO t_fotografias_Encabezado (
                                 IdEntSal,
                                 FechaIngreso,
                                 Tipo,
@@ -68,7 +69,7 @@ try {
                             ) VALUES (
                                 :IdEntSal,
                                 GETDATE(),
-                                1,
+                                :tipo,
                                 1,
                                 :Ubicacion,
                                 1
@@ -76,6 +77,7 @@ try {
             
             $stmtEncabezado = $Conexion->prepare($sqlEncabezado);
             $stmtEncabezado->bindParam(':IdEntSal', $IdMovimiento, PDO::PARAM_STR);
+            $stmtEncabezado->bindParam(':tipo', $Tipo, PDO::PARAM_INT);
             $stmtEncabezado->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
             
             if (!$stmtEncabezado->execute()) {

@@ -41,6 +41,7 @@ try {
     $IdUsuario = $input['IdUsuario'];
     $base64Image = $input['FotoBase64'];
     $nextId = isset($input['nextId']) ? $input['nextId'] : 1;
+    $Tipo= 2;
     
     $RutaLocal = getenv('VERSION');
 
@@ -48,9 +49,10 @@ try {
     
     try {
         $sqlCheckEncabezado = "SELECT IdFotografias FROM t_fotografias_Encabezado 
-                               WHERE IdEntSal = :IdEntSal AND Tipo = 2";
+                               WHERE IdEntSal = :IdEntSal AND Tipo = :tipo";
         $stmtCheck = $Conexion->prepare($sqlCheckEncabezado);
         $stmtCheck->bindParam(':IdEntSal', $IdMovimiento, PDO::PARAM_STR);
+        $stmtCheck->bindParam(':tipo', $Tipo, PDO::PARAM_INT);
         $stmtCheck->execute();
         
         $existingEncabezado = $stmtCheck->fetch(PDO::FETCH_ASSOC);
@@ -68,7 +70,7 @@ try {
                             ) VALUES (
                                 :IdEntSal,
                                 GETDATE(),
-                                2,
+                                :tipo,
                                 1,
                                 :Ubicacion,
                                 1
@@ -76,6 +78,7 @@ try {
             
             $stmtEncabezado = $Conexion->prepare($sqlEncabezado);
             $stmtEncabezado->bindParam(':IdEntSal', $IdMovimiento, PDO::PARAM_STR);
+            $stmtEncabezado->bindParam(':tipo', $Tipo, PDO::PARAM_INT);
             $stmtEncabezado->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
             
             if (!$stmtEncabezado->execute()) {
@@ -90,6 +93,7 @@ try {
             }
         }
 
+        // Detectar tipo de imagen
         $imageHeader = substr($base64Image, 0, 20);
         if (strpos($imageHeader, '/9j/') !== false) {
             $extension = 'jpg';
