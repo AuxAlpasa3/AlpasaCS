@@ -108,7 +108,7 @@ try {
         }
 
         $directoryName = "Ubicacion{$Ubicacion}Movimiento{$IdMovimiento}";
-        $uploadDir = "C:\\xampp\\htdocs\\{$RutaLocal}\\Empleados\\Fotografias\\${$Carpeta}\\{$directoryName}\\";
+        $uploadDir = "C:\\xampp\\htdocs\\{$RutaLocal}\\Empleados\\Fotografias\\{$Carpeta}\\{$directoryName}\\";
 
         if (!is_dir($uploadDir)) {
             if (!mkdir($uploadDir, 0777, true) && !is_dir($uploadDir)) {
