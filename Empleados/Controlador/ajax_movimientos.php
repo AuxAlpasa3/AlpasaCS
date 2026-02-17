@@ -48,7 +48,7 @@ try {
                 t1.tiempo as Tiempo,
                 t2.RutaFoto
             FROM regentsalper as t1 
-            LEFT JOIN t_ubicacion as t5 ON t5.IdUbicacion = t1.IdUbicacion 
+            LEFT JOIN t_ubicacion_interna as t5 ON t5.IdUbicacion = t1.IdUbicacion 
             INNER JOIN t_personal as t2 ON t1.IdPer = t2.IdPersonal
             WHERE t2.status = 1";
     
