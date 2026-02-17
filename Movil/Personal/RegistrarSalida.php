@@ -28,7 +28,7 @@ try {
         throw new Exception('Datos no válidos');
     }
 
-    error_log('Payload salida recibido: ' . json_encode($input));
+    error_log('Payload para registrar salida: ' . json_encode($input));
 
     $requiredFields = ['IdPersonal', 'IdUsuario', 'Ubicacion'];
     foreach ($requiredFields as $field) {
@@ -41,13 +41,19 @@ try {
     $IdUsuario = $input['IdUsuario'];
     $Ubicacion = $input['Ubicacion'];
     
-    $FolMovEnt = isset($input['FolMovEnt']) ? (int)$input['FolMovEnt'] : null;
+    // Manejar IdVehiculo - asegurar que sea 0 si no hay vehículo
+    $IdVehiculo = isset($input['IdVehiculo']) ? (int)$input['IdVehiculo'] : 0;
+    
+    $IdRegistroIngreso = isset($input['IdRegistroIngreso']) ? (int)$input['IdRegistroIngreso'] : null;
     $DispN = isset($input['DispN']) ? $input['DispN'] : 'APP_MOVIL';
     $Observaciones = isset($input['Observaciones']) && $input['Observaciones'] !== 'NULL' ? $input['Observaciones'] : 'Salida registrada desde móvil';
     
     $NotificarSupervisor = isset($input['NotificarSupervisor']) ? (int)$input['NotificarSupervisor'] : 0;
     if ($NotificarSupervisor > 1) $NotificarSupervisor = 1;
     if ($NotificarSupervisor < 0) $NotificarSupervisor = 0;
+    
+    $TipoTransporte = isset($input['TipoTransporte']) ? (int)$input['TipoTransporte'] : 0;
+    $LibreUso = isset($input['LibreUso']) ? (int)$input['LibreUso'] : 0;
     
     $FechaSalida = isset($input['FechaSalida']) ? $input['FechaSalida'] : date('Y-m-d');
     $HoraSalida = isset($input['HoraSalida']) ? $input['HoraSalida'] : date('H:i:s');
@@ -74,8 +80,8 @@ try {
                                 t1.Fecha as FechaEntrada,
                                 t1.TiempoMarcaje as HoraEntrada,
                                 t1.TipoVehiculo,
-                                t1.IdVeh,
-                                t2.tieneVehiculo,
+                                COALESCE(t1.IdVeh, 0) as IdVeh,
+                                COALESCE(t2.tieneVehiculo, 0) as tieneVehiculo,
                                 t2.IdMovEnTSal
                             FROM regentper t1
                             LEFT JOIN regentsalper t2 ON t1.FolMov = t2.FolMovEnt
@@ -96,12 +102,18 @@ try {
     $entrada = $entradaActiva[0];
     $FolMovEntActual = (int)$entrada['FolMovEnt'];
     $tieneVehiculo = (int)$entrada['tieneVehiculo'];
-    $IdVeh = $entrada['IdVeh'] ? (int)$entrada['IdVeh'] : null;
+    $IdVeh = (int)$entrada['IdVeh']; // Ahora siempre será un número, nunca null
     $IdMovEnTSal = $entrada['IdMovEnTSal'] ? (int)$entrada['IdMovEnTSal'] : null;
     $TipoVehiculoEntrada = (int)$entrada['TipoVehiculo'];
     $UbicacionEntrada = $entrada['UbicacionEntrada'];
     
-    error_log("Entrada activa encontrada: FolMovEnt=$FolMovEntActual, tieneVehiculo=$tieneVehiculo, IdVeh=" . ($IdVeh ?: 'NULL'));
+    error_log("Entrada activa encontrada: FolMovEnt=$FolMovEntActual, tieneVehiculo=$tieneVehiculo, IdVeh=$IdVeh");
+    
+    // Si el TipoTransporte es 0, asegurar que IdVeh sea 0
+    if ($TipoTransporte == 0) {
+        $IdVeh = 0;
+        $tieneVehiculo = 0;
+    }
     
     // Calcular tiempo de estancia
     $fechaEntrada = $entrada['FechaEntrada'];
@@ -136,7 +148,7 @@ try {
     $Conexion->beginTransaction();
     
     try {
-        // Registrar salida del personal
+        // Registrar salida del personal - IdVeh siempre será un número (0 si no hay vehículo)
         $sqlSalidaPersonal = "INSERT INTO regsalper (
                                 IdPer,
                                 IdFolEnt,
@@ -174,7 +186,7 @@ try {
         $stmtSalidaPersonal->bindParam(':Observaciones', $Observaciones, PDO::PARAM_STR);
         $stmtSalidaPersonal->bindParam(':Usuario', $IdUsuario, PDO::PARAM_STR);
         $stmtSalidaPersonal->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
-        $stmtSalidaPersonal->bindParam(':IdVeh', $IdVeh, PDO::PARAM_INT);
+        $stmtSalidaPersonal->bindParam(':IdVeh', $IdVeh, PDO::PARAM_INT); // Ahora IdVeh siempre es INT
         
         if (!$stmtSalidaPersonal->execute()) {
             $errorInfo = $stmtSalidaPersonal->errorInfo();
@@ -217,7 +229,8 @@ try {
                                         FechaEntrada,
                                         FechaSalida,
                                         Tiempo,
-                                        StatusRegistro
+                                        StatusRegistro,
+                                        tieneVehiculo
                                     ) VALUES (
                                         :IdPer,
                                         :IdUbicacion,
@@ -226,7 +239,8 @@ try {
                                         :FechaEntrada,
                                         :FechaSalida,
                                         :Tiempo,
-                                        2
+                                        2,
+                                        :tieneVehiculo
                                     )";
             
             $stmtInsertRegentSalPer = $Conexion->prepare($sqlInsertRegentSalPer);
@@ -237,6 +251,7 @@ try {
             $stmtInsertRegentSalPer->bindParam(':FechaEntrada', $fechaHoraEntrada, PDO::PARAM_STR);
             $stmtInsertRegentSalPer->bindParam(':FechaSalida', $fechaHoraSalida, PDO::PARAM_STR);
             $stmtInsertRegentSalPer->bindParam(':Tiempo', $tiempoFormateado, PDO::PARAM_STR);
+            $stmtInsertRegentSalPer->bindParam(':tieneVehiculo', $tieneVehiculo, PDO::PARAM_INT);
             
             if (!$stmtInsertRegentSalPer->execute()) {
                 $errorInfo = $stmtInsertRegentSalPer->errorInfo();
@@ -244,12 +259,12 @@ try {
             }
         }
         
-        // Procesar salida de vehículo si aplica
+        // Procesar salida de vehículo si aplica (solo si IdVeh > 0)
         $IdMovSalidaVehiculo = null;
         $tiempoFormateadoVehiculo = null;
         $FolMovEntVeh = null;
         
-        if ($tieneVehiculo == 1 && $IdVeh) {
+        if ($tieneVehiculo == 1 && $IdVeh > 0) {
             error_log("Procesando salida de vehículo ID: $IdVeh");
             
             // Verificar si hay entrada activa del vehículo
