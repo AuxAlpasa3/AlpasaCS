@@ -20,7 +20,7 @@ try {
                 t3.NomCorto as Ubicacion
             FROM regentsalper as t1 
             INNER JOIN t_personal as t2 ON t1.IdPer = t2.IdPersonal
-            LEFT JOIN t_ubicacion as t3 ON t1.IdUbicacion = t3.IdUbicacion
+            LEFT JOIN t_ubicacion_interna as t3 ON t1.IdUbicacion = t3.IdUbicacion
             INNER JOIN t_cargo as t4 on t2.Cargo=t4.IdCargo
             INNER JOIN t_departamento as t5 on t2.Departamento=t5.IdDepartamento
             WHERE t1.IdMovEntSal= ?";
@@ -60,7 +60,7 @@ try {
     (case when t1.Notificar =0 then 'Sin Notificar a Supervisor' else 'Se Notifico a Supervisor' End) as Notificar
     FROM $tabla AS t1 
     INNER JOIN t_personal AS t2 on t1.IdPer=t2.IdPersonal
-    INNER JOIN t_ubicacion AS t3 on t1.Ubicacion=t3.IdUbicacion
+    INNER JOIN t_ubicacion_interna AS t3 on t1.Ubicacion=t3.IdUbicacion
     LEFT JOIN t_vehiculos AS t4 on t1.IdVeh=t4.IdVehiculo
     INNER JOIN t_usuario as t5 on t1.Usuario=t5.IdUsuario
     WHERE FolMov = ?";

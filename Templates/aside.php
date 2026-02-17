@@ -157,7 +157,7 @@ $isNotClient = in_array($currentRole, [6]);
               </p>
             </a>
             <ul class="nav nav-treeview">
-              <?php if ($isConfigUser) { ?>
+              <!-- <?php if ($isConfigUser) { ?>
                 <li class="nav-item">
                   <a href="" class="nav-link">
                     <b>USUARIOS</b>
@@ -172,17 +172,9 @@ $isNotClient = in_array($currentRole, [6]);
                         </a>
                       </li>
                     <?php } ?>
-                    <?php if ($isAdmin) { ?>
-                      <li class="nav-item">
-                        <a href="../Config/TipoUsuario" class="nav-link">
-                          <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                          <p style="color: #dc5504;">Tipo de Usuarios</p>
-                        </a>
-                      </li>
-                    <?php } ?>
                   </ul>
                 </li>
-              <?php } ?>
+              <?php } ?> -->
 
               <?php if ($isConfigUser) { ?>
                 <li class="nav-item">
