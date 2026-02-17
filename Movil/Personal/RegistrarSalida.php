@@ -70,7 +70,7 @@ try {
         }
     }
     
-    // IMPORTANTE: Crear fecha completa de salida
+    // Crear fecha completa de salida en PHP
     $fechaHoraSalidaCompleta = $FechaSalida . ' ' . $HoraSalida;
     
     // Verificar si hay una entrada activa del personal
@@ -80,11 +80,8 @@ try {
                                 t1.Ubicacion as UbicacionEntrada,
                                 t1.Fecha as FechaEntrada,
                                 t1.TiempoMarcaje as HoraEntrada,
-                                -- Construir fecha completa de entrada (asumiendo que Fecha ya incluye la hora o es solo fecha)
-                                CASE 
-                                    WHEN t1.Fecha LIKE '%:%' THEN t1.Fecha
-                                    ELSE CONVERT(VARCHAR, t1.Fecha, 120) + ' ' + ISNULL(t1.TiempoMarcaje, '00:00:00')
-                                END as FechaHoraEntradaCompleta,
+                                -- Construir fecha completa de entrada en SQL Server correctamente
+                                CONVERT(VARCHAR, t1.Fecha, 120) + ' ' + CONVERT(VARCHAR, t1.TiempoMarcaje, 108) as FechaHoraEntradaCompleta,
                                 t1.TipoVehiculo,
                                 COALESCE(t1.IdVeh, 0) as IdVeh,
                                 COALESCE(t2.tieneVehiculo, 0) as tieneVehiculo,
@@ -113,7 +110,7 @@ try {
     $TipoVehiculoEntrada = (int)$entrada['TipoVehiculo'];
     $UbicacionEntrada = $entrada['UbicacionEntrada'];
     
-    // Obtener la fecha completa de entrada
+    // Obtener la fecha completa de entrada (ya viene concatenada de la BD)
     $fechaHoraEntradaCompleta = $entrada['FechaHoraEntradaCompleta'];
     
     error_log("Entrada activa encontrada: FolMovEnt=$FolMovEntActual, tieneVehiculo=$tieneVehiculo, IdVeh=$IdVeh");
@@ -126,13 +123,13 @@ try {
         $tieneVehiculo = 0;
     }
     
-    // ============ CÁLCULO CORREGIDO DEL TIEMPO DE ESTANCIA ============
+    // ============ CÁLCULO DEL TIEMPO DE ESTANCIA ============
     // Convertir a timestamp para cálculo preciso
     $timestampEntrada = strtotime($fechaHoraEntradaCompleta);
     $timestampSalida = strtotime($fechaHoraSalidaCompleta);
     
     if ($timestampEntrada === false || $timestampSalida === false) {
-        throw new Exception("Error al convertir las fechas a timestamp");
+        throw new Exception("Error al convertir las fechas a timestamp. Entrada: $fechaHoraEntradaCompleta, Salida: $fechaHoraSalidaCompleta");
     }
     
     error_log("Timestamp Entrada: $timestampEntrada");
@@ -161,12 +158,12 @@ try {
     error_log("Diferencia en segundos: $diferenciaSegundos");
     error_log("Minutos totales: $minutosTotales");
     error_log("Tiempo formateado (HH:MM): $tiempoFormateado");
-    // ============ FIN CÁLCULO CORREGIDO ============
+    // ============ FIN CÁLCULO ============
     
     $Conexion->beginTransaction();
     
     try {
-        // Registrar salida del personal - Usar fechaHoraSalidaCompleta
+        // Registrar salida del personal
         $sqlSalidaPersonal = "INSERT INTO regsalper (
                                 IdPer,
                                 IdFolEnt,
@@ -218,7 +215,7 @@ try {
             throw new Exception("No se pudo obtener el ID de la inserción");
         }
         
-        // Actualizar/Insertar en regentsalper con el tiempo calculado correctamente
+        // Actualizar/Insertar en regentsalper
         if ($IdMovEnTSal) {
             $sqlActualizarRegentSalPer = "UPDATE regentsalper SET 
                                           FolMovSal = :FolMovSal,
@@ -277,7 +274,7 @@ try {
             }
         }
         
-        // Procesar salida de vehículo si aplica (solo si IdVeh > 0)
+        // Procesar salida de vehículo si aplica
         $IdMovSalidaVehiculo = null;
         $tiempoFormateadoVehiculo = null;
         $FolMovEntVeh = null;
@@ -291,11 +288,8 @@ try {
                                                 t1.Ubicacion as UbicacionEntrada,
                                                 t1.Fecha as FechaEntrada,
                                                 t1.TiempoMarcaje as HoraEntrada,
-                                                -- Construir fecha completa de entrada del vehículo
-                                                CASE 
-                                                    WHEN t1.Fecha LIKE '%:%' THEN t1.Fecha
-                                                    ELSE CONVERT(VARCHAR, t1.Fecha, 120) + ' ' + ISNULL(t1.TiempoMarcaje, '00:00:00')
-                                                END as FechaHoraEntradaCompleta,
+                                                -- Construir fecha completa de entrada del vehículo correctamente
+                                                CONVERT(VARCHAR, t1.Fecha, 120) + ' ' + CONVERT(VARCHAR, t1.TiempoMarcaje, 108) as FechaHoraEntradaCompleta,
                                                 t1.TipoVehiculo,
                                                 t2.FolMovEnt,
                                                 t2.FolMovSal,
@@ -420,7 +414,7 @@ try {
         $Conexion->commit();
         error_log("Salida completada exitosamente");
         
-        // Obtener información del personal para la respuesta
+        // Obtener información del personal
         $sqlPersonal = "SELECT 
                             t1.IdPersonal,
                             t1.NoEmpleado,
