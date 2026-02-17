@@ -81,7 +81,7 @@ try {
                                 t1.Fecha as FechaEntrada,
                                 t1.TiempoMarcaje as HoraEntrada,
                                 -- Construir fecha completa de entrada en SQL Server correctamente
-                                t2.FechaEntrada as FechaHoraEntradaCompleta,
+                                CONVERT(VARCHAR, t1.Fecha, 120) + ' ' + CONVERT(VARCHAR, t1.TiempoMarcaje, 108) as FechaHoraEntradaCompleta,
                                 t1.TipoVehiculo,
                                 COALESCE(t1.IdVeh, 0) as IdVeh,
                                 COALESCE(t2.tieneVehiculo, 0) as tieneVehiculo,
@@ -113,7 +113,7 @@ try {
     // Obtener la fecha completa de entrada (ya viene concatenada de la BD)
     $fechaHoraEntradaCompleta = $entrada['FechaHoraEntradaCompleta'];
     
-    error_log("Entrada activa encontrada: FolMovEnt=$FolMovEntActual, tieneVehiculo=$tieneVehiculo, IdVeh=$IdVeh");
+    error_log("Entrada activa encontrada: FolMovEnt=$FolMovEntActual, tieneVehiculo=$tieneVehiculo, IdVeh=$IdVeh, IdMovEnTSal=$IdMovEnTSal");
     error_log("Fecha/Hora Entrada completa: $fechaHoraEntradaCompleta");
     error_log("Fecha/Hora Salida completa: $fechaHoraSalidaCompleta");
     
@@ -123,6 +123,8 @@ try {
         $tieneVehiculo = 0;
     }
     
+    // ============ CÁLCULO DEL TIEMPO DE ESTANCIA ============
+    // Convertir a timestamp para cálculo preciso
     $timestampEntrada = strtotime($fechaHoraEntradaCompleta);
     $timestampSalida = strtotime($fechaHoraSalidaCompleta);
     
@@ -159,6 +161,9 @@ try {
     // ============ FIN CÁLCULO ============
     
     $Conexion->beginTransaction();
+    
+    // Variable para almacenar el ID generado en regentsalper
+    $nuevoIdMovEnTSal = null;
     
     try {
         // Registrar salida del personal
@@ -232,6 +237,8 @@ try {
                 $errorInfo = $stmtActualizarRegentSalPer->errorInfo();
                 throw new Exception('Error al actualizar regentsalper: ' . ($errorInfo[2] ?? 'Error desconocido'));
             }
+            
+            $nuevoIdMovEnTSal = $IdMovEnTSal; // Usamos el ID existente
         } else {
             // Si no hay IdMovEnTSal, insertar en regentsalper
             $sqlInsertRegentSalPer = "INSERT INTO regentsalper (
@@ -254,7 +261,8 @@ try {
                                         :Tiempo,
                                         2,
                                         :tieneVehiculo
-                                    )";
+                                    );
+                                    SELECT SCOPE_IDENTITY() as IdMovEnTSal";
             
             $stmtInsertRegentSalPer = $Conexion->prepare($sqlInsertRegentSalPer);
             $stmtInsertRegentSalPer->bindParam(':IdPer', $IdPersonal, PDO::PARAM_STR);
@@ -270,6 +278,12 @@ try {
                 $errorInfo = $stmtInsertRegentSalPer->errorInfo();
                 throw new Exception('Error al insertar en regentsalper: ' . ($errorInfo[2] ?? 'Error desconocido'));
             }
+            
+            // Obtener el ID generado
+            $resultado = $stmtInsertRegentSalPer->fetch(PDO::FETCH_ASSOC);
+            $nuevoIdMovEnTSal = $resultado ? (int)$resultado['IdMovEnTSal'] : null;
+            
+            error_log("Nuevo IdMovEnTSal generado: $nuevoIdMovEnTSal");
         }
         
         // Procesar salida de vehículo si aplica
@@ -286,8 +300,7 @@ try {
                                                 t1.Ubicacion as UbicacionEntrada,
                                                 t1.Fecha as FechaEntrada,
                                                 t1.TiempoMarcaje as HoraEntrada,
-                                                -- Construir fecha completa de entrada del vehículo correctamente
-                                                CONVERT(VARCHAR, t1.Fecha, 120) + ' ' + CONVERT(VARCHAR, t1.TiempoMarcaje, 108) as FechaHoraEntradaCompleta,
+                                                t2.FechaEntrada as FechaHoraEntradaCompleta,
                                                 t1.TipoVehiculo,
                                                 t2.FolMovEnt,
                                                 t2.FolMovSal,
@@ -432,6 +445,7 @@ try {
         
         $response['data'] = [
             'FolMovSalida' => $IdMovSalidaPersonal,
+            'IdMovEnTSal' => $nuevoIdMovEnTSal, // ← ESTE ES EL ID QUE NECESITAS PARA LAS FOTOS
             'fecha_salida' => $FechaSalida,
             'hora_salida' => $HoraSalida,
             'folio_entrada' => $FolMovEntActual,
