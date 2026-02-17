@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $query = "SELECT IdMovEnTSal FROM regentsalper 
                   WHERE IdPer = ? AND IdUbicacion = ? AND StatusRegistro = 1 AND FechaSalida IS NULL";
         
-        $stmt = $conn->prepare($query);
+        $stmt = $Conexion->prepare($query);
         $stmt->bind_param("ii", $idPersonal, $idUbicacion);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -55,6 +55,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'message' => 'Método no permitido'
     ]);
 }
-
-$conn->close();
 ?>
