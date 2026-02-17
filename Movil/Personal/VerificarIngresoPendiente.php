@@ -9,9 +9,8 @@ require_once '../../api/db/conexion.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $idPersonal = $_POST['IdPersonal'] ?? '';
     $idUbicacion = $_POST['IdUbicacion'] ?? '';
-    $idUsuario = $_POST['IdUsuario'] ?? '';
 
-    if (empty($idPersonal) || empty($idUbicacion) || empty($idUsuario)) {
+    if (empty($idPersonal) || empty($idUbicacion) ) {
         echo json_encode([
             'success' => false,
             'message' => 'Faltan datos requeridos'
