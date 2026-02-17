@@ -102,7 +102,7 @@ try {
     $entrada = $entradaActiva[0];
     $FolMovEntActual = (int)$entrada['FolMovEnt'];
     $tieneVehiculo = (int)$entrada['tieneVehiculo'];
-    $IdVeh = (int)$entrada['IdVeh']; // Ahora siempre será un número, nunca null
+    $IdVeh = (int)$entrada['IdVeh'];
     $IdMovEnTSal = $entrada['IdMovEnTSal'] ? (int)$entrada['IdMovEnTSal'] : null;
     $TipoVehiculoEntrada = (int)$entrada['TipoVehiculo'];
     $UbicacionEntrada = $entrada['UbicacionEntrada'];
@@ -115,25 +115,27 @@ try {
         $tieneVehiculo = 0;
     }
     
-    // Calcular tiempo de estancia
+    // ============ CÁLCULO CORREGIDO DEL TIEMPO DE ESTANCIA ============
     $fechaEntrada = $entrada['FechaEntrada'];
     $horaEntrada = isset($entrada['HoraEntrada']) ? $entrada['HoraEntrada'] : '00:00:00';
     
+    // Asegurar que las fechas tengan el formato correcto
     $fechaHoraEntrada = date('Y-m-d H:i:s', strtotime($fechaEntrada . ' ' . $horaEntrada));
+    $fechaHoraSalida = date('Y-m-d H:i:s', strtotime($FechaSalida . ' ' . $HoraSalida));
     
-    $sqlDiferencia = "SELECT DATEDIFF(MINUTE, 
-                      CAST(:FechaHoraEntrada AS DATETIME), 
-                      CAST(:FechaHoraSalida AS DATETIME)) as Minutos";
+    // Calcular diferencia usando strtotime en PHP
+    $timestampEntrada = strtotime($fechaHoraEntrada);
+    $timestampSalida = strtotime($fechaHoraSalida);
     
-    $stmtDiferencia = $Conexion->prepare($sqlDiferencia);
-    $stmtDiferencia->bindParam(':FechaHoraEntrada', $fechaHoraEntrada, PDO::PARAM_STR);
-    $stmtDiferencia->bindParam(':FechaHoraSalida', $fechaHoraSalida, PDO::PARAM_STR);
-    $stmtDiferencia->execute();
+    // Si la hora de salida es menor que la de entrada, asumimos que pasó la medianoche
+    if ($timestampSalida < $timestampEntrada) {
+        $timestampSalida = strtotime('+1 day', $timestampSalida);
+        error_log("Se detectó cruce de medianoche, ajustando fecha de salida");
+    }
     
-    $diferenciaResult = $stmtDiferencia->fetchAll(PDO::FETCH_ASSOC);
-    $diferencia = $diferenciaResult[0];
+    $diferenciaSegundos = $timestampSalida - $timestampEntrada;
+    $minutosTotales = floor($diferenciaSegundos / 60);
     
-    $minutosTotales = (int)$diferencia['Minutos'];
     if ($minutosTotales < 0) {
         $minutosTotales = 0;
     }
@@ -143,12 +145,17 @@ try {
     
     $tiempoFormateado = sprintf("%02d:%02d", $horasTotales, $minutosRestantes);
     
-    error_log("Tiempo total estancia: $tiempoFormateado ($minutosTotales minutos)");
+    error_log("Cálculo de tiempo corregido:");
+    error_log("Entrada: $fechaHoraEntrada");
+    error_log("Salida: $fechaHoraSalida");
+    error_log("Diferencia: $diferenciaSegundos segundos = $minutosTotales minutos");
+    error_log("Tiempo formateado: $tiempoFormateado");
+    // ============ FIN CÁLCULO CORREGIDO ============
     
     $Conexion->beginTransaction();
     
     try {
-        // Registrar salida del personal - IdVeh siempre será un número (0 si no hay vehículo)
+        // Registrar salida del personal
         $sqlSalidaPersonal = "INSERT INTO regsalper (
                                 IdPer,
                                 IdFolEnt,
@@ -186,7 +193,7 @@ try {
         $stmtSalidaPersonal->bindParam(':Observaciones', $Observaciones, PDO::PARAM_STR);
         $stmtSalidaPersonal->bindParam(':Usuario', $IdUsuario, PDO::PARAM_STR);
         $stmtSalidaPersonal->bindParam(':Notificar', $NotificarSupervisor, PDO::PARAM_INT);
-        $stmtSalidaPersonal->bindParam(':IdVeh', $IdVeh, PDO::PARAM_INT); // Ahora IdVeh siempre es INT
+        $stmtSalidaPersonal->bindParam(':IdVeh', $IdVeh, PDO::PARAM_INT);
         
         if (!$stmtSalidaPersonal->execute()) {
             $errorInfo = $stmtSalidaPersonal->errorInfo();
@@ -298,24 +305,21 @@ try {
                 
                 error_log("Entrada activa vehículo encontrada: FolMovEntVeh=$FolMovEntVeh, StatusRegistro=$StatusRegistroVeh");
                 
-                // Calcular tiempo de estancia del vehículo
+                // Calcular tiempo de estancia del vehículo usando PHP
                 $fechaEntradaVeh = $entradaVeh['FechaEntrada'];
                 $horaEntradaVeh = $entradaVeh['HoraEntrada'];
                 $fechaHoraEntradaVeh = date('Y-m-d H:i:s', strtotime($fechaEntradaVeh . ' ' . $horaEntradaVeh));
                 
-                $sqlDiferenciaVeh = "SELECT DATEDIFF(MINUTE, 
-                                      CAST(:FechaHoraEntrada AS DATETIME), 
-                                      CAST(:FechaHoraSalida AS DATETIME)) as Minutos";
+                $timestampEntradaVeh = strtotime($fechaHoraEntradaVeh);
+                $timestampSalidaVeh = strtotime($fechaHoraSalida);
                 
-                $stmtDiferenciaVeh = $Conexion->prepare($sqlDiferenciaVeh);
-                $stmtDiferenciaVeh->bindParam(':FechaHoraEntrada', $fechaHoraEntradaVeh, PDO::PARAM_STR);
-                $stmtDiferenciaVeh->bindParam(':FechaHoraSalida', $fechaHoraSalida, PDO::PARAM_STR);
-                $stmtDiferenciaVeh->execute();
+                if ($timestampSalidaVeh < $timestampEntradaVeh) {
+                    $timestampSalidaVeh = strtotime('+1 day', $timestampSalidaVeh);
+                }
                 
-                $diferenciaVehResult = $stmtDiferenciaVeh->fetchAll(PDO::FETCH_ASSOC);
-                $diferenciaVeh = $diferenciaVehResult[0];
+                $diferenciaSegundosVeh = $timestampSalidaVeh - $timestampEntradaVeh;
+                $minutosTotalesVeh = floor($diferenciaSegundosVeh / 60);
                 
-                $minutosTotalesVeh = (int)$diferenciaVeh['Minutos'];
                 if ($minutosTotalesVeh < 0) {
                     $minutosTotalesVeh = 0;
                 }
