@@ -41,7 +41,8 @@ try {
     $IdUsuario = $input['IdUsuario'];
     $base64Image = $input['FotoBase64'];
     $nextId = isset($input['nextId']) ? $input['nextId'] : 1;
-    $Tipo= 1;
+    $Carpeta= $input['Carpeta'];
+    $Tipo= $input['Tipo'];
     
     $RutaLocal = getenv('VERSION');
 
@@ -107,7 +108,7 @@ try {
         }
 
         $directoryName = "Ubicacion{$Ubicacion}Movimiento{$IdMovimiento}";
-        $uploadDir = "C:\\xampp\\htdocs\\{$RutaLocal}\\Empleados\\Fotografias\\{$directoryName}\\";
+        $uploadDir = "C:\\xampp\\htdocs\\{$RutaLocal}\\Empleados\\Fotografias\\${$Carpeta}\\{$directoryName}\\";
 
         if (!is_dir($uploadDir)) {
             if (!mkdir($uploadDir, 0777, true) && !is_dir($uploadDir)) {
@@ -132,7 +133,7 @@ try {
             optimizarJpegAsync($filePath);
         }
 
-        $rutaPublica = "https://intranet.alpasamx.com/{$RutaLocal}/Empleados/Fotografias/{$directoryName}/{$nombreFoto}";
+        $rutaPublica = "https://intranet.alpasamx.com/{$RutaLocal}/Empleados/Fotografias/{$Carpeta}/{$directoryName}/{$nombreFoto}";
 
         $sqlDetalle = "INSERT INTO t_fotografias_Detalle (
                             IdFotografiaRef,
