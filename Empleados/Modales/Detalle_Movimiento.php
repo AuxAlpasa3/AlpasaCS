@@ -2,7 +2,7 @@
 include '../../api/db/conexion.php';
 
 $idMov = $_GET['idMov'] ?? 0;
-$tipo = $_GET['tipo'] ?? 'entrada';
+$tipo = $_GET['tipo'];
 
 if ($idMov <= 0) {
     echo '<div class="alert alert-danger">ID de movimiento no válido</div>';
@@ -41,7 +41,7 @@ try {
         $icono = 'fa-sign-in-alt';
         $color = 'success';
         $TipoMov = 1;
-    } else {
+    } elseif ($tipo === 'salida') {
         $tabla = 'regsalper';
         $campoFolio = 'FolMovSal';
         $titulo = 'Salida';
@@ -61,7 +61,7 @@ try {
     FROM $tabla AS t1 
     INNER JOIN t_personal AS t2 on t1.IdPer=t2.IdPersonal
     INNER JOIN t_ubicacion AS t3 on t1.Ubicacion=t3.IdUbicacion
-    INNER JOIN t_vehiculos AS t4 on t1.IdVeh=t4.IdVehiculo
+    LEFT JOIN t_vehiculos AS t4 on t1.IdVeh=t4.IdVehiculo
     INNER JOIN t_usuario as t5 on t1.Usuario=t5.IdUsuario
     WHERE FolMov = ?";
 
@@ -72,11 +72,20 @@ try {
     $sqlFotografias= "SELECT RutaFoto,NombreFoto,NextIdFoto
     from t_fotografias_Encabezado as t1 
     INNER JOIN t_fotografias_Detalle as t2 on t1.IdFotografias=t2.IdFotografiaRef
-    WHERE  IdEntSal= ? and TipoMov= ?";
+    WHERE  t1.IdEntSal= ? and t1.Tipo= ?";
 
     $stmtFotografias = $Conexion->prepare($sqlFotografias);
     $stmtFotografias->execute([$folio,$TipoMov]);
-    $fotografias = $stmtFotografias->fetchALL(PDO::FETCH_OBJ);
+    $fotografias = $stmtFotografias->fetchAll(PDO::FETCH_OBJ);
+
+    // DEBUG: Verificar qué datos trae la consulta
+error_log("Número de fotografías encontradas: " . count($fotografias));
+if(count($fotografias) > 0) {
+    error_log("Primera foto: " . print_r($fotografias[0], true));
+} else {
+    error_log("No se encontraron fotografías para IdEntSal: $folio, Tipo: $TipoMov");
+}
+
     
 } catch (PDOException $e) {
     echo '<div class="alert alert-danger">Error: ' . $e->getMessage() . '</div>';
@@ -144,9 +153,7 @@ try {
                         </div>
                       <div class="card-body">
     <?php if($fotografias && count($fotografias) > 0): ?>
-        <!-- Carrusel Bootstrap -->
         <div id="fotografiasCarousel" class="carousel slide" data-bs-ride="carousel">
-            <!-- Indicadores -->
             <div class="carousel-indicators">
                 <?php foreach($fotografias as $index => $foto): ?>
                     <button type="button" data-bs-target="#fotografiasCarousel" 
