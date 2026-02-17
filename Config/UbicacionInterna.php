@@ -15,7 +15,7 @@
               <BR>
               <div class="card">
                 <div class="card-header text-white" style="padding: 1rem; border-bottom: 2px solid #d94f00; background-color: #d94f00 ">
-                  <h1 class="card-title">CATALOGO DE ALMACENES</h1>
+                  <h1 class="card-title">CATALOGO DE UBICACIONES INTERNAS</h1>
                 </div>
                 <div class="card-body">
                   <div style="max-width: 100%;">
@@ -23,8 +23,9 @@
                   <div class="row">
                   <div class="col-12">
                       <?php
-                       $sentAlmacen = $Conexion->query("SELECT IdAlmacen,Almacen,Ubicacion FROM t_almacen order by IdAlmacen asc");
-                          $Almacenes = $sentAlmacen->fetchAll(PDO::FETCH_OBJ);
+                       $sentUbicacionInterna = $Conexion->query("SELECT IdUbicacion, NomCorto, NomLargo, 
+Concat(Ciudad,',',Estado,'.',Pais) as Ubicacion From t_ubicacion_interna");
+                          $UbicacionesInternas = $sentUbicacionInterna->fetchAll(PDO::FETCH_OBJ);
                       ?>
                   <div class="row">
                     <div class="col-12">
@@ -36,36 +37,40 @@
                               <table class="table table-bordered  table-striped" id="dataTable" > 
                                 <thead>
                                   <tr>
-                                   <th width="auto" style="color:black; text-align: center;">Id Almacen</th>
-                                   <th width="auto" style="color:black; text-align: center;">Almacen</th>
+                                   <th width="auto" style="color:black; text-align: center;">IdUbicacion Interna</th>
+                                   <th width="auto" style="color:black; text-align: center;">NomCorto</th>
+                                   <th width="auto" style="color:black; text-align: center;">NomLargo</th>
                                    <th width="auto" style="color:black; text-align: center;">Ubicacion</th>
                                    <th width="auto" style="color:black; text-align: center;"></th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   <?php
-                                     foreach($Almacenes as $Almacen){
-                                      $IdAlmacen=$Almacen->IdAlmacen;
+                                     foreach($UbicacionesInternas as $UbicacionInterna){
+                                      $IdUbicacion=$UbicacionInterna->IdUbicacion;
                                       ?>
                                   <tr>
                                     <td width="auto" style="text-align: center;">
-                                      <?php echo $IdAlmacen=$Almacen->IdAlmacen;?>    
+                                      <?php echo $IdUbicacion;?>    
                                     </td>
                                     <td width="auto" style="text-align: center;">
-                                      <?php echo $Almacen->Almacen;?>
+                                      <?php echo $UbicacionInterna->NomCorto;?>
                                     </td>
                                     <td width="auto" style="text-align: center;">
-                                      <?php echo $Almacen->Ubicacion;?>
+                                      <?php echo $UbicacionInterna->NomLargo;?>
+                                    </td>
+                                      <td width="auto" style="text-align: center;">
+                                      <?php echo $UbicacionInterna->Ubicacion;?>
                                     </td>
                                     <td width="auto" style="text-align: center;">
                                         <button type="button" 
                                               class="btn-editar btn btn-warning" 
-                                              data-id="<?php echo $IdAlmacen=$Almacen->IdAlmacen;?>">
+                                              data-id="<?php echo $IdUbicacion;?>">
                                           <i class="fa fa-pen"></i>
                                       </button>
                                         <button type="button" 
                                                 class="btn-eliminar btn btn-danger" 
-                                                data-id="<?php echo $IdAlmacen=$Almacen->IdAlmacen;?>">
+                                                data-id="<?php echo $IdUbicacion;?>">
                                             <i class="fa fa-trash"></i>
                                         </button>
                                     </td> 
@@ -103,12 +108,12 @@
 $(document).ready(function() {
     $(document).on('click', '.btn-eliminar', function() {
         var id = $(this).data('id');
-        $('#modal-container').load('ProcesosAlmacen/Eliminar.php?IdAlmacen=' + id, function() {
-            $('#EliminarAlmacen').modal('show');
+        $('#modal-container').load('ProcesosUbicacionInterna/Eliminar.php?IdUbicacionInterna=' + id, function() {
+            $('#EliminarUbicacionInterna').modal('show');
             $(document).off('click.modal-close').on('click.modal-close', 
                 '[data-dismiss="modal"], .btn-close, .modal-close', 
                 function() {
-                    $('#EliminarAlmacen').modal('hide');
+                    $('#EliminarUbicacionInterna').modal('hide');
                 }
             );
         });
@@ -116,25 +121,25 @@ $(document).ready(function() {
     
     $(document).on('click', '.btn-editar', function() {
         var id = $(this).data('id');
-        $('#modal-container').load('ProcesosAlmacen/Modificar.php?IdAlmacen=' + id, function() {
-            $('#ModificarAlmacen').modal('show');
+        $('#modal-container').load('ProcesosUbicacionInterna/Modificar.php?IdUbicacionInterna=' + id, function() {
+            $('#ModificarUbicacionInterna').modal('show');
             
             $(document).off('click.modal-close').on('click.modal-close', 
                 '[data-dismiss="modal"], .btn-close, .modal-close', 
                 function() {
-                    $('#ModificarAlmacen').modal('hide');
+                    $('#ModificarUbicacionInterna').modal('hide');
                 }
             );
         });
     });
 
     $('.btn-nuevo').click(function() {
-        $('#modal-container').load('ProcesosAlmacen/Agregar.php', function() {
-            $('#NuevoAlmacen').modal('show');
+        $('#modal-container').load('ProcesosUbicacionInterna/Agregar.php', function() {
+            $('#NuevoUbicacionInterna').modal('show');
             $(document).off('click.modal-close').on('click.modal-close', 
                 '[data-dismiss="modal"], .btn-close, .modal-close', 
                 function() {
-                    $('#NuevoAlmacen').modal('hide');
+                    $('#NuevoUbicacionInterna').modal('hide');
                 }
             );
         });
@@ -153,19 +158,19 @@ $(document).ready(function() {
             {
                 switch($_POST['Mov'])
                 {
-                  case 'AgregarAlmacen':
-                    AgregarAlmacen();
+                  case 'AgregarUbicacionInterna':
+                    AgregarUbicacionInterna();
                   break;
-                   case 'ModificarAlmacen':
-                    ModificarAlmacen();
+                   case 'ModificarUbicacionInterna':
+                    ModificarUbicacionInterna();
                   break;
-                   case 'EliminarAlmacen':
-                    EliminarAlmacen();
+                   case 'EliminarUbicacionInterna':
+                    EliminarUbicacionInterna();
                   break;
                 }
             }
 
-            function AgregarAlmacen()
+            function AgregarUbicacionInterna()
             {
                $rutaServidor= getenv('DB_HOST');
               $nombreBaseDeDatos= getenv('DB');
@@ -183,20 +188,23 @@ $(document).ready(function() {
                 $fecha = date('Ymd');
                 $fechahora = date('Ymd H:i:s');
                 $usuario = (!empty($_POST['user']))   ?  $_POST['user']: NULL;
-                $IdAlmacen = (!empty($_POST['IdAlmacen']))   ?  $_POST['IdAlmacen']: NULL;
-                $Almacen = (!empty($_POST['Almacen']))   ?  $_POST['Almacen']: NULL;
-                $Ubicacion = (!empty($_POST['Ubicacion']))   ?  $_POST['Ubicacion']: NULL;
+                $IdUbicacion = (!empty($_POST['IdUbicacion']))   ?  $_POST['IdUbicacion']: NULL;
+                $NomCorto = (!empty($_POST['NomCorto']))   ?  $_POST['NomCorto']: NULL;
+                $NomLargo = (!empty($_POST['NomLargo']))   ?  $_POST['NomLargo']: NULL;
+                $Ciudad = (!empty($_POST['Ciudad']))   ?  $_POST['Ciudad']: NULL;
+                $Estado = (!empty($_POST['Estado']))   ?  $_POST['Estado']: NULL;
+                $Pais = (!empty($_POST['Pais']))   ?  $_POST['Pais']: NULL;
                 
-                  $consulta2=" INSERT INTO t_almacen (IdAlmacen,Almacen,Ubicacion) VALUES ($IdAlmacen,$Almacen, $Ubicacion)";
+                  $consulta2=" INSERT INTO t_ubicacion_interna (IdUbicacionInterna,NomCorto,NomLargo,Ciudad,Estado,Pais) VALUES ($IdUbicacion,$NomCorto,$NomLargo,$Ciudad,$Estado,$Pais)";
 
-                  $sentencia2 = $Conexion->prepare("INSERT INTO t_almacen (IdAlmacen,Almacen,Ubicacion) VALUES (?,?,?);");
+                  $sentencia2 = $Conexion->prepare("INSERT INTO t_ubicacion_interna (IdUbicacionInterna,NomCorto,NomLargo,Ciudad,Estado,Pais) VALUES (?,?,?,?,?,?);");
 
-                  $resultado2 = $sentencia2->execute([$IdAlmacen,$Almacen, $Ubicacion]);
+                  $resultado2 = $sentencia2->execute([$IdUbicacion,$NomCorto,$NomLargo,$Ciudad,$Estado,$Pais]);
 
                   if($resultado2)
                   {   
                     $sentencia = $Conexion->prepare("INSERT INTO t_bitacora (Tabla,Movimiento,Fecha ,Consulta ,Usuario) VALUES (?,?,?,?,?);");
-                    $resultado = $sentencia->execute(['t_almacen','Agregar Almacen'.$IdAlmacen,$fechahora,"$consulta2",$usuario]);   
+                    $resultado = $sentencia->execute(['t_ubicacion_interna','Agregar UbicacionInterna'.$IdUbicacion,$fechahora,"$consulta2",$usuario]);   
                                 
                     echo "
                       <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
@@ -207,7 +215,7 @@ $(document).ready(function() {
                                   title: 'Se ha dado de Alta Correctamente',
                                   showConfirmButton: false
                                   }).then(function() {
-                                  window.location =  'Almacen.php';
+                                  window.location =  'UbicacionInterna.php';
                             });
                           });
                       </script>";
@@ -224,7 +232,7 @@ $(document).ready(function() {
                           showConfirmButton: false,
                           timer: 500
                           }).then(function() {
-                           window.location =  'Almacen.php';
+                           window.location =  'UbicacionInterna.php';
                             });
                         });
                     </script>";
@@ -237,7 +245,7 @@ $(document).ready(function() {
               }
 
             }
-            function ModificarAlmacen()
+            function ModificarUbicacionInterna()
             {   
                $rutaServidor= getenv('DB_HOST');
               $nombreBaseDeDatos= getenv('DB');
@@ -255,20 +263,20 @@ $(document).ready(function() {
                 $fecha = date('Ymd');
                 $fechahora = date('Ymd H:i:s');
                 $usuario = (!empty($_POST['user']))   ?  $_POST['user']: NULL;
-                $IdAlmacen = (!empty($_POST['IdAlmacen']))   ?  $_POST['IdAlmacen']: NULL;
-                $Almacen = (!empty($_POST['Almacen']))   ?  $_POST['Almacen']: NULL;
+                $IdUbicacionInterna = (!empty($_POST['IdUbicacionInterna']))   ?  $_POST['IdUbicacionInterna']: NULL;
+                $UbicacionInterna = (!empty($_POST['UbicacionInterna']))   ?  $_POST['UbicacionInterna']: NULL;
                 $Ubicacion = (!empty($_POST['Ubicacion']))   ?  $_POST['Ubicacion']: NULL;
                   
-                  $consulta2="UPDATE t_almacen SET Almacen = $Almacen , Ubicacion  = $Ubicacion WHERE  IdAlmacen = $IdAlmacen";
+                  $consulta2="UPDATE t_almacen SET UbicacionInterna = $UbicacionInterna , Ubicacion  = $Ubicacion WHERE  IdUbicacionInterna = $IdUbicacionInterna";
 
-                  $sentencia2 = $Conexion->prepare("UPDATE t_almacen SET Almacen = ? , Ubicacion  = ? WHERE  IdAlmacen = ?;");
+                  $sentencia2 = $Conexion->prepare("UPDATE t_almacen SET UbicacionInterna = ? , Ubicacion  = ? WHERE  IdUbicacionInterna = ?;");
 
-                  $resultado2 = $sentencia2->execute([$Almacen,$Ubicacion,$IdAlmacen]);
+                  $resultado2 = $sentencia2->execute([$UbicacionInterna,$Ubicacion,$IdUbicacionInterna]);
 
                   if($resultado2)
                   {   
                     $sentencia = $Conexion->prepare("INSERT INTO t_bitacora (Tabla,Movimiento,Fecha ,Consulta ,Usuario) VALUES (?,?,?,?,?);");
-                    $resultado = $sentencia->execute(['t_almacen','Modificar Almacen'.$IdAlmacen,$fechahora,"$consulta2",$usuario]); 
+                    $resultado = $sentencia->execute(['t_almacen','Modificar UbicacionInterna'.$IdUbicacionInterna,$fechahora,"$consulta2",$usuario]); 
                                 
                     echo "
                       <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
@@ -280,7 +288,7 @@ $(document).ready(function() {
                                   showConfirmButton: false,
                                   timer: 500
                                   }).then(function() {
-                                  window.location =  'Almacen.php';
+                                  window.location =  'UbicacionInterna.php';
                             });
                           });
                       </script>";
@@ -297,7 +305,7 @@ $(document).ready(function() {
                           showConfirmButton: false,
                           timer: 500
                           }).then(function() {
-                           window.location =  'Almacen.php';
+                           window.location =  'UbicacionInterna.php';
                             });
                         });
                     </script>";
@@ -310,7 +318,7 @@ $(document).ready(function() {
               }
 
             }
-            function EliminarAlmacen()
+            function EliminarUbicacionInterna()
             { 
                $rutaServidor= getenv('DB_HOST');
               $nombreBaseDeDatos= getenv('DB');
@@ -328,18 +336,18 @@ $(document).ready(function() {
                 $fecha = date('Ymd');
                 $fechahora = date('Ymd H:i:s');
                 $usuario = (!empty($_POST['user']))   ?  $_POST['user']: NULL;
-                $IdAlmacen = (!empty($_POST['IdAlmacen']))   ?  $_POST['IdAlmacen']: NULL;
+                $IdUbicacionInterna = (!empty($_POST['IdUbicacionInterna']))   ?  $_POST['IdUbicacionInterna']: NULL;
 
-                $consulta2="DELETE FROM t_almacen where IdAlmacen=$IdAlmacen";
+                $consulta2="DELETE FROM t_almacen where IdUbicacionInterna=$IdUbicacionInterna";
 
-                $sentencia2 = $Conexion->prepare("DELETE FROM t_almacen where IdAlmacen=?;");
+                $sentencia2 = $Conexion->prepare("DELETE FROM t_almacen where IdUbicacionInterna=?;");
 
-                 $resultado2 = $sentencia2->execute([$IdAlmacen]);
+                 $resultado2 = $sentencia2->execute([$IdUbicacionInterna]);
 
                     if($resultado2)
                     {   
                             $sentencia = $Conexion->prepare("INSERT INTO t_bitacora (Tabla,Movimiento,Fecha ,Consulta ,Usuario) VALUES (?,?,?,?,?);");
-                            $resultado = $sentencia->execute(['t_almacen','Eliminar Almacen '.$IdAlmacen,$fechahora,$consulta2,$usuario]);   
+                            $resultado = $sentencia->execute(['t_almacen','Eliminar UbicacionInterna '.$IdUbicacionInterna,$fechahora,$consulta2,$usuario]);   
                         
                             echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
                               <script language='JavaScript'>
@@ -350,7 +358,7 @@ $(document).ready(function() {
                                       showConfirmButton: false,
                                       timer: 500
                                       }).then(function() {
-                                      window.location = 'Almacen.php';
+                                      window.location = 'UbicacionInterna.php';
                                 });
                                    });
                                 </script>";
@@ -367,7 +375,7 @@ $(document).ready(function() {
                                     showConfirmButton: false,
                                     timer: 500
                                     }).then(function() {
-                                    window.location = 'Almacen.php';
+                                    window.location = 'UbicacionInterna.php';
                               });
                                  });
                               </script>";

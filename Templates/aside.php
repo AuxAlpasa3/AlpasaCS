@@ -19,7 +19,7 @@ $isNotClient = in_array($currentRole, [6]);
 <aside class="main-sidebar sidebar-light-primary elevation-4"> 
   <div class="text-center">
     <a href="#" class="brand">
-      <img src="../dist/img/LogoAlpasaBlanco.png" width="70%" alt="ALPASA" class="brand-image">
+      <img src="../dist/img/LogoAlpasaC.png" width="70%" alt="ALPASA" class="brand-image">
       <span class="brand-text font-weight-bold" style="color: orangered;"></span>
     </a>
   </div>
@@ -86,12 +86,12 @@ $isNotClient = in_array($currentRole, [6]);
                           <p style="color: #dc5504;">Maniobras</p>
                         </a>
                       </li>
-                      <li class="nav-item">
+                      <!-- <li class="nav-item">
                         <a href="../Bascula/Catalogos" class="nav-link">
                           <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
                           <p style="color: #dc5504;">Bascula</p>
                         </a>
-                      </li>
+                      </li> -->
                   </ul>
                 </li>
               <?php } ?>
@@ -133,12 +133,12 @@ $isNotClient = in_array($currentRole, [6]);
                         <p style="color: #dc5504;">Maniobras</p>
                       </a>
                     </li>
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                       <a href="../Bascula/Accesos" class="nav-link">
                         <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
                         <p style="color: #dc5504;">Bascula</p>
                       </a>
-                    </li>
+                    </li> -->
                   </ul>
                 </li>
               <?php } ?>
@@ -187,15 +187,15 @@ $isNotClient = in_array($currentRole, [6]);
               <?php if ($isConfigUser) { ?>
                 <li class="nav-item">
                   <a href="" class="nav-link">
-                    <b>ALMACEN</b>
+                    <b>UBICACION</b>
                     <i class="fas fa-angle-left right" style="color: #dc5504;"></i>
                   </a>
                   <ul class="nav nav-treeview">
                     <?php if ($isAdmin) { ?>
                       <li class="nav-item">
-                        <a href="../Config/Almacen" class="nav-link">
+                        <a href="../Config/UbicacionInterna" class="nav-link">
                           <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                          <p style="color: #dc5504;">Almacenes</p>
+                          <p style="color: #dc5504;">Ubicaciones Internas</p>
                         </a>
                       </li>
                     <?php } ?>
@@ -212,83 +212,6 @@ $isNotClient = in_array($currentRole, [6]);
           </li>
         <?php } ?>
 
-        <?php if ($isNotLimited) { ?>
-          <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="fa-solid fa-table-list" style="color: #dc5504;"></i>
-              <p style="color: #dc5504;">CATALOGOS INTERNOS
-                <i class="fas fa-angle-left right" style="color: #dc5504;"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <!-- ARTICULOS -->
-              <?php if ($isNotLimited) { ?>
-                <li class="nav-item">
-                  <a href="" class="nav-link">
-                    <b>ARTICULOS</b>
-                    <i class="fas fa-angle-left right" style="color: #dc5504;"></i>
-                  </a>
-                  <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                      <a href="../Catalogos/Articulos" class="nav-link">
-                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                        <p style="color: #dc5504;">Articulos</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="../Catalogos/TipoMaterial" class="nav-link">
-                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                        <p style="color: #dc5504;">Tipo de Material</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="../Catalogos/TipoEmbalaje" class="nav-link">
-                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                        <p style="color: #dc5504;">Tipo de Embalaje</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="../Catalogos/ReglaEstiba" class="nav-link">
-                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                        <p style="color: #dc5504;">Reglas de Estiba</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="../Catalogos/Periodicidad" class="nav-link">
-                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                        <p style="color: #dc5504;">Periodicidad</p>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-              <?php } ?>
-
-              <!-- CLIENTES -->
-              <?php if ($isNotClient) { ?>
-                <li class="nav-item">
-                  <a href="" class="nav-link">
-                    <b>CLIENTES</b>
-                    <i class="fas fa-angle-left right" style="color: #dc5504;"></i>
-                  </a>
-                  <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                      <a href="../Catalogos/Clientes" class="nav-link">
-                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                        <p style="color: #dc5504;">Clientes</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="../Catalogos/GrupoClientes" class="nav-link">
-                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
-                        <p style="color: #dc5504;">Grupo de Clientes</p>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-              <?php } ?>
-            </ul>
-          </li>
-        <?php } ?>
       </ul>
     </nav>
   </div>
