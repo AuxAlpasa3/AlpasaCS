@@ -81,7 +81,7 @@ try {
                                 t1.Fecha as FechaEntrada,
                                 t1.TiempoMarcaje as HoraEntrada,
                                 -- Construir fecha completa de entrada en SQL Server correctamente
-                                CONVERT(VARCHAR, t1.Fecha, 120) + ' ' + CONVERT(VARCHAR, t1.TiempoMarcaje, 108) as FechaHoraEntradaCompleta,
+                                t2.FechaEntrada as FechaHoraEntradaCompleta,
                                 t1.TipoVehiculo,
                                 COALESCE(t1.IdVeh, 0) as IdVeh,
                                 COALESCE(t2.tieneVehiculo, 0) as tieneVehiculo,
@@ -123,8 +123,6 @@ try {
         $tieneVehiculo = 0;
     }
     
-    // ============ CÁLCULO DEL TIEMPO DE ESTANCIA ============
-    // Convertir a timestamp para cálculo preciso
     $timestampEntrada = strtotime($fechaHoraEntradaCompleta);
     $timestampSalida = strtotime($fechaHoraSalidaCompleta);
     
