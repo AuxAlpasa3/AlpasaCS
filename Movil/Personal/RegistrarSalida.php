@@ -70,7 +70,8 @@ try {
         }
     }
     
-    $fechaHoraSalida = $FechaSalida . ' ' . $HoraSalida;
+    // IMPORTANTE: Crear fecha completa de salida
+    $fechaHoraSalidaCompleta = $FechaSalida . ' ' . $HoraSalida;
     
     // Verificar si hay una entrada activa del personal
     $sqlVerificarEntrada = "SELECT 
@@ -79,6 +80,11 @@ try {
                                 t1.Ubicacion as UbicacionEntrada,
                                 t1.Fecha as FechaEntrada,
                                 t1.TiempoMarcaje as HoraEntrada,
+                                -- Construir fecha completa de entrada (asumiendo que Fecha ya incluye la hora o es solo fecha)
+                                CASE 
+                                    WHEN t1.Fecha LIKE '%:%' THEN t1.Fecha
+                                    ELSE CONVERT(VARCHAR, t1.Fecha, 120) + ' ' + ISNULL(t1.TiempoMarcaje, '00:00:00')
+                                END as FechaHoraEntradaCompleta,
                                 t1.TipoVehiculo,
                                 COALESCE(t1.IdVeh, 0) as IdVeh,
                                 COALESCE(t2.tieneVehiculo, 0) as tieneVehiculo,
@@ -107,7 +113,12 @@ try {
     $TipoVehiculoEntrada = (int)$entrada['TipoVehiculo'];
     $UbicacionEntrada = $entrada['UbicacionEntrada'];
     
+    // Obtener la fecha completa de entrada
+    $fechaHoraEntradaCompleta = $entrada['FechaHoraEntradaCompleta'];
+    
     error_log("Entrada activa encontrada: FolMovEnt=$FolMovEntActual, tieneVehiculo=$tieneVehiculo, IdVeh=$IdVeh");
+    error_log("Fecha/Hora Entrada completa: $fechaHoraEntradaCompleta");
+    error_log("Fecha/Hora Salida completa: $fechaHoraSalidaCompleta");
     
     // Si el TipoTransporte es 0, asegurar que IdVeh sea 0
     if ($TipoTransporte == 0) {
@@ -116,16 +127,16 @@ try {
     }
     
     // ============ CÁLCULO CORREGIDO DEL TIEMPO DE ESTANCIA ============
-    $fechaEntrada = $entrada['FechaEntrada'];
-    $horaEntrada = isset($entrada['HoraEntrada']) ? $entrada['HoraEntrada'] : '00:00:00';
+    // Convertir a timestamp para cálculo preciso
+    $timestampEntrada = strtotime($fechaHoraEntradaCompleta);
+    $timestampSalida = strtotime($fechaHoraSalidaCompleta);
     
-    // Asegurar que las fechas tengan el formato correcto
-    $fechaHoraEntrada = date('Y-m-d H:i:s', strtotime($fechaEntrada . ' ' . $horaEntrada));
-    $fechaHoraSalida = date('Y-m-d H:i:s', strtotime($FechaSalida . ' ' . $HoraSalida));
+    if ($timestampEntrada === false || $timestampSalida === false) {
+        throw new Exception("Error al convertir las fechas a timestamp");
+    }
     
-    // Calcular diferencia usando strtotime en PHP
-    $timestampEntrada = strtotime($fechaHoraEntrada);
-    $timestampSalida = strtotime($fechaHoraSalida);
+    error_log("Timestamp Entrada: $timestampEntrada");
+    error_log("Timestamp Salida: $timestampSalida");
     
     // Si la hora de salida es menor que la de entrada, asumimos que pasó la medianoche
     if ($timestampSalida < $timestampEntrada) {
@@ -140,22 +151,22 @@ try {
         $minutosTotales = 0;
     }
     
-    $horasTotales = floor($minutosTotales / 60);
-    $minutosRestantes = $minutosTotales % 60;
+    $horas = floor($minutosTotales / 60);
+    $minutos = $minutosTotales % 60;
     
-    $tiempoFormateado = sprintf("%02d:%02d", $horasTotales, $minutosRestantes);
+    // Formato HH:MM (solo horas y minutos)
+    $tiempoFormateado = sprintf("%02d:%02d", $horas, $minutos);
     
-    error_log("Cálculo de tiempo corregido:");
-    error_log("Entrada: $fechaHoraEntrada");
-    error_log("Salida: $fechaHoraSalida");
-    error_log("Diferencia: $diferenciaSegundos segundos = $minutosTotales minutos");
-    error_log("Tiempo formateado: $tiempoFormateado");
+    error_log("Cálculo de tiempo:");
+    error_log("Diferencia en segundos: $diferenciaSegundos");
+    error_log("Minutos totales: $minutosTotales");
+    error_log("Tiempo formateado (HH:MM): $tiempoFormateado");
     // ============ FIN CÁLCULO CORREGIDO ============
     
     $Conexion->beginTransaction();
     
     try {
-        // Registrar salida del personal
+        // Registrar salida del personal - Usar fechaHoraSalidaCompleta
         $sqlSalidaPersonal = "INSERT INTO regsalper (
                                 IdPer,
                                 IdFolEnt,
@@ -187,7 +198,7 @@ try {
         $stmtSalidaPersonal->bindParam(':IdFolEnt', $FolMovEntActual, PDO::PARAM_INT);
         $stmtSalidaPersonal->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
         $stmtSalidaPersonal->bindParam(':DispN', $DispN, PDO::PARAM_STR);
-        $stmtSalidaPersonal->bindParam(':FechaSalida', $fechaHoraSalida, PDO::PARAM_STR);
+        $stmtSalidaPersonal->bindParam(':FechaSalida', $fechaHoraSalidaCompleta, PDO::PARAM_STR);
         $stmtSalidaPersonal->bindParam(':TiempoMarcaje', $HoraSalida, PDO::PARAM_STR);
         $stmtSalidaPersonal->bindParam(':TipoVehiculo', $TipoVehiculoEntrada, PDO::PARAM_INT);
         $stmtSalidaPersonal->bindParam(':Observaciones', $Observaciones, PDO::PARAM_STR);
@@ -207,7 +218,7 @@ try {
             throw new Exception("No se pudo obtener el ID de la inserción");
         }
         
-        // Actualizar regentsalper
+        // Actualizar/Insertar en regentsalper con el tiempo calculado correctamente
         if ($IdMovEnTSal) {
             $sqlActualizarRegentSalPer = "UPDATE regentsalper SET 
                                           FolMovSal = :FolMovSal,
@@ -218,7 +229,7 @@ try {
             
             $stmtActualizarRegentSalPer = $Conexion->prepare($sqlActualizarRegentSalPer);
             $stmtActualizarRegentSalPer->bindParam(':FolMovSal', $IdMovSalidaPersonal, PDO::PARAM_INT);
-            $stmtActualizarRegentSalPer->bindParam(':FechaSalida', $fechaHoraSalida, PDO::PARAM_STR);
+            $stmtActualizarRegentSalPer->bindParam(':FechaSalida', $fechaHoraSalidaCompleta, PDO::PARAM_STR);
             $stmtActualizarRegentSalPer->bindParam(':Tiempo', $tiempoFormateado, PDO::PARAM_STR);
             $stmtActualizarRegentSalPer->bindParam(':IdMovEnTSal', $IdMovEnTSal, PDO::PARAM_INT);
             
@@ -255,8 +266,8 @@ try {
             $stmtInsertRegentSalPer->bindParam(':IdUbicacion', $UbicacionEntrada, PDO::PARAM_STR);
             $stmtInsertRegentSalPer->bindParam(':FolMovEnt', $FolMovEntActual, PDO::PARAM_INT);
             $stmtInsertRegentSalPer->bindParam(':FolMovSal', $IdMovSalidaPersonal, PDO::PARAM_INT);
-            $stmtInsertRegentSalPer->bindParam(':FechaEntrada', $fechaHoraEntrada, PDO::PARAM_STR);
-            $stmtInsertRegentSalPer->bindParam(':FechaSalida', $fechaHoraSalida, PDO::PARAM_STR);
+            $stmtInsertRegentSalPer->bindParam(':FechaEntrada', $fechaHoraEntradaCompleta, PDO::PARAM_STR);
+            $stmtInsertRegentSalPer->bindParam(':FechaSalida', $fechaHoraSalidaCompleta, PDO::PARAM_STR);
             $stmtInsertRegentSalPer->bindParam(':Tiempo', $tiempoFormateado, PDO::PARAM_STR);
             $stmtInsertRegentSalPer->bindParam(':tieneVehiculo', $tieneVehiculo, PDO::PARAM_INT);
             
@@ -280,6 +291,11 @@ try {
                                                 t1.Ubicacion as UbicacionEntrada,
                                                 t1.Fecha as FechaEntrada,
                                                 t1.TiempoMarcaje as HoraEntrada,
+                                                -- Construir fecha completa de entrada del vehículo
+                                                CASE 
+                                                    WHEN t1.Fecha LIKE '%:%' THEN t1.Fecha
+                                                    ELSE CONVERT(VARCHAR, t1.Fecha, 120) + ' ' + ISNULL(t1.TiempoMarcaje, '00:00:00')
+                                                END as FechaHoraEntradaCompleta,
                                                 t1.TipoVehiculo,
                                                 t2.FolMovEnt,
                                                 t2.FolMovSal,
@@ -302,16 +318,13 @@ try {
                 $StatusRegistroVeh = isset($entradaVeh['StatusRegistro']) ? (int)$entradaVeh['StatusRegistro'] : null;
                 $TipoVehiculoVeh = (int)$entradaVeh['TipoVehiculo'];
                 $UbicacionEntradaVeh = $entradaVeh['UbicacionEntrada'];
+                $fechaHoraEntradaVehCompleta = $entradaVeh['FechaHoraEntradaCompleta'];
                 
-                error_log("Entrada activa vehículo encontrada: FolMovEntVeh=$FolMovEntVeh, StatusRegistro=$StatusRegistroVeh");
+                error_log("Entrada activa vehículo encontrada: FolMovEntVeh=$FolMovEntVeh");
                 
-                // Calcular tiempo de estancia del vehículo usando PHP
-                $fechaEntradaVeh = $entradaVeh['FechaEntrada'];
-                $horaEntradaVeh = $entradaVeh['HoraEntrada'];
-                $fechaHoraEntradaVeh = date('Y-m-d H:i:s', strtotime($fechaEntradaVeh . ' ' . $horaEntradaVeh));
-                
-                $timestampEntradaVeh = strtotime($fechaHoraEntradaVeh);
-                $timestampSalidaVeh = strtotime($fechaHoraSalida);
+                // Calcular tiempo de estancia del vehículo
+                $timestampEntradaVeh = strtotime($fechaHoraEntradaVehCompleta);
+                $timestampSalidaVeh = strtotime($fechaHoraSalidaCompleta);
                 
                 if ($timestampSalidaVeh < $timestampEntradaVeh) {
                     $timestampSalidaVeh = strtotime('+1 day', $timestampSalidaVeh);
@@ -324,12 +337,12 @@ try {
                     $minutosTotalesVeh = 0;
                 }
                 
-                $horasTotalesVeh = floor($minutosTotalesVeh / 60);
-                $minutosRestantesVeh = $minutosTotalesVeh % 60;
+                $horasVeh = floor($minutosTotalesVeh / 60);
+                $minutosVeh = $minutosTotalesVeh % 60;
                 
-                $tiempoFormateadoVehiculo = sprintf("%02d:%02d", $horasTotalesVeh, $minutosRestantesVeh);
+                $tiempoFormateadoVehiculo = sprintf("%02d:%02d", $horasVeh, $minutosVeh);
                 
-                error_log("Tiempo vehículo: $tiempoFormateadoVehiculo ($minutosTotalesVeh minutos)");
+                error_log("Tiempo vehículo: $tiempoFormateadoVehiculo");
                 
                 // Registrar salida del vehículo
                 $sqlSalidaVehiculo = "INSERT INTO regsalveh (
@@ -363,7 +376,7 @@ try {
                 $stmtSalidaVeh->bindParam(':IdFolEnt', $FolMovEntVeh, PDO::PARAM_INT);
                 $stmtSalidaVeh->bindParam(':Ubicacion', $Ubicacion, PDO::PARAM_STR);
                 $stmtSalidaVeh->bindParam(':DispN', $DispN, PDO::PARAM_STR);
-                $stmtSalidaVeh->bindParam(':FechaSalida', $fechaHoraSalida, PDO::PARAM_STR);
+                $stmtSalidaVeh->bindParam(':FechaSalida', $fechaHoraSalidaCompleta, PDO::PARAM_STR);
                 $stmtSalidaVeh->bindParam(':TiempoMarcaje', $HoraSalida, PDO::PARAM_STR);
                 $stmtSalidaVeh->bindParam(':TipoVehiculo', $TipoVehiculoVeh, PDO::PARAM_INT);
                 $stmtSalidaVeh->bindParam(':Observaciones', $observacionesSalidaVehiculo, PDO::PARAM_STR);
@@ -389,7 +402,7 @@ try {
                 
                 $stmtUpdateRegentsalveh = $Conexion->prepare($sqlUpdateRegentsalveh);
                 $stmtUpdateRegentsalveh->bindParam(':FolMovSal', $IdMovSalidaVehiculo, PDO::PARAM_INT);
-                $stmtUpdateRegentsalveh->bindParam(':FechaSalida', $fechaHoraSalida, PDO::PARAM_STR);
+                $stmtUpdateRegentsalveh->bindParam(':FechaSalida', $fechaHoraSalidaCompleta, PDO::PARAM_STR);
                 $stmtUpdateRegentsalveh->bindParam(':Tiempo', $tiempoFormateadoVehiculo, PDO::PARAM_STR);
                 $stmtUpdateRegentsalveh->bindParam(':FolMovEnt', $FolMovEntVeh, PDO::PARAM_INT);
                 
