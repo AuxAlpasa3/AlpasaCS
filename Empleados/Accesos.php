@@ -454,10 +454,116 @@ $(document).ready(function() {
         showNotification('Página lista para imprimir', 'info');
     });
     
-    $('#btn-refresh').click(function(e) {
-        e.preventDefault();
-        cargarMovimientos();
+$('#btn-export-excel').click(function(e) {
+    e.preventDefault();
+    
+    if ($('#resultados-movimientos').find('tbody tr').length === 0) {
+        showNotification('No hay datos para exportar', 'warning');
+        return;
+    }
+    
+    var filtros = {
+        filtro_fecha: $('#filtro-fecha').val(),
+        fecha_inicio: $('#fecha-inicio').val(),
+        fecha_fin: $('#fecha-fin').val(),
+        id_personal: $('#filtro-personal').val(),
+        id_ubicacion: $('#filtro-ubicacion').val(),
+        tipo_movimiento: $('#filtro-tipo').val(),
+        id_personal_especifico: $('#filtro-id-personal').val()
+    };
+    
+    var params = new URLSearchParams();
+    Object.keys(filtros).forEach(key => {
+        if (filtros[key]) params.append(key, filtros[key]);
     });
+    
+    showNotification('Generando archivo Excel...', 'info');
+    window.location.href = 'Controlador/exportar_movimientos_excel.php?' + params.toString();
+});
+
+$('#btn-export-pdf').click(function(e) {
+    e.preventDefault();
+    
+    if ($('#resultados-movimientos').find('tbody tr').length === 0) {
+        showNotification('No hay datos para exportar', 'warning');
+        return;
+    }
+    
+    var filtros = {
+        filtro_fecha: $('#filtro-fecha').val(),
+        fecha_inicio: $('#fecha-inicio').val(),
+        fecha_fin: $('#fecha-fin').val(),
+        id_personal: $('#filtro-personal').val(),
+        id_ubicacion: $('#filtro-ubicacion').val(),
+        tipo_movimiento: $('#filtro-tipo').val(),
+        id_personal_especifico: $('#filtro-id-personal').val()
+    };
+    
+    var params = new URLSearchParams();
+    Object.keys(filtros).forEach(key => {
+        if (filtros[key]) params.append(key, filtros[key]);
+    });
+    
+    showNotification('Generando archivo PDF...', 'info');
+    window.location.href = 'Controlador/exportar_movimientos_pdf.php?' + params.toString();
+});
+
+$('#btn-print').click(function(e) {
+    e.preventDefault();
+    
+    if ($('#resultados-movimientos').find('tbody tr').length === 0) {
+        showNotification('No hay datos para imprimir', 'warning');
+        return;
+    }
+    
+    var printWindow = window.open('', '_blank');
+    printWindow.document.write('<html><head><title>Reporte de Movimientos</title>');
+    printWindow.document.write('<style>');
+    printWindow.document.write('body { font-family: Arial, sans-serif; margin: 20px; }');
+    printWindow.document.write('h1 { color: #d94f00; text-align: center; }');
+    printWindow.document.write('.fecha { text-align: center; color: #666; margin-bottom: 20px; }');
+    printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
+    printWindow.document.write('th { background-color: #d94f00; color: white; padding: 10px; text-align: center; }');
+    printWindow.document.write('td { padding: 8px; border: 1px solid #ddd; text-align: center; }');
+    printWindow.document.write('tr:nth-child(even) { background-color: #f9f9f9; }');
+    printWindow.document.write('.resumen { margin-top: 20px; padding: 10px; background-color: #f5f5f5; border-radius: 5px; }');
+    printWindow.document.write('</style>');
+    printWindow.document.write('</head><body>');
+    
+    printWindow.document.write('<h1>Reporte de Movimientos</h1>');
+    printWindow.document.write('<div class="fecha">Generado: ' + new Date().toLocaleString() + '</div>');
+    
+    var table = $('#dataTableMovimientos').clone();
+    table.find('.btn, .btn-ver-entrada, .btn-ver-salida').each(function() {
+        $(this).replaceWith($(this).text().replace('Ver ', ''));
+    });
+    
+    printWindow.document.write(table[0].outerHTML);
+    
+    var totalRows = $('#dataTableMovimientos tbody tr').length;
+    var totalEntradas = $('#dataTableMovimientos tbody tr').filter(function() {
+        return $(this).find('td:eq(3) .badge-warning').length === 0;
+    }).length;
+    var totalSalidas = $('#dataTableMovimientos tbody tr').filter(function() {
+        return $(this).find('td:eq(5) .badge-warning').length === 0;
+    }).length;
+    
+    printWindow.document.write('<div class="resumen">');
+    printWindow.document.write('<h3>Resumen:</h3>');
+    printWindow.document.write('<p>Total de registros: ' + totalRows + '</p>');
+    printWindow.document.write('<p>Total de entradas: ' + totalEntradas + '</p>');
+    printWindow.document.write('<p>Total de salidas: ' + totalSalidas + '</p>');
+    printWindow.document.write('</div>');
+    
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
+});
+
+$('#btn-refresh').click(function(e) {
+    e.preventDefault();
+    cargarMovimientos();
+});
     
     $('#filtro-id-personal').keypress(function(e) {
         if (e.which == 13) {
