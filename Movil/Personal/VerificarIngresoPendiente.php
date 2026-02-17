@@ -19,18 +19,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        // Para SQL Server, usamos parámetros con nombres o con ?
         $query = "SELECT IdMovEnTSal FROM regentsalper 
                   WHERE IdPer = ? AND IdUbicacion = ? AND StatusRegistro = 1 AND FechaSalida IS NULL";
         
         $stmt = $Conexion->prepare($query);
-        // En PDO, ejecutamos pasando los parámetros directamente
-        $stmt->execute([$idPersonal, $idUbicacion]);
+        $stmt->bind_param("ii", $idPersonal, $idUbicacion);
+        $stmt->execute();
+        $result = $stmt->get_result();
         
-        // fetch() en lugar de get_result() y fetch_assoc()
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($row) {
+        if ($row = $result->fetch_assoc()) {
             echo json_encode([
                 'success' => true,
                 'data' => [
@@ -44,10 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
         }
         
-        // No es necesario cerrar explícitamente, PDO lo maneja
-        $stmt = null;
-        
-    } catch (PDOException $e) {
+        $stmt->close();
+    } catch (Exception $e) {
         echo json_encode([
             'success' => false,
             'message' => 'Error en la consulta: ' . $e->getMessage()
