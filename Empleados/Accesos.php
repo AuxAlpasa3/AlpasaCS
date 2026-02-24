@@ -128,7 +128,6 @@ include_once "../templates/head.php";
                         <p class="mt-2 text-primary">Cargando movimientos...</p>
                     </div>
                     
-                    <!-- Aquí se cargarán los resultados -->
                     <div id="resultados-movimientos">
                         <div class="text-center text-muted p-5">
                             <i class="fas fa-exchange-alt fa-3x mb-3"></i>
@@ -202,7 +201,6 @@ $(document).ready(function() {
     }
     
     function cargarDatosFiltros() {
-        // Configurar Select2 para fecha
         $('#filtro-fecha').select2({
             theme: 'custom-theme',
             width: '100%',
@@ -211,7 +209,6 @@ $(document).ready(function() {
             language: 'es'
         });
         
-        // Configurar Select2 para tipo
         $('#filtro-tipo').select2({
             theme: 'custom-theme',
             width: '100%',
@@ -220,7 +217,6 @@ $(document).ready(function() {
             language: 'es'
         });
         
-        // Cargar personal
         $.ajax({
             url: 'Controlador/ajax_get_personal.php',
             type: 'GET',
