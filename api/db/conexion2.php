@@ -1,6 +1,6 @@
 <?php
 $rutaServidor = getenv('DB_HOST');
-$nombreBaseDeDatos = 'B_ALPASA';
+$nombreBaseDeDatos = 'B_ALPASA_PRUEBAS';
 $usuario = getenv('DB_USER');
 $contraseña = getenv('DB_PASS');
 
