@@ -1,5 +1,4 @@
 <?php
-// obtenerPersonal.php
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -17,7 +16,7 @@ if (empty($idUbicacion)) {
     exit;
 }
 try {
-    $query = "SELECT 
+      $query = "SELECT 
                 t1.IdPersonal,
                 t1.Nombre,
                 t1.ApPaterno,
@@ -25,8 +24,8 @@ try {
                 CONCAT(t1.Nombre, ' ', t1.ApPaterno, ' ', t1.ApMaterno) as NombreCompleto
               FROM t_personal as t1
               INNER JOIN regentsalper as t2 on t1.IdPersonal= t2.IdPer
-              WHERE t2.IdUbicacion = 2 and t2.FechaSalida is null
-              AND t1.Status = :idUbicacion 
+              WHERE t2.IdUbicacion = :idUbicacion  and t2.FechaSalida is null
+              AND t1.Status =1
               ORDER BY t1.Nombre, t1.ApPaterno";
 
     $stmt = $Conexion->prepare($query);
