@@ -21,9 +21,13 @@ try {
                 t1.Nombre,
                 t1.ApPaterno,
                 t1.ApMaterno,
+                t3.NomCargo AS Puesto,
+                t4.NomDepto as Area,
                 CONCAT(t1.Nombre, ' ', t1.ApPaterno, ' ', t1.ApMaterno) as NombreCompleto
               FROM t_personal as t1
               INNER JOIN regentsalper as t2 on t1.IdPersonal= t2.IdPer
+              INNER JOIN t_cargo as t3 on t1.Cargo=t3.IdCargo
+              INNER JOIN t_departamento as t4 on t1.Departamento=t4.IdDepartamento
               WHERE t2.IdUbicacion = :idUbicacion  and t2.FechaSalida is null
               AND t1.Status =1
               ORDER BY t1.Nombre, t1.ApPaterno";

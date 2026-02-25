@@ -68,6 +68,7 @@ $isNotClient = in_array($currentRole, [6]);
                           <p style="color: #dc5504;">Personal Externo</p>
                         </a>
                       </li>
+                      <!--
                       <li class="nav-item">
                         <a href="../Proveedores/Catalogos" class="nav-link">
                           <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
@@ -86,7 +87,7 @@ $isNotClient = in_array($currentRole, [6]);
                           <p style="color: #dc5504;">Maniobras</p>
                         </a>
                       </li>
-                      <!-- <li class="nav-item">
+                      <li class="nav-item">
                         <a href="../Bascula/Catalogos" class="nav-link">
                           <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
                           <p style="color: #dc5504;">Bascula</p>
@@ -115,6 +116,7 @@ $isNotClient = in_array($currentRole, [6]);
                         <p style="color: #dc5504;">Personal Externo</p>
                       </a>
                     </li>
+                     <!--
                     <li class="nav-item">
                       <a href="../Proveedores/Accesos" class="nav-link">
                         <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
@@ -132,8 +134,7 @@ $isNotClient = in_array($currentRole, [6]);
                         <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
                         <p style="color: #dc5504;">Maniobras</p>
                       </a>
-                    </li>
-                    <!-- <li class="nav-item">
+                    </li> <li class="nav-item">
                       <a href="../Bascula/Accesos" class="nav-link">
                         <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
                         <p style="color: #dc5504;">Bascula</p>
