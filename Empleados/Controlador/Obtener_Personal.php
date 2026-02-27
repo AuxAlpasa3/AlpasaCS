@@ -10,16 +10,7 @@ $searchValue = $_POST['search']['value'] ?? '';
 $orderColumnIndex = $_POST['order'][0]['column'] ?? 0;
 $orderDirection = $_POST['order'][0]['dir'] ?? 'asc';
 
-$noempleado = $_POST['noempleado'] ?? '';
-$nombre = $_POST['nombre'] ?? '';
-$cargo = $_POST['cargo'] ?? '';
-$departamento = $_POST['departamento'] ?? '';
-$ubicacion = $_POST['ubicacion'] ?? '';
-$estatus = $_POST['estatus'] ?? '';
-$empresa = $_POST['empresa'] ?? '';
-$vehiculo = $_POST['vehiculo'] ?? '';
-
-$imagenPorDefecto = 'https://intranet.alpasamx.com/regentsalper/imagenes/empleados/Default.jpg';
+$imagenPorDefecto = 'https://intranet.alpasamx.com/AlpasaCS/Empleados/empleados/Default.jpg';
 
 $columns = [
     0 => 't1.NoEmpleado',

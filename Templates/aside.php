@@ -68,7 +68,12 @@ $isNotClient = in_array($currentRole, [6]);
                           <p style="color: #dc5504;">Personal Externo</p>
                         </a>
                       </li>
-                      <!--
+                      <li class="nav-item">
+                      <a href="../Vehiculos/Catalogos" class="nav-link">
+                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
+                        <p style="color: #dc5504;">Vehiculos</p>
+                      </a>
+                    </li>
                       <li class="nav-item">
                         <a href="../Proveedores/Catalogos" class="nav-link">
                           <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
@@ -92,7 +97,7 @@ $isNotClient = in_array($currentRole, [6]);
                           <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
                           <p style="color: #dc5504;">Bascula</p>
                         </a>
-                      </li> -->
+                      </li> 
                   </ul>
                 </li>
               <?php } ?>
@@ -115,8 +120,13 @@ $isNotClient = in_array($currentRole, [6]);
                         <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
                         <p style="color: #dc5504;">Personal Externo</p>
                       </a>
+                    </li> 
+                    <li class="nav-item">
+                      <a href="../Vehiculos/Accesos" class="nav-link">
+                        <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
+                        <p style="color: #dc5504;">Vehiculos</p>
+                      </a>
                     </li>
-                     <!--
                     <li class="nav-item">
                       <a href="../Proveedores/Accesos" class="nav-link">
                         <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
@@ -139,7 +149,7 @@ $isNotClient = in_array($currentRole, [6]);
                         <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
                         <p style="color: #dc5504;">Bascula</p>
                       </a>
-                    </li> -->
+                    </li> 
                   </ul>
                 </li>
               <?php } ?>
