@@ -31,7 +31,7 @@ LEFT JOIN t_transportista as t9 on t1.Transportista = t9.IdTransportista
 INNER JOIN t_ubicacion as t11 on t1.Origen = t11.IdUbicacion
 INNER JOIN t_ubicacion as t12 on t1.Destino = t12.IdUbicacion
 WHERE t1.Estatus = 0  AND t1.FechaCita >= CAST(GETDATE() AS DATE) 
-  AND t1.FechaCita < DATEADD(DAY, 1, CAST(GETDATE() AS DATE))  
+  AND t1.FechaCita < DATEADD(DAY, 1, CAST(GETDATE() AS DATE)) AND t1.CitaAtlas IS NOT NULL
 GROUP BY t1.IdBoletasEnc,t1.IdBoletas, t1.Placas, t1.Chofer,t1.Cliente,
          t7.TipoTransporte, t9.Transportista, t11.Ubicacion, t12.Ubicacion,t1.FechaCita,t1.CitaAtlas";
     
