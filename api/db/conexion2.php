@@ -1,6 +1,6 @@
 <?php
 $rutaServidor = getenv('DB_HOST');
-$nombreBaseDeDatos = 'B_ALPASA_PRUEBAS';
+$nombreBaseDeDatos = 'B_ALPASA';
 $usuario = getenv('DB_USER');
 $contraseña = getenv('DB_PASS');
 
@@ -8,8 +8,8 @@ $ZonaHoraria = getenv('ZonaHoraria');
 $VERSION = getenv('VERSION');
 
 date_default_timezone_set($ZonaHoraria);
-//define('base_url', "https://intranet.alpasamx.com/" . $VERSION . "/");
-       const base_url = "http://localhost/AlpasaCS/";
+define('base_url', "https://intranet.alpasamx.com/" . $VERSION . "/");
+       //const base_url = "http://localhost/AlpasaCS/";
 
 try {
     $Conexion = new PDO(
