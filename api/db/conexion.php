@@ -7,10 +7,9 @@ $contraseña = getenv('DB_PASS');
 $ZonaHoraria = getenv('ZonaHoraria');
 $VERSION = getenv('VERSION');
 
-date_default_timezone_set($ZonaHoraria);
+date_default_timezone_set($ZonaHoraria); 
 define('base_url', "https://intranet.alpasamx.com/" . $VERSION . "/");
-//const base_url = "https://localhost/AlpasaCS/";
-
+//const base_url = "https://localhost/AlpasaCS/"; 
 try {
     $Conexion = new PDO(
         "sqlsrv:server=$rutaServidor;database=$nombreBaseDeDatos;TrustServerCertificate=yes;Encrypt=yes",
@@ -22,6 +21,6 @@ try {
 } catch (PDOException $e) {
     echo "Error de conexión: " . $e->getMessage();
 } finally {
-    $conexion = null;
+    $Conexion = null;
 }
 ?>

@@ -80,7 +80,7 @@ $isNotClient = in_array($currentRole, [6]);
                           <p style="color: #dc5504;">Proveedores</p>
                         </a>
                       </li>
-                      <li class="nav-item">
+                      <!-- <li class="nav-item">
                         <a href="../Visitas/Catalogos" class="nav-link">
                           <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
                           <p style="color: #dc5504;">Visitas</p>
@@ -97,7 +97,7 @@ $isNotClient = in_array($currentRole, [6]);
                           <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
                           <p style="color: #dc5504;">Bascula</p>
                         </a>
-                      </li> 
+                      </li>  -->
                   </ul>
                 </li>
               <?php } ?>
@@ -133,7 +133,7 @@ $isNotClient = in_array($currentRole, [6]);
                         <p style="color: #dc5504;">Proveedores</p>
                       </a>
                     </li>
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                       <a href="../Visitas/Accesos" class="nav-link">
                         <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
                         <p style="color: #dc5504;">Visitas</p>
@@ -149,7 +149,7 @@ $isNotClient = in_array($currentRole, [6]);
                         <i class="fa-solid fa-file-text" style="color: #dc5504;"></i>
                         <p style="color: #dc5504;">Bascula</p>
                       </a>
-                    </li> 
+                    </li>  -->
                   </ul>
                 </li>
               <?php } ?>
